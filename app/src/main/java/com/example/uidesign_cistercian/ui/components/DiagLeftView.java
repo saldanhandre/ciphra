@@ -9,8 +9,6 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.view.MotionEvent;
 import android.graphics.Color;
-
-
 public class DiagLeftView extends androidx.appcompat.widget.AppCompatImageView {
 
     private Path diagonalPath;
