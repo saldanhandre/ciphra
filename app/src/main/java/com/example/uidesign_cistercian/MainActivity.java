@@ -17,54 +17,57 @@ public class MainActivity extends AppCompatActivity {
         // Set up the click listener for each segment
         setupSegmentClickListener(R.id.segment1);
         setupSegmentClickListener(R.id.segment2);
-        setupSegmentClickListener(R.id.segment3);
-        setupSegmentClickListener(R.id.segment4);
+        setupDiagonalSegmentClickListener(R.id.segment3_1, R.id.segment3_2);
+        setupDiagonalSegmentClickListener(R.id.segment4_1, R.id.segment4_2);
         setupSegmentClickListener(R.id.segment5);
+
         setupSegmentClickListener(R.id.segment6);
         setupSegmentClickListener(R.id.segment7);
-        setupSegmentClickListener(R.id.segment8);
-        setupSegmentClickListener(R.id.segment9);
+        setupDiagonalSegmentClickListener(R.id.segment8_1, R.id.segment8_2);
+        setupDiagonalSegmentClickListener(R.id.segment9_1, R.id.segment9_2);
         setupSegmentClickListener(R.id.segment10);
+
         setupSegmentClickListener(R.id.segment11);
         setupSegmentClickListener(R.id.segment12);
-        setupSegmentClickListener(R.id.segment13);
-        setupSegmentClickListener(R.id.segment14);
+        setupDiagonalSegmentClickListener(R.id.segment13_1, R.id.segment13_2);
+        setupDiagonalSegmentClickListener(R.id.segment14_1, R.id.segment14_2);
         setupSegmentClickListener(R.id.segment15);
+
         setupSegmentClickListener(R.id.segment16);
         setupSegmentClickListener(R.id.segment17);
-        setupSegmentClickListener(R.id.segment18);
-        setupSegmentClickListener(R.id.segment19);
+        setupDiagonalSegmentClickListener(R.id.segment18_1, R.id.segment18_2);
+        setupDiagonalSegmentClickListener(R.id.segment19_1, R.id.segment19_2);
         setupSegmentClickListener(R.id.segment20);
     }
 
-    private void setupSegmentClickListener(int segmentId) {
-        final View segmentView = findViewById(segmentId);
-        segmentView.setOnClickListener(new View.OnClickListener() {
+    private void setupSegmentClickListener(int imageViewId) {
+        final View imageView = findViewById(imageViewId);
+        imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                v.setSelected(!v.isSelected());
+                // Toggle the selected state of the ImageView
+                imageView.setSelected(!imageView.isSelected());
             }
         });
+    }
 
-        // Post a runnable to the segment view's message queue to set touch delegate after the layout is complete
-        segmentView.post(new Runnable() {
+
+    private void setupDiagonalSegmentClickListener(int segmentHalf1Id, int segmentHalf2Id) {
+        final View segmentHalf1 = findViewById(segmentHalf1Id);
+        final View segmentHalf2 = findViewById(segmentHalf2Id);
+
+        View.OnClickListener clickListener = new View.OnClickListener() {
             @Override
-            public void run() {
-                // Calculate touchable area rect here based on the expected touch area
-                Rect delegateArea = new Rect();
-                segmentView.getHitRect(delegateArea);
-
-                // Optionally increase touch area. This example code expands the touch area by 10 pixels on all sides.
-                delegateArea.left -= 10;
-                delegateArea.right += 10;
-                delegateArea.top -= 10;
-                delegateArea.bottom += 10;
-
-                // Set the TouchDelegate on the parent view to the calculated area
-                if (View.class.isInstance(segmentView.getParent())) {
-                    ((View) segmentView.getParent()).setTouchDelegate(new TouchDelegate(delegateArea, segmentView));
-                }
+            public void onClick(View v) {
+                // Toggle the selected state of both halves
+                boolean newSelectedState = !segmentHalf1.isSelected();
+                segmentHalf1.setSelected(newSelectedState);
+                segmentHalf2.setSelected(newSelectedState);
             }
-        });
+        };
+
+        // Set the same click listener for both halves of the diagonal segment
+        segmentHalf1.setOnClickListener(clickListener);
+        segmentHalf2.setOnClickListener(clickListener);
     }
 }

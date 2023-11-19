@@ -11,7 +11,7 @@
     <color name="red">#FF0000</color>
     <color name="transparent">#00000000</color>
 
-    <color name="colorStatePressed">#C8000000</color>
-    <color name="colorStateEnabled">#BCF4EBEB</color>
+    <color name="colorStateSelected">#C8000000</color>
+    <color name="colorStateEnabledOrPressed">#E0E0E0</color>
     <color name="colorStateNotEnabled">#FB0909</color>
 </resources>

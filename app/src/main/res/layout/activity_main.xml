@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:paddingTop="?attr/actionBarSize">
 
-
     <View
         android:id="@+id/central_stem"
         android:layout_width="10dp"
@@ -20,10 +19,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.436" />
 
-    <Button
+    <ImageView
         android:id="@+id/segment1"
         android:layout_width="100dp"
-        android:layout_height="7dp"
+        android:layout_height="8dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
         android:clickable="true"
@@ -38,10 +37,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.232" />
 
-    <Button
+    <ImageView
         android:id="@+id/segment2"
         android:layout_width="100dp"
-        android:layout_height="7dp"
+        android:layout_height="8dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
         android:clickable="true"
@@ -54,40 +53,83 @@
         app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.386" />
+        app:layout_constraintVertical_bias="0.405" />
 
-    <com.example.uidesign_cistercian.ui.components.DiagLeftView
-        android:id="@+id/segment3"
-        android:layout_width="100dp"
-        android:layout_height="91dp"
-        android:background="@drawable/diagleft_segment_selector"
+    <ImageView
+        android:id="@+id/segment3_1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagtopleft_segment_selector"
         android:clickable="true"
+        android:enabled="false"
         android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.7"
+        app:layout_constraintHorizontal_bias="0.602"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.281" />
+        app:layout_constraintVertical_bias="0.266" />
 
-    <com.example.uidesign_cistercian.ui.components.DiagRightView
-        android:id="@+id/segment4"
-        android:layout_width="100dp"
-        android:layout_height="91dp"
-        android:background="@drawable/diagright_segment_selector"
+    <ImageView
+        android:id="@+id/segment3_2"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagbottomright_segment_selector"
         android:clickable="true"
+        android:enabled="false"
         android:focusable="true"
-        android:rotation="0"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.7"
+        app:layout_constraintHorizontal_bias="0.74"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.281" />
+        app:layout_constraintVertical_bias="0.346" />
 
-    <Button
+    <ImageView
+        android:id="@+id/segment4_1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagbottomleft_segment_selector"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.602"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.346" />
+
+    <ImageView
+        android:id="@+id/segment4_2"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagtopright_segment_selector"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.74"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.266" />
+
+    <ImageView
         android:id="@+id/segment5"
-        android:layout_width="7dp"
+        android:layout_width="8dp"
         android:layout_height="100dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
@@ -98,15 +140,15 @@
         android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.804"
+        app:layout_constraintHorizontal_bias="0.797"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.278" />
+        app:layout_constraintVertical_bias="0.289" />
 
-    <Button
+    <ImageView
         android:id="@+id/segment6"
         android:layout_width="100dp"
-        android:layout_height="7dp"
+        android:layout_height="8dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
         android:clickable="true"
@@ -121,10 +163,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.232" />
 
-    <Button
+    <ImageView
         android:id="@+id/segment7"
         android:layout_width="100dp"
-        android:layout_height="7dp"
+        android:layout_height="8dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
         android:clickable="true"
@@ -137,41 +179,83 @@
         app:layout_constraintHorizontal_bias="0.3"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.386" />
+        app:layout_constraintVertical_bias="0.405" />
 
     <ImageView
-        android:id="@+id/segment8"
-        android:layout_width="100dp"
-        android:layout_height="91dp"
-        android:background="@drawable/diagright_segment_selector"
+        android:id="@+id/segment8_1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagtopright_segment_selector"
         android:clickable="true"
+        android:enabled="false"
         android:focusable="true"
-        android:rotation="0"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintHorizontal_bias="0.396"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.281" />
+        app:layout_constraintVertical_bias="0.266" />
 
     <ImageView
-        android:id="@+id/segment9"
-        android:layout_width="100dp"
-        android:layout_height="91dp"
-        android:background="@drawable/diagleft_segment_selector"
+        android:id="@+id/segment8_2"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagbottomleft_segment_selector"
         android:clickable="true"
+        android:enabled="false"
         android:focusable="true"
-        android:rotation="0"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintHorizontal_bias="0.258"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.281" />
+        app:layout_constraintVertical_bias="0.346" />
 
-    <Button
+    <ImageView
+        android:id="@+id/segment9_1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagbottomright_segment_selector"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.396"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.346" />
+
+    <ImageView
+        android:id="@+id/segment9_2"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagtopleft_segment_selector"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.258"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.266" />
+
+    <ImageView
         android:id="@+id/segment10"
-        android:layout_width="7dp"
+        android:layout_width="8dp"
         android:layout_height="100dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
@@ -182,15 +266,15 @@
         android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.196"
+        app:layout_constraintHorizontal_bias="0.203"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.276" />
+        app:layout_constraintVertical_bias="0.289" />
 
-    <Button
+    <ImageView
         android:id="@+id/segment11"
         android:layout_width="100dp"
-        android:layout_height="7dp"
+        android:layout_height="8dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
         android:clickable="true"
@@ -205,10 +289,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.698" />
 
-    <Button
+    <ImageView
         android:id="@+id/segment12"
         android:layout_width="100dp"
-        android:layout_height="7dp"
+        android:layout_height="8dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
         android:clickable="true"
@@ -221,41 +305,83 @@
         app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.544" />
+        app:layout_constraintVertical_bias="0.525" />
 
     <ImageView
-        android:id="@+id/segment13"
-        android:layout_width="100dp"
-        android:layout_height="91dp"
-        android:background="@drawable/diagright_segment_selector"
+        android:id="@+id/segment13_1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagbottomleft_segment_selector"
         android:clickable="true"
+        android:enabled="false"
         android:focusable="true"
-        android:rotation="0"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.7"
+        app:layout_constraintHorizontal_bias="0.602"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.639" />
+        app:layout_constraintVertical_bias="0.659" />
 
     <ImageView
-        android:id="@+id/segment14"
-        android:layout_width="100dp"
-        android:layout_height="91dp"
-        android:background="@drawable/diagleft_segment_selector"
+        android:id="@+id/segment13_2"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagtopright_segment_selector"
         android:clickable="true"
+        android:enabled="false"
         android:focusable="true"
-        android:rotation="0"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.7"
+        app:layout_constraintHorizontal_bias="0.74"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.639" />
+        app:layout_constraintVertical_bias="0.579" />
 
-    <Button
+    <ImageView
+        android:id="@+id/segment14_1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagtopleft_segment_selector"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.602"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.579" />
+
+    <ImageView
+        android:id="@+id/segment14_2"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagbottomright_segment_selector"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.74"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.659" />
+
+    <ImageView
         android:id="@+id/segment15"
-        android:layout_width="7dp"
+        android:layout_width="8dp"
         android:layout_height="100dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
@@ -266,15 +392,15 @@
         android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.804"
+        app:layout_constraintHorizontal_bias="0.797"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.64" />
+        app:layout_constraintVertical_bias="0.629" />
 
-    <Button
+    <ImageView
         android:id="@+id/segment16"
         android:layout_width="100dp"
-        android:layout_height="7dp"
+        android:layout_height="8dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
         android:clickable="true"
@@ -289,10 +415,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.698" />
 
-    <Button
+    <ImageView
         android:id="@+id/segment17"
         android:layout_width="100dp"
-        android:layout_height="7dp"
+        android:layout_height="8dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
         android:clickable="true"
@@ -305,41 +431,84 @@
         app:layout_constraintHorizontal_bias="0.3"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.544" />
+        app:layout_constraintVertical_bias="0.525" />
 
     <ImageView
-        android:id="@+id/segment18"
-        android:layout_width="100dp"
-        android:layout_height="91dp"
-        android:background="@drawable/diagleft_segment_selector"
+        android:id="@+id/segment18_1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagbottomright_segment_selector"
         android:clickable="true"
+        android:enabled="false"
         android:focusable="true"
-        android:rotation="0"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintHorizontal_bias="0.396"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.639" />
+        app:layout_constraintVertical_bias="0.659" />
 
     <ImageView
-        android:id="@+id/segment19"
-        android:layout_width="100dp"
-        android:layout_height="91dp"
-        android:background="@drawable/diagright_segment_selector"
+        android:id="@+id/segment18_2"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagtopleft_segment_selector"
         android:clickable="true"
+        android:enabled="false"
         android:focusable="true"
-        android:rotation="0"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintHorizontal_bias="0.258"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.639" />
+        app:layout_constraintVertical_bias="0.579" />
 
-    <Button
+    <ImageView
+        android:id="@+id/segment19_1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagtopright_segment_selector"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.396"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.579" />
+
+
+    <ImageView
+        android:id="@+id/segment19_2"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/diagbottomleft_segment_selector"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.258"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.659" />
+
+    <ImageView
         android:id="@+id/segment20"
-        android:layout_width="7dp"
+        android:layout_width="8dp"
         android:layout_height="100dp"
         android:layout_centerInParent="true"
         android:background="@drawable/button_bg_color"
@@ -350,9 +519,9 @@
         android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.196"
+        app:layout_constraintHorizontal_bias="0.203"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.64" />
+        app:layout_constraintVertical_bias="0.629" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
