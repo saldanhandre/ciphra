@@ -524,4 +524,23 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.629" />
 
+    <Button
+        android:id="@+id/cistArabConversionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        android:layout_centerInParent="true"
+        android:background="@drawable/conversion_button_color"
+        android:clickable="true"
+        android:focusable="true"
+        android:enabled="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.85"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.9"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
