@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     // Map to hold the relationships between segments
     private Map<Integer, int[]> segmentRelations;
     private Map<Integer, Integer> diagonalSegmentPairs;
-    private LinkedList<Integer> pressedSegments = new LinkedList<>();
+    TextView resultTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +32,10 @@ public class MainActivity extends AppCompatActivity {
         initializeSegmentRelations(); // Initialize the relationships
         initializeDiagonalSegmentPairs();
         initializeSegmentClickListeners(); // Set up the click listeners for each segment
+        resultTextView = findViewById(R.id.resultTextView); // Initialize the TextView for the result
+
+        // Update the result initially
+        updateResult();
 
         Button conversionButton = findViewById(R.id.cistArabConversionButton);
         conversionButton.setOnClickListener(new View.OnClickListener() {
@@ -112,36 +117,23 @@ public class MainActivity extends AppCompatActivity {
     /*
     Setting up click listeners
     */
-
     private void setupSegmentClickListener(int imageViewId) {
-        ImageView imageView = findViewById(imageViewId);
-        imageView.setOnClickListener(new View.OnClickListener() {
+        FrameLayout frameLayout = findViewById(imageViewId);
+        frameLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Toggle the selected state
-                boolean isSelected = !imageView.isSelected();
-                imageView.setSelected(isSelected);
-
-                // If the segment is pressed, add it to the list
-                if (isSelected) {
-                    pressedSegments.add(imageViewId);
-                } else {
-                    // If the segment is unpressed, remove it from the list
-                    pressedSegments.remove(Integer.valueOf(imageViewId));
-
-                    // If this is segment5 being unpressed, unpress the segment associated with it
-                    if (imageViewId == R.id.segment5 && imageView.getTag() != null) {
-                        int segmentToUnpress = (int) imageView.getTag();
-                        setSegmentPressed(segmentToUnpress, false);
-                        pressedSegments.remove(Integer.valueOf(segmentToUnpress));
-                    }
-                }
+                boolean isSelected = v.isSelected(); // Use v to refer to the clicked View
+                v.setSelected(!isSelected); // Toggle the state
 
                 // Check for invalid combinations every time a segment is pressed
                 invalidCheck();
 
-                // Now update the related segments for both halves
+                // Update the related segments for both halves
                 updateRelatedSegments(imageViewId, isSelected);
+
+                // Update the result
+                updateResult();
             }
         });
     }
@@ -161,12 +153,17 @@ public class MainActivity extends AppCompatActivity {
                 // Now update the related segments for both halves
                 updateRelatedSegments(segmentHalf1Id, newSelectedState);
                 updateRelatedSegments(segmentHalf2Id, newSelectedState);
+
+                // Update the result
+                updateResult();
             }
         };
 
         // Set the same click listener for both halves
         segmentHalf1.setOnClickListener(clickListener);
         segmentHalf2.setOnClickListener(clickListener);
+
+
     }
 
 
@@ -174,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
     This method is the 1st step in avoiding invalid combinations.
     When a segment is pressed, it makes the segments that wouldn't make a valid combination with the clicked one, unclickable
     */
-
     private void updateRelatedSegments(int clickedSegmentId, boolean isSelected) {
         if (isSelected) {
             // If the segment is now selected, disable related segments
@@ -213,24 +209,29 @@ public class MainActivity extends AppCompatActivity {
     When a segment is pressed and forms an invalid combination, the next segment to form a valid combination is automatically pressed. If that segment
     is manually unpressed, the method remembers the last pressed segment and unpressed it as well.
     */
-
     private void invalidCheck() {
-        // Check for the specific invalid combination
+        // Check for invalid combination
         if (isSegmentPressed(R.id.segment1) && isSegmentPressed(R.id.segment2) &&
                 !isSegmentPressed(R.id.segment3_1) && !isSegmentPressed(R.id.segment3_2) &&
                 !isSegmentPressed(R.id.segment4_1) && !isSegmentPressed(R.id.segment4_2)) {
             // This is the invalid combination. Press segment5 automatically.
             setSegmentPressed(R.id.segment5, true);
-
-            // Record the last pressed segment (1 or 2) in this case.
-            // Assuming the last segment pressed is at the end of the list
-            int lastPressedSegment = pressedSegments.peekLast();
-
-            // Attach a tag to segment5 to know which segment to unpress if segment5 is unpressed
-            findViewById(R.id.segment5).setTag(lastPressedSegment);
         }
-
-
+        if (isSegmentPressed(R.id.segment6) && isSegmentPressed(R.id.segment7) &&
+                !isSegmentPressed(R.id.segment8_1) && !isSegmentPressed(R.id.segment8_2) &&
+                !isSegmentPressed(R.id.segment9_1) && !isSegmentPressed(R.id.segment9_2)) {
+            setSegmentPressed(R.id.segment10, true);
+        }
+        if (isSegmentPressed(R.id.segment11) && isSegmentPressed(R.id.segment12) &&
+                !isSegmentPressed(R.id.segment13_1) && !isSegmentPressed(R.id.segment13_2) &&
+                !isSegmentPressed(R.id.segment14_1) && !isSegmentPressed(R.id.segment14_2)) {
+            setSegmentPressed(R.id.segment15, true);
+        }
+        if (isSegmentPressed(R.id.segment16) && isSegmentPressed(R.id.segment17) &&
+                !isSegmentPressed(R.id.segment18_1) && !isSegmentPressed(R.id.segment18_2) &&
+                !isSegmentPressed(R.id.segment19_1) && !isSegmentPressed(R.id.segment19_2)) {
+            setSegmentPressed(R.id.segment20, true);
+        }
     }
 
     private boolean isSegmentPressed(int segmentId) {
@@ -248,24 +249,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     /*
-    MAYBE DELETE
-     */
-    private boolean isSegmentInArray(int segmentId, int[] array) {
-        for (int id : array) {
-            if (id == segmentId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    /*
     Logic of conversion from Cistercian to Arabic.
     Tests the combinations and turns them into arabic numbers
     Result in int arabicResult
      */
-
     private int convertCistercianToArabic() {
         // Initialize the number for each quadrant
         int units = 0, tens = 0, hundreds = 0, thousands = 0;
@@ -347,7 +334,6 @@ public class MainActivity extends AppCompatActivity {
     /*
     Display the arabicResult
      */
-
     private void displayArabicNumber(int number) {
         // Create an AlertDialog builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -368,5 +354,10 @@ public class MainActivity extends AppCompatActivity {
         // Create and show the AlertDialog
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void updateResult() {
+        int arabicNumber = convertCistercianToArabic();
+        resultTextView.setText(String.valueOf(arabicNumber));
     }
 }
