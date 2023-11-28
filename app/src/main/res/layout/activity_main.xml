@@ -19,49 +19,41 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.436" />
 
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="20dp"
-        android:paddingBottom="4dp"
+    <ImageView
+        android:id="@+id/segment1"
+        android:layout_width="100dp"
+        android:layout_height="8dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.208">
+        app:layout_constraintVertical_bias="0.233" />
 
-        <ImageView
-            android:id="@+id/segment1"
-            android:layout_width="100dp"
-            android:layout_height="8dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="4dp"
-        android:paddingBottom="20dp"
+    <ImageView
+        android:id="@+id/segment2"
+        android:layout_width="100dp"
+        android:layout_height="8dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.414">
-
-        <ImageView
-            android:id="@+id/segment2"
-            android:layout_width="100dp"
-            android:layout_height="8dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
+        app:layout_constraintVertical_bias="0.403" />
 
     <ImageView
         android:id="@+id/segment3_1"
@@ -135,72 +127,60 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.266" />
 
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="4dp"
-        android:paddingRight="20dp"
+
+    <ImageView
+        android:id="@+id/segment5"
+        android:layout_width="8dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.836"
+        app:layout_constraintHorizontal_bias="0.797"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.288">
+        app:layout_constraintVertical_bias="0.288" />
 
-        <ImageView
-            android:id="@+id/segment5"
-            android:layout_width="8dp"
-            android:layout_height="100dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
-
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="20dp"
-        android:paddingBottom="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.299"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.208">
-
-        <ImageView
-            android:id="@+id/segment6"
-            android:layout_width="100dp"
-            android:layout_height="8dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="4dp"
-        android:paddingBottom="20dp"
+    <ImageView
+        android:id="@+id/segment6"
+        android:layout_width="100dp"
+        android:layout_height="8dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.299"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.414">
+        app:layout_constraintVertical_bias="0.233" />
 
-        <ImageView
-            android:id="@+id/segment7"
-            android:layout_width="100dp"
-            android:layout_height="8dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
+    <ImageView
+        android:id="@+id/segment7"
+        android:layout_width="100dp"
+        android:layout_height="8dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.299"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.403" />
 
     <ImageView
         android:id="@+id/segment8_1"
@@ -274,71 +254,59 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.266" />
 
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingRight="4dp"
+    <ImageView
+        android:id="@+id/segment10"
+        android:layout_width="8dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:focusable="true"
+        android:enabled="false"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.16"
+        app:layout_constraintHorizontal_bias="0.203"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.288">
+        app:layout_constraintVertical_bias="0.288" />
 
-        <ImageView
-            android:id="@+id/segment10"
-            android:layout_width="8dp"
-            android:layout_height="100dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="4dp"
-        android:paddingBottom="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.7"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.718">
-
-        <ImageView
-            android:id="@+id/segment11"
-            android:layout_width="100dp"
-            android:layout_height="8dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="20dp"
-        android:paddingBottom="4dp"
+    <ImageView
+        android:id="@+id/segment11"
+        android:layout_width="100dp"
+        android:layout_height="8dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.513">
+        app:layout_constraintVertical_bias="0.698" />
 
-        <ImageView
-            android:id="@+id/segment12"
-            android:layout_width="100dp"
-            android:layout_height="8dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
+    <ImageView
+        android:id="@+id/segment12"
+        android:layout_width="100dp"
+        android:layout_height="8dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.7"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.524" />
 
     <ImageView
         android:id="@+id/segment13_1"
@@ -412,71 +380,59 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.659" />
 
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="4dp"
-        android:paddingRight="20dp"
+    <ImageView
+        android:id="@+id/segment15"
+        android:layout_width="8dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:focusable="true"
+        android:enabled="false"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.836"
+        app:layout_constraintHorizontal_bias="0.797"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.629">
+        app:layout_constraintVertical_bias="0.629" />
 
-        <ImageView
-            android:id="@+id/segment15"
-            android:layout_width="8dp"
-            android:layout_height="100dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="4dp"
-        android:paddingBottom="20dp"
+    <ImageView
+        android:id="@+id/segment16"
+        android:layout_width="100dp"
+        android:layout_height="8dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:focusable="true"
+        android:enabled="false"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.299"
+        app:layout_constraintHorizontal_bias="0.3"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.718">
+        app:layout_constraintVertical_bias="0.698" />
 
-        <ImageView
-            android:id="@+id/segment16"
-            android:layout_width="100dp"
-            android:layout_height="8dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="20dp"
-        android:paddingBottom="4dp"
+    <ImageView
+        android:id="@+id/segment17"
+        android:layout_width="100dp"
+        android:layout_height="8dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:enabled="false"
+        android:focusable="true"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.299"
+        app:layout_constraintHorizontal_bias="0.3"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.513">
-
-        <ImageView
-            android:id="@+id/segment17"
-            android:layout_width="100dp"
-            android:layout_height="8dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
+        app:layout_constraintVertical_bias="0.524" />
 
     <ImageView
         android:id="@+id/segment18_1"
@@ -551,27 +507,23 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.659" />
 
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingRight="4dp"
+    <ImageView
+        android:id="@+id/segment20"
+        android:layout_width="8dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_bg_color"
+        android:clickable="true"
+        android:focusable="true"
+        android:enabled="false"
+        android:paddingLeft="0dp"
+        android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.16"
+        app:layout_constraintHorizontal_bias="0.203"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.63">
-
-        <ImageView
-            android:id="@+id/segment20"
-            android:layout_width="8dp"
-            android:layout_height="100dp"
-            android:background="@drawable/button_bg_color"
-            android:clickable="true"
-            android:enabled="false"
-            android:focusable="true" />
-    </FrameLayout>
+        app:layout_constraintVertical_bias="0.629" />
 
     <Button
         android:id="@+id/cistArabConversionButton"

@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -118,18 +120,18 @@ public class MainActivity extends AppCompatActivity {
     Setting up click listeners
     */
     private void setupSegmentClickListener(int imageViewId) {
-        FrameLayout frameLayout = findViewById(imageViewId);
-        frameLayout.setOnClickListener(new View.OnClickListener() {
+        ImageView imageView = findViewById(imageViewId);
+        imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Toggle the selected state
-                boolean isSelected = v.isSelected(); // Use v to refer to the clicked View
-                v.setSelected(!isSelected); // Toggle the state
+                boolean isSelected = !imageView.isSelected();
+                imageView.setSelected(isSelected);
 
                 // Check for invalid combinations every time a segment is pressed
                 invalidCheck();
 
-                // Update the related segments for both halves
+                // Update the related segments for this ImageView
                 updateRelatedSegments(imageViewId, isSelected);
 
                 // Update the result
@@ -137,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void setupDiagonalSegmentClickListener(int segmentHalf1Id, int segmentHalf2Id) {
         final ImageView segmentHalf1 = findViewById(segmentHalf1Id);
@@ -155,16 +158,15 @@ public class MainActivity extends AppCompatActivity {
                 updateRelatedSegments(segmentHalf2Id, newSelectedState);
 
                 // Update the result
-                updateResult();
+                updateResult();  // Make sure this line is there
             }
         };
 
         // Set the same click listener for both halves
         segmentHalf1.setOnClickListener(clickListener);
         segmentHalf2.setOnClickListener(clickListener);
-
-
     }
+
 
 
     /*
@@ -199,6 +201,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+
+
     /*
     This logic is the 2nd step in avoiding invalid combinations.
     Even after making some segments unavailable, it is possible for the user to write an invalid character while trying to achieve another one.
@@ -210,28 +215,35 @@ public class MainActivity extends AppCompatActivity {
     is manually unpressed, the method remembers the last pressed segment and unpressed it as well.
     */
     private void invalidCheck() {
+        Log.d("InvalidCheck", "Checking for invalid combinations");
         // Check for invalid combination
         if (isSegmentPressed(R.id.segment1) && isSegmentPressed(R.id.segment2) &&
                 !isSegmentPressed(R.id.segment3_1) && !isSegmentPressed(R.id.segment3_2) &&
                 !isSegmentPressed(R.id.segment4_1) && !isSegmentPressed(R.id.segment4_2)) {
+            Log.d("InvalidCheck", "Invalid combination found with segments 1 and 2");
             // This is the invalid combination. Press segment5 automatically.
             setSegmentPressed(R.id.segment5, true);
         }
         if (isSegmentPressed(R.id.segment6) && isSegmentPressed(R.id.segment7) &&
                 !isSegmentPressed(R.id.segment8_1) && !isSegmentPressed(R.id.segment8_2) &&
                 !isSegmentPressed(R.id.segment9_1) && !isSegmentPressed(R.id.segment9_2)) {
+            Log.d("InvalidCheck", "Invalid combination found with segments 6 and 7");
             setSegmentPressed(R.id.segment10, true);
         }
         if (isSegmentPressed(R.id.segment11) && isSegmentPressed(R.id.segment12) &&
                 !isSegmentPressed(R.id.segment13_1) && !isSegmentPressed(R.id.segment13_2) &&
                 !isSegmentPressed(R.id.segment14_1) && !isSegmentPressed(R.id.segment14_2)) {
+            Log.d("InvalidCheck", "Invalid combination found with segments 11 and 12");
             setSegmentPressed(R.id.segment15, true);
         }
         if (isSegmentPressed(R.id.segment16) && isSegmentPressed(R.id.segment17) &&
                 !isSegmentPressed(R.id.segment18_1) && !isSegmentPressed(R.id.segment18_2) &&
                 !isSegmentPressed(R.id.segment19_1) && !isSegmentPressed(R.id.segment19_2)) {
+            Log.d("InvalidCheck", "Invalid combination found with segments 16 and 17");
             setSegmentPressed(R.id.segment20, true);
         }
+
+
     }
 
     private boolean isSegmentPressed(int segmentId) {
