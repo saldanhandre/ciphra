@@ -23,6 +23,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ConversionResultActivity" />
+        <activity android:name=".ArabicConversionActivity" />
     </application>
 
 </manifest>

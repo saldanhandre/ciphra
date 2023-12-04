@@ -40,6 +40,13 @@ public class MainActivity extends AppCompatActivity {
         updateResult();
 
         Button conversionButton = findViewById(R.id.cistArabConversionButton);
+
+        Button openArabicConversionLayoutButton = findViewById(R.id.openArabicConversionLayoutButton);
+        openArabicConversionLayoutButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ArabicConversionActivity.class);
+            startActivity(intent);
+        });
+
         conversionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,6 +137,38 @@ public class MainActivity extends AppCompatActivity {
 
                 // Check for invalid combinations every time a segment is pressed
                 invalidCheck();
+
+                // If segment 5 is unpressed and both 1 and 2 are pressed, unpress segment 1
+                if (imageViewId == R.id.segment5 && !isSelected &&
+                        isSegmentPressed(R.id.segment1) && isSegmentPressed(R.id.segment2)) {
+                    Log.d("SegmentClick", "Unpressing segment 2 as segment 5 is unpressed while 1 and 2 are pressed");
+                    setSegmentPressed(R.id.segment2, false);
+                    setSegmentPressed(R.id.segment5, false);
+                }
+
+                // If segment 10 is unpressed and both 6 and 7 are pressed, unpress segment 6
+                if (imageViewId == R.id.segment10 && !isSelected &&
+                        isSegmentPressed(R.id.segment6) && isSegmentPressed(R.id.segment7)) {
+                    Log.d("SegmentClick", "Unpressing segment 7 as segment 10 is unpressed while 6 and 7 are pressed");
+                    setSegmentPressed(R.id.segment7, false);
+                    setSegmentPressed(R.id.segment10, false);
+                }
+
+                // If segment 15 is unpressed and both 11 and 12 are pressed, unpress segment 11
+                if (imageViewId == R.id.segment15 && !isSelected &&
+                        isSegmentPressed(R.id.segment11) && isSegmentPressed(R.id.segment12)) {
+                    Log.d("SegmentClick", "Unpressing segment 12 as segment 15 is unpressed while 11 and 12 are pressed");
+                    setSegmentPressed(R.id.segment12, false);
+                    setSegmentPressed(R.id.segment15, false);
+                }
+
+                // If segment 20 is unpressed and both 16 and 17 are pressed, unpress segment 16
+                if (imageViewId == R.id.segment20 && !isSelected &&
+                        isSegmentPressed(R.id.segment16) && isSegmentPressed(R.id.segment17)) {
+                    Log.d("SegmentClick", "Unpressing segment 17 as segment 20 is unpressed while 16 and 17 are pressed");
+                    setSegmentPressed(R.id.segment17, false);
+                    setSegmentPressed(R.id.segment20, false);
+                }
 
                 // Update the related segments for this ImageView
                 updateRelatedSegments(imageViewId, isSelected);
@@ -242,6 +281,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d("InvalidCheck", "Invalid combination found with segments 16 and 17");
             setSegmentPressed(R.id.segment20, true);
         }
+        /*
+        // Check if segment 5 is unpressed while both 1 and 2 are pressed
+        if (!isSegmentPressed(R.id.segment5) && isSegmentPressed(R.id.segment1) && isSegmentPressed(R.id.segment2)) {
+            Log.d("InvalidCheck", "Unpressing segment 1 as segment 5 is unpressed while 1 and 2 are pressed");
+            setSegmentPressed(R.id.segment1, false);
+        }
+        */
 
 
     }
