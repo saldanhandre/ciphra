@@ -5,6 +5,10 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+/* This activity is to show the converted value from Cistercian To Arabic
+ * by clicking on the conversion button that's on the activity_main.
+ * Right now it's not in use.
+ */
 public class ConversionResultActivity extends AppCompatActivity {
 
     @Override

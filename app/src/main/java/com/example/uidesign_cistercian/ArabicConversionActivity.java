@@ -36,10 +36,12 @@ public class ArabicConversionActivity extends AppCompatActivity {
             // Update the segments based on these values
             eraseSegments();
             updateSegments(thousands, hundreds, tens, units);
-            System.out.println(thousands);
-            System.out.println(hundreds);
-            System.out.println(tens);
-            System.out.println(units);
+
+            /*
+            // Add to list for history
+            ArabToCistConversionItem conversionItem = new ArabToCistConversionItem(String.valueOf(number), segmentsState);
+            ConversionHistoryManager.getInstance().addArabToCistConversion(conversionItem);
+*/
         });
     }
 
