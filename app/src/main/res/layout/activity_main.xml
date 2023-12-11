@@ -17,17 +17,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- Horizontal Guidelines -->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/horizontalGuideline1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.13" />
+
+        <!-- Vertical Guidelines -->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/verticalGuideline1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.48" />
+
         <View
             android:id="@+id/central_stem"
-            android:layout_width="10dp"
-            android:layout_height="300dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:background="@drawable/stem_background"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.033333333333"
+            app:layout_constraintHeight_percent="0.75"
+            app:layout_constraintStart_toStartOf="@id/verticalGuideline1"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5" />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <ImageView
             android:id="@+id/segment1"
@@ -405,7 +420,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.087" />
 
-    <TextView
+    <!--
+        <TextView
         android:id="@+id/resultTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -419,6 +435,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.087" />
+    -->
 
     <Button
         android:id="@+id/openArabicConversionLayoutButton"
