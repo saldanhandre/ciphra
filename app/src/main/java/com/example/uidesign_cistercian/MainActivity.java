@@ -461,35 +461,14 @@ public class MainActivity extends AppCompatActivity {
     Display the arabicResult
      */
     private void displayArabicNumber(int number) {
-        // Create an AlertDialog builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        // Inflate the custom layout
-        View dialogView = getLayoutInflater().inflate(R.layout.cistercian_conversion_layout, null);
-        // Find the TextView and set the number
-        TextView resultTextView = dialogView.findViewById(R.id.resultTextView);
-        resultTextView.setText(String.valueOf(number));
-        // Set the custom layout on the dialog builder
-        builder.setView(dialogView);
-        // Add an OK button to dismiss the dialog
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User clicked OK button
-                dialog.dismiss();
-            }
-        });
-        // Create and show the AlertDialog
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        EditText resultEditText = findViewById(R.id.resultEditText);
+        resultEditText.setText(String.valueOf(number));
     }
 
     private void updateResult() {
         int arabicNumber = convertCistercianToArabic();
-        resultTextView.setText(String.valueOf(arabicNumber));
+        displayArabicNumber(arabicNumber);
     }
-
-
-
-
 
 
     /*
@@ -687,6 +666,7 @@ public class MainActivity extends AppCompatActivity {
                 updateRelatedSegments(R.id.segment9_1, false);
                 updateRelatedSegments(R.id.segment9_2, false);
                 updateRelatedSegments(R.id.segment10, false);
+                break;
             case 1:
                 setSegmentPressed(R.id.segment6, true);
                 setSegmentPressed(R.id.segment7, false);
@@ -1207,8 +1187,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-
-    // method to be called whenever a segment is interacted with
     private void resetConversionTimer() {
         conversionHandler.removeCallbacks(conversionRunnable);
         conversionHandler.postDelayed(conversionRunnable, 5000); // 5 seconds
