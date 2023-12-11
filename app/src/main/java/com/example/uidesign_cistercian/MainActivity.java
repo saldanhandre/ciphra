@@ -6,9 +6,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,10 +27,10 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Map to hold the relationships between segments
     private Map<Integer, int[]> segmentRelations;
     private Map<Integer, Integer> diagonalSegmentPairs;
     TextView resultTextView;
+    private EditText resultEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,19 +45,79 @@ public class MainActivity extends AppCompatActivity {
         // Update the result initially
         updateResult();
 
-        Button conversionButton = findViewById(R.id.cistArabConversionButton);
-
         Button openArabicConversionLayoutButton = findViewById(R.id.openArabicConversionLayoutButton);
         openArabicConversionLayoutButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ArabicConversionActivity.class);
             startActivity(intent);
         });
 
+        Button conversionButton = findViewById(R.id.cistArabConversionButton);
         conversionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int arabicNumber = convertCistercianToArabic();
                 displayArabicNumber(arabicNumber);
+            }
+        });
+
+        Button historyButton = findViewById(R.id.historyButton);
+        historyButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+            startActivity(intent);
+        });
+
+        resultEditText = findViewById(R.id.resultEditText);
+        resultEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+//                // Convert the input to Cistercian and update segments
+//                if (!s.toString().isEmpty()) {
+//                    int number = Integer.parseInt(s.toString());
+//
+//                    // Break down the number into thousands, hundreds, tens, and units
+//                    int thousands = number / 1000;
+//                    int hundreds = (number % 1000) / 100;
+//                    int tens = (number % 100) / 10;
+//                    int units = number % 10;
+//
+//                    updateCistercianSegments(thousands, hundreds, tens, units);
+//                    updateResult();
+//                } else {
+//                    // Handle empty input
+//                }
+            }
+        });
+
+        Button convertButton = findViewById(R.id.convertButton);
+        convertButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Get the text from resultEditText
+                String input = resultEditText.getText().toString();
+
+                // Check if the input is not empty
+                if (!input.isEmpty()) {
+                    int number = Integer.parseInt(input);
+
+                    // Break down the number into thousands, hundreds, tens, and units
+                    int thousands = number / 1000;
+                    int hundreds = (number % 1000) / 100;
+                    int tens = (number % 100) / 10;
+                    int units = number % 10;
+
+                    updateCistercianSegments(thousands, hundreds, tens, units);
+                    updateResult();
+                    resetConversionTimer();
+
+                } else {
+                    updateCistercianSegments(0, 0, 0, 0);
+                    updateResult();
+                    resetConversionTimer();
+                }
             }
         });
     }
@@ -175,6 +241,9 @@ public class MainActivity extends AppCompatActivity {
 
                 // Update the result
                 updateResult();
+
+                // Reset the timer
+                resetConversionTimer();
             }
         });
     }
@@ -198,6 +267,9 @@ public class MainActivity extends AppCompatActivity {
 
                 // Update the result
                 updateResult();  // Make sure this line is there
+
+                // Reset the timer
+                resetConversionTimer();
             }
         };
 
@@ -205,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
         segmentHalf1.setOnClickListener(clickListener);
         segmentHalf2.setOnClickListener(clickListener);
     }
-
 
 
     /*
@@ -239,8 +310,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
 
 
     /*
@@ -281,15 +350,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d("InvalidCheck", "Invalid combination found with segments 16 and 17");
             setSegmentPressed(R.id.segment20, true);
         }
-        /*
-        // Check if segment 5 is unpressed while both 1 and 2 are pressed
-        if (!isSegmentPressed(R.id.segment5) && isSegmentPressed(R.id.segment1) && isSegmentPressed(R.id.segment2)) {
-            Log.d("InvalidCheck", "Unpressing segment 1 as segment 5 is unpressed while 1 and 2 are pressed");
-            setSegmentPressed(R.id.segment1, false);
-        }
-        */
-
-
     }
 
     private boolean isSegmentPressed(int segmentId) {
@@ -318,8 +378,10 @@ public class MainActivity extends AppCompatActivity {
         // Check the segments for the units
         if (findViewById(R.id.segment1).isSelected()) units += 1;
         if (findViewById(R.id.segment2).isSelected()) units += 2;
-        if (findViewById(R.id.segment3_1).isSelected() || findViewById(R.id.segment3_2).isSelected()) units += 3;
-        if (findViewById(R.id.segment4_1).isSelected() || findViewById(R.id.segment4_2).isSelected()) units += 4;
+        if (findViewById(R.id.segment3_1).isSelected() || findViewById(R.id.segment3_2).isSelected())
+            units += 3;
+        if (findViewById(R.id.segment4_1).isSelected() || findViewById(R.id.segment4_2).isSelected())
+            units += 4;
         // Check if segment5 is selected along with segments 1 or 2 for numbers 7 and 8
         if (findViewById(R.id.segment5).isSelected()) {
             if (units == 1) {
@@ -336,8 +398,10 @@ public class MainActivity extends AppCompatActivity {
         // Check the segments for the tens
         if (findViewById(R.id.segment6).isSelected()) tens += 10;
         if (findViewById(R.id.segment7).isSelected()) tens += 20;
-        if (findViewById(R.id.segment8_1).isSelected() || findViewById(R.id.segment8_2).isSelected()) tens += 30;
-        if (findViewById(R.id.segment9_1).isSelected() || findViewById(R.id.segment9_2).isSelected()) tens += 40;
+        if (findViewById(R.id.segment8_1).isSelected() || findViewById(R.id.segment8_2).isSelected())
+            tens += 30;
+        if (findViewById(R.id.segment9_1).isSelected() || findViewById(R.id.segment9_2).isSelected())
+            tens += 40;
         if (findViewById(R.id.segment10).isSelected()) {
             if (tens == 10) {
                 tens = 70;
@@ -353,8 +417,10 @@ public class MainActivity extends AppCompatActivity {
         // Check the segments for the hundreds
         if (findViewById(R.id.segment11).isSelected()) hundreds += 100;
         if (findViewById(R.id.segment12).isSelected()) hundreds += 200;
-        if (findViewById(R.id.segment13_1).isSelected() || findViewById(R.id.segment13_2).isSelected()) hundreds += 300;
-        if (findViewById(R.id.segment14_1).isSelected() || findViewById(R.id.segment14_2).isSelected()) hundreds += 400;
+        if (findViewById(R.id.segment13_1).isSelected() || findViewById(R.id.segment13_2).isSelected())
+            hundreds += 300;
+        if (findViewById(R.id.segment14_1).isSelected() || findViewById(R.id.segment14_2).isSelected())
+            hundreds += 400;
         if (findViewById(R.id.segment15).isSelected()) {
             if (hundreds == 100) {
                 hundreds = 700;
@@ -370,8 +436,10 @@ public class MainActivity extends AppCompatActivity {
         // Check the segments for the thousands
         if (findViewById(R.id.segment16).isSelected()) thousands += 1000;
         if (findViewById(R.id.segment17).isSelected()) thousands += 2000;
-        if (findViewById(R.id.segment18_1).isSelected() || findViewById(R.id.segment18_2).isSelected()) thousands += 3000;
-        if (findViewById(R.id.segment19_1).isSelected() || findViewById(R.id.segment19_2).isSelected()) thousands += 4000;
+        if (findViewById(R.id.segment18_1).isSelected() || findViewById(R.id.segment18_2).isSelected())
+            thousands += 3000;
+        if (findViewById(R.id.segment19_1).isSelected() || findViewById(R.id.segment19_2).isSelected())
+            thousands += 4000;
         if (findViewById(R.id.segment20).isSelected()) {
             if (thousands == 1000) {
                 thousands = 7000;
@@ -417,5 +485,732 @@ public class MainActivity extends AppCompatActivity {
     private void updateResult() {
         int arabicNumber = convertCistercianToArabic();
         resultTextView.setText(String.valueOf(arabicNumber));
+    }
+
+
+
+
+
+
+    /*
+     * Arabic to Cistercian Conversion
+     */
+    private void updateCistercianSegments(int thousands, int hundreds, int tens, int units) {
+        findViewById(R.id.central_stem).setVisibility(View.VISIBLE);
+        switch(units){
+            case 0:
+                setSegmentPressed(R.id.segment1, false);
+                setSegmentPressed(R.id.segment2, false);
+                setSegmentPressed(R.id.segment3_1, false);
+                setSegmentPressed(R.id.segment3_2, false);
+                setSegmentPressed(R.id.segment4_1, false);
+                setSegmentPressed(R.id.segment4_2, false);
+                setSegmentPressed(R.id.segment5, false);
+
+                updateRelatedSegments(R.id.segment1, false);
+                updateRelatedSegments(R.id.segment2, false);
+                updateRelatedSegments(R.id.segment3_1, false);
+                updateRelatedSegments(R.id.segment3_2, false);
+                updateRelatedSegments(R.id.segment4_1, false);
+                updateRelatedSegments(R.id.segment4_2, false);
+                updateRelatedSegments(R.id.segment5, false);
+                break;
+            case 1:
+                setSegmentPressed(R.id.segment1, true);
+                setSegmentPressed(R.id.segment2, false);
+                setSegmentPressed(R.id.segment3_1, false);
+                setSegmentPressed(R.id.segment3_2, false);
+                setSegmentPressed(R.id.segment4_1, false);
+                setSegmentPressed(R.id.segment4_2, false);
+                setSegmentPressed(R.id.segment5, false);
+
+                updateRelatedSegments(R.id.segment1, true);
+                updateRelatedSegments(R.id.segment2, false);
+                updateRelatedSegments(R.id.segment3_1, false);
+                updateRelatedSegments(R.id.segment3_2, false);
+                updateRelatedSegments(R.id.segment4_1, false);
+                updateRelatedSegments(R.id.segment4_2, false);
+                updateRelatedSegments(R.id.segment5, false);
+                break;
+            case 2:
+                setSegmentPressed(R.id.segment1, false);
+                setSegmentPressed(R.id.segment2, true);
+                setSegmentPressed(R.id.segment3_1, false);
+                setSegmentPressed(R.id.segment3_2, false);
+                setSegmentPressed(R.id.segment4_1, false);
+                setSegmentPressed(R.id.segment4_2, false);
+                setSegmentPressed(R.id.segment5, false);
+
+                updateRelatedSegments(R.id.segment1, false);
+                updateRelatedSegments(R.id.segment2, true);
+                updateRelatedSegments(R.id.segment3_1, false);
+                updateRelatedSegments(R.id.segment3_2, false);
+                updateRelatedSegments(R.id.segment4_1, false);
+                updateRelatedSegments(R.id.segment4_2, false);
+                updateRelatedSegments(R.id.segment5, false);
+                break;
+            case 3:
+                setSegmentPressed(R.id.segment1, false);
+                setSegmentPressed(R.id.segment2, false);
+                setSegmentPressed(R.id.segment3_1, true);
+                setSegmentPressed(R.id.segment3_2, true);
+                setSegmentPressed(R.id.segment4_1, false);
+                setSegmentPressed(R.id.segment4_2, false);
+                setSegmentPressed(R.id.segment5, false);
+
+                updateRelatedSegments(R.id.segment1, false);
+                updateRelatedSegments(R.id.segment2, false);
+                updateRelatedSegments(R.id.segment3_1, true);
+                updateRelatedSegments(R.id.segment3_2, true);
+                updateRelatedSegments(R.id.segment4_1, false);
+                updateRelatedSegments(R.id.segment4_2, false);
+                updateRelatedSegments(R.id.segment5, false);
+                break;
+            case 4:
+                setSegmentPressed(R.id.segment1, false);
+                setSegmentPressed(R.id.segment2, false);
+                setSegmentPressed(R.id.segment3_1, false);
+                setSegmentPressed(R.id.segment3_2, false);
+                setSegmentPressed(R.id.segment4_1, true);
+                setSegmentPressed(R.id.segment4_2, true);
+                setSegmentPressed(R.id.segment5, false);
+
+                updateRelatedSegments(R.id.segment1, false);
+                updateRelatedSegments(R.id.segment2, false);
+                updateRelatedSegments(R.id.segment3_1, false);
+                updateRelatedSegments(R.id.segment3_2, false);
+                updateRelatedSegments(R.id.segment4_1, true);
+                updateRelatedSegments(R.id.segment4_2, true);
+                updateRelatedSegments(R.id.segment5, false);
+                break;
+            case 5:
+                setSegmentPressed(R.id.segment1, true);
+                setSegmentPressed(R.id.segment2, false);
+                setSegmentPressed(R.id.segment3_1, false);
+                setSegmentPressed(R.id.segment3_2, false);
+                setSegmentPressed(R.id.segment4_1, true);
+                setSegmentPressed(R.id.segment4_2, true);
+                setSegmentPressed(R.id.segment5, false);
+
+                updateRelatedSegments(R.id.segment1, true);
+                updateRelatedSegments(R.id.segment2, false);
+                updateRelatedSegments(R.id.segment3_1, false);
+                updateRelatedSegments(R.id.segment3_2, false);
+                updateRelatedSegments(R.id.segment4_1, true);
+                updateRelatedSegments(R.id.segment4_2, true);
+                updateRelatedSegments(R.id.segment5, false);
+                break;
+            case 6:
+                setSegmentPressed(R.id.segment1, false);
+                setSegmentPressed(R.id.segment2, false);
+                setSegmentPressed(R.id.segment3_1, false);
+                setSegmentPressed(R.id.segment3_2, false);
+                setSegmentPressed(R.id.segment4_1, false);
+                setSegmentPressed(R.id.segment4_2, false);
+                setSegmentPressed(R.id.segment5, true);
+
+                updateRelatedSegments(R.id.segment1, false);
+                updateRelatedSegments(R.id.segment2, false);
+                updateRelatedSegments(R.id.segment3_1, false);
+                updateRelatedSegments(R.id.segment3_2, false);
+                updateRelatedSegments(R.id.segment4_1, false);
+                updateRelatedSegments(R.id.segment4_2, false);
+                updateRelatedSegments(R.id.segment5, true);
+                break;
+            case 7:
+                setSegmentPressed(R.id.segment1, true);
+                setSegmentPressed(R.id.segment2, false);
+                setSegmentPressed(R.id.segment3_1, false);
+                setSegmentPressed(R.id.segment3_2, false);
+                setSegmentPressed(R.id.segment4_1, false);
+                setSegmentPressed(R.id.segment4_2, false);
+                setSegmentPressed(R.id.segment5, true);
+
+                updateRelatedSegments(R.id.segment1, true);
+                updateRelatedSegments(R.id.segment2, false);
+                updateRelatedSegments(R.id.segment3_1, false);
+                updateRelatedSegments(R.id.segment3_2, false);
+                updateRelatedSegments(R.id.segment4_1, false);
+                updateRelatedSegments(R.id.segment4_2, false);
+                updateRelatedSegments(R.id.segment5, true);
+                break;
+            case 8:
+                setSegmentPressed(R.id.segment1, false);
+                setSegmentPressed(R.id.segment2, true);
+                setSegmentPressed(R.id.segment3_1, false);
+                setSegmentPressed(R.id.segment3_2, false);
+                setSegmentPressed(R.id.segment4_1, false);
+                setSegmentPressed(R.id.segment4_2, false);
+                setSegmentPressed(R.id.segment5, true);
+
+                updateRelatedSegments(R.id.segment1, false);
+                updateRelatedSegments(R.id.segment2, true);
+                updateRelatedSegments(R.id.segment3_1, false);
+                updateRelatedSegments(R.id.segment3_2, false);
+                updateRelatedSegments(R.id.segment4_1, false);
+                updateRelatedSegments(R.id.segment4_2, false);
+                updateRelatedSegments(R.id.segment5, true);
+                break;
+            case 9:
+                setSegmentPressed(R.id.segment1, true);
+                setSegmentPressed(R.id.segment2, true);
+                setSegmentPressed(R.id.segment3_1, false);
+                setSegmentPressed(R.id.segment3_2, false);
+                setSegmentPressed(R.id.segment4_1, false);
+                setSegmentPressed(R.id.segment4_2, false);
+                setSegmentPressed(R.id.segment5, true);
+
+                updateRelatedSegments(R.id.segment1, true);
+                updateRelatedSegments(R.id.segment2, true);
+                updateRelatedSegments(R.id.segment3_1, false);
+                updateRelatedSegments(R.id.segment3_2, false);
+                updateRelatedSegments(R.id.segment4_1, false);
+                updateRelatedSegments(R.id.segment4_2, false);
+                updateRelatedSegments(R.id.segment5, true);
+                break;
+        }
+
+        switch(tens){
+            case 0:
+                setSegmentPressed(R.id.segment6, false);
+                setSegmentPressed(R.id.segment7, false);
+                setSegmentPressed(R.id.segment8_1, false);
+                setSegmentPressed(R.id.segment8_2, false);
+                setSegmentPressed(R.id.segment9_1, false);
+                setSegmentPressed(R.id.segment9_2, false);
+                setSegmentPressed(R.id.segment10, false);
+
+                updateRelatedSegments(R.id.segment6, false);
+                updateRelatedSegments(R.id.segment7, false);
+                updateRelatedSegments(R.id.segment8_1, false);
+                updateRelatedSegments(R.id.segment8_2, false);
+                updateRelatedSegments(R.id.segment9_1, false);
+                updateRelatedSegments(R.id.segment9_2, false);
+                updateRelatedSegments(R.id.segment10, false);
+            case 1:
+                setSegmentPressed(R.id.segment6, true);
+                setSegmentPressed(R.id.segment7, false);
+                setSegmentPressed(R.id.segment8_1, false);
+                setSegmentPressed(R.id.segment8_2, false);
+                setSegmentPressed(R.id.segment9_1, false);
+                setSegmentPressed(R.id.segment9_2, false);
+                setSegmentPressed(R.id.segment10, false);
+
+                updateRelatedSegments(R.id.segment6, true);
+                updateRelatedSegments(R.id.segment7, false);
+                updateRelatedSegments(R.id.segment8_1, false);
+                updateRelatedSegments(R.id.segment8_2, false);
+                updateRelatedSegments(R.id.segment9_1, false);
+                updateRelatedSegments(R.id.segment9_2, false);
+                updateRelatedSegments(R.id.segment10, false);
+                break;
+            case 2:
+                setSegmentPressed(R.id.segment6, false);
+                setSegmentPressed(R.id.segment7, true);
+                setSegmentPressed(R.id.segment8_1, false);
+                setSegmentPressed(R.id.segment8_2, false);
+                setSegmentPressed(R.id.segment9_1, false);
+                setSegmentPressed(R.id.segment9_2, false);
+                setSegmentPressed(R.id.segment10, false);
+
+                updateRelatedSegments(R.id.segment6, false);
+                updateRelatedSegments(R.id.segment7, true);
+                updateRelatedSegments(R.id.segment8_1, false);
+                updateRelatedSegments(R.id.segment8_2, false);
+                updateRelatedSegments(R.id.segment9_1, false);
+                updateRelatedSegments(R.id.segment9_2, false);
+                updateRelatedSegments(R.id.segment10, false);
+                break;
+            case 3:
+                setSegmentPressed(R.id.segment6, false);
+                setSegmentPressed(R.id.segment7, false);
+                setSegmentPressed(R.id.segment8_1, true);
+                setSegmentPressed(R.id.segment8_2, true);
+                setSegmentPressed(R.id.segment9_1, false);
+                setSegmentPressed(R.id.segment9_2, false);
+                setSegmentPressed(R.id.segment10, false);
+
+                updateRelatedSegments(R.id.segment6, false);
+                updateRelatedSegments(R.id.segment7, false);
+                updateRelatedSegments(R.id.segment8_1, true);
+                updateRelatedSegments(R.id.segment8_2, true);
+                updateRelatedSegments(R.id.segment9_1, false);
+                updateRelatedSegments(R.id.segment9_2, false);
+                updateRelatedSegments(R.id.segment10, false);
+                break;
+            case 4:
+                setSegmentPressed(R.id.segment6, false);
+                setSegmentPressed(R.id.segment7, false);
+                setSegmentPressed(R.id.segment8_1, false);
+                setSegmentPressed(R.id.segment8_2, false);
+                setSegmentPressed(R.id.segment9_1, true);
+                setSegmentPressed(R.id.segment9_2, true);
+                setSegmentPressed(R.id.segment10, false);
+
+                updateRelatedSegments(R.id.segment6, false);
+                updateRelatedSegments(R.id.segment7, false);
+                updateRelatedSegments(R.id.segment8_1, false);
+                updateRelatedSegments(R.id.segment8_2, false);
+                updateRelatedSegments(R.id.segment9_1, true);
+                updateRelatedSegments(R.id.segment9_2, true);
+                updateRelatedSegments(R.id.segment10, false);
+                break;
+            case 5:
+                setSegmentPressed(R.id.segment6, true);
+                setSegmentPressed(R.id.segment7, false);
+                setSegmentPressed(R.id.segment8_1, false);
+                setSegmentPressed(R.id.segment8_2, false);
+                setSegmentPressed(R.id.segment9_1, true);
+                setSegmentPressed(R.id.segment9_2, true);
+                setSegmentPressed(R.id.segment10, false);
+
+                updateRelatedSegments(R.id.segment6, true);
+                updateRelatedSegments(R.id.segment7, false);
+                updateRelatedSegments(R.id.segment8_1, false);
+                updateRelatedSegments(R.id.segment8_2, false);
+                updateRelatedSegments(R.id.segment9_1, true);
+                updateRelatedSegments(R.id.segment9_2, true);
+                updateRelatedSegments(R.id.segment10, false);
+                break;
+            case 6:
+                setSegmentPressed(R.id.segment6, false);
+                setSegmentPressed(R.id.segment7, false);
+                setSegmentPressed(R.id.segment8_1, false);
+                setSegmentPressed(R.id.segment8_2, false);
+                setSegmentPressed(R.id.segment9_1, false);
+                setSegmentPressed(R.id.segment9_2, false);
+                setSegmentPressed(R.id.segment10, true);
+
+                updateRelatedSegments(R.id.segment6, false);
+                updateRelatedSegments(R.id.segment7, false);
+                updateRelatedSegments(R.id.segment8_1, false);
+                updateRelatedSegments(R.id.segment8_2, false);
+                updateRelatedSegments(R.id.segment9_1, false);
+                updateRelatedSegments(R.id.segment9_2, false);
+                updateRelatedSegments(R.id.segment10, true);
+                break;
+            case 7:
+                setSegmentPressed(R.id.segment6, true);
+                setSegmentPressed(R.id.segment7, false);
+                setSegmentPressed(R.id.segment8_1, false);
+                setSegmentPressed(R.id.segment8_2, false);
+                setSegmentPressed(R.id.segment9_1, false);
+                setSegmentPressed(R.id.segment9_2, false);
+                setSegmentPressed(R.id.segment10, true);
+
+                updateRelatedSegments(R.id.segment6, true);
+                updateRelatedSegments(R.id.segment7, false);
+                updateRelatedSegments(R.id.segment8_1, false);
+                updateRelatedSegments(R.id.segment8_2, false);
+                updateRelatedSegments(R.id.segment9_1, false);
+                updateRelatedSegments(R.id.segment9_2, false);
+                updateRelatedSegments(R.id.segment10, true);
+                break;
+            case 8:
+                setSegmentPressed(R.id.segment6, false);
+                setSegmentPressed(R.id.segment7, true);
+                setSegmentPressed(R.id.segment8_1, false);
+                setSegmentPressed(R.id.segment8_2, false);
+                setSegmentPressed(R.id.segment9_1, false);
+                setSegmentPressed(R.id.segment9_2, false);
+                setSegmentPressed(R.id.segment10, true);
+
+                updateRelatedSegments(R.id.segment6, false);
+                updateRelatedSegments(R.id.segment7, true);
+                updateRelatedSegments(R.id.segment8_1, false);
+                updateRelatedSegments(R.id.segment8_2, false);
+                updateRelatedSegments(R.id.segment9_1, false);
+                updateRelatedSegments(R.id.segment9_2, false);
+                updateRelatedSegments(R.id.segment10, true);
+                break;
+            case 9:
+                setSegmentPressed(R.id.segment6, true);
+                setSegmentPressed(R.id.segment7, true);
+                setSegmentPressed(R.id.segment8_1, false);
+                setSegmentPressed(R.id.segment8_2, false);
+                setSegmentPressed(R.id.segment9_1, false);
+                setSegmentPressed(R.id.segment9_2, false);
+                setSegmentPressed(R.id.segment10, true);
+
+                updateRelatedSegments(R.id.segment6, true);
+                updateRelatedSegments(R.id.segment7, true);
+                updateRelatedSegments(R.id.segment8_1, false);
+                updateRelatedSegments(R.id.segment8_2, false);
+                updateRelatedSegments(R.id.segment9_1, false);
+                updateRelatedSegments(R.id.segment9_2, false);
+                updateRelatedSegments(R.id.segment10, true);
+                break;
+        }
+
+        switch(hundreds){
+            case 0:
+                setSegmentPressed(R.id.segment11, false);
+                setSegmentPressed(R.id.segment12, false);
+                setSegmentPressed(R.id.segment13_1, false);
+                setSegmentPressed(R.id.segment13_2, false);
+                setSegmentPressed(R.id.segment14_1, false);
+                setSegmentPressed(R.id.segment14_2, false);
+                setSegmentPressed(R.id.segment15, false);
+
+                updateRelatedSegments(R.id.segment11, false);
+                updateRelatedSegments(R.id.segment12, false);
+                updateRelatedSegments(R.id.segment13_1, false);
+                updateRelatedSegments(R.id.segment13_2, false);
+                updateRelatedSegments(R.id.segment14_1, false);
+                updateRelatedSegments(R.id.segment14_2, false);
+                updateRelatedSegments(R.id.segment15, false);
+                break;
+            case 1:
+                setSegmentPressed(R.id.segment11, true);
+                setSegmentPressed(R.id.segment12, false);
+                setSegmentPressed(R.id.segment13_1, false);
+                setSegmentPressed(R.id.segment13_2, false);
+                setSegmentPressed(R.id.segment14_1, false);
+                setSegmentPressed(R.id.segment14_2, false);
+                setSegmentPressed(R.id.segment15, false);
+
+                updateRelatedSegments(R.id.segment11, true);
+                updateRelatedSegments(R.id.segment12, false);
+                updateRelatedSegments(R.id.segment13_1, false);
+                updateRelatedSegments(R.id.segment13_2, false);
+                updateRelatedSegments(R.id.segment14_1, false);
+                updateRelatedSegments(R.id.segment14_2, false);
+                updateRelatedSegments(R.id.segment15, false);
+                break;
+            case 2:
+                setSegmentPressed(R.id.segment11, false);
+                setSegmentPressed(R.id.segment12, true);
+                setSegmentPressed(R.id.segment13_1, false);
+                setSegmentPressed(R.id.segment13_2, false);
+                setSegmentPressed(R.id.segment14_1, false);
+                setSegmentPressed(R.id.segment14_2, false);
+                setSegmentPressed(R.id.segment15, false);
+
+                updateRelatedSegments(R.id.segment11, false);
+                updateRelatedSegments(R.id.segment12, true);
+                updateRelatedSegments(R.id.segment13_1, false);
+                updateRelatedSegments(R.id.segment13_2, false);
+                updateRelatedSegments(R.id.segment14_1, false);
+                updateRelatedSegments(R.id.segment14_2, false);
+                updateRelatedSegments(R.id.segment15, false);
+                break;
+            case 3:
+                setSegmentPressed(R.id.segment11, false);
+                setSegmentPressed(R.id.segment12, false);
+                setSegmentPressed(R.id.segment13_1, true);
+                setSegmentPressed(R.id.segment13_2, true);
+                setSegmentPressed(R.id.segment14_1, false);
+                setSegmentPressed(R.id.segment14_2, false);
+                setSegmentPressed(R.id.segment15, false);
+
+                updateRelatedSegments(R.id.segment11, false);
+                updateRelatedSegments(R.id.segment12, false);
+                updateRelatedSegments(R.id.segment13_1, true);
+                updateRelatedSegments(R.id.segment13_2, true);
+                updateRelatedSegments(R.id.segment14_1, false);
+                updateRelatedSegments(R.id.segment14_2, false);
+                updateRelatedSegments(R.id.segment15, false);
+                break;
+            case 4:
+                setSegmentPressed(R.id.segment11, false);
+                setSegmentPressed(R.id.segment12, false);
+                setSegmentPressed(R.id.segment13_1, false);
+                setSegmentPressed(R.id.segment13_2, false);
+                setSegmentPressed(R.id.segment14_1, true);
+                setSegmentPressed(R.id.segment14_2, true);
+                setSegmentPressed(R.id.segment15, false);
+
+                updateRelatedSegments(R.id.segment11, false);
+                updateRelatedSegments(R.id.segment12, false);
+                updateRelatedSegments(R.id.segment13_1, false);
+                updateRelatedSegments(R.id.segment13_2, false);
+                updateRelatedSegments(R.id.segment14_1, true);
+                updateRelatedSegments(R.id.segment14_2, true);
+                updateRelatedSegments(R.id.segment15, false);
+                break;
+            case 5:
+                setSegmentPressed(R.id.segment11, true);
+                setSegmentPressed(R.id.segment12, false);
+                setSegmentPressed(R.id.segment13_1, false);
+                setSegmentPressed(R.id.segment13_2, false);
+                setSegmentPressed(R.id.segment14_1, true);
+                setSegmentPressed(R.id.segment14_2, true);
+                setSegmentPressed(R.id.segment15, false);
+
+                updateRelatedSegments(R.id.segment11, true);
+                updateRelatedSegments(R.id.segment12, false);
+                updateRelatedSegments(R.id.segment13_1, false);
+                updateRelatedSegments(R.id.segment13_2, false);
+                updateRelatedSegments(R.id.segment14_1, true);
+                updateRelatedSegments(R.id.segment14_2, true);
+                updateRelatedSegments(R.id.segment15, false);
+                break;
+            case 6:
+                setSegmentPressed(R.id.segment11, false);
+                setSegmentPressed(R.id.segment12, false);
+                setSegmentPressed(R.id.segment13_1, false);
+                setSegmentPressed(R.id.segment13_2, false);
+                setSegmentPressed(R.id.segment14_1, false);
+                setSegmentPressed(R.id.segment14_2, false);
+                setSegmentPressed(R.id.segment15, true);
+
+                updateRelatedSegments(R.id.segment11, false);
+                updateRelatedSegments(R.id.segment12, false);
+                updateRelatedSegments(R.id.segment13_1, false);
+                updateRelatedSegments(R.id.segment13_2, false);
+                updateRelatedSegments(R.id.segment14_1, false);
+                updateRelatedSegments(R.id.segment14_2, false);
+                updateRelatedSegments(R.id.segment15, true);
+                break;
+            case 7:
+                setSegmentPressed(R.id.segment11, true);
+                setSegmentPressed(R.id.segment12, false);
+                setSegmentPressed(R.id.segment13_1, false);
+                setSegmentPressed(R.id.segment13_2, false);
+                setSegmentPressed(R.id.segment14_1, false);
+                setSegmentPressed(R.id.segment14_2, false);
+                setSegmentPressed(R.id.segment15, true);
+
+                updateRelatedSegments(R.id.segment11, true);
+                updateRelatedSegments(R.id.segment12, false);
+                updateRelatedSegments(R.id.segment13_1, false);
+                updateRelatedSegments(R.id.segment13_2, false);
+                updateRelatedSegments(R.id.segment14_1, false);
+                updateRelatedSegments(R.id.segment14_2, false);
+                updateRelatedSegments(R.id.segment15, true);
+                break;
+            case 8:
+                setSegmentPressed(R.id.segment11, false);
+                setSegmentPressed(R.id.segment12, true);
+                setSegmentPressed(R.id.segment13_1, false);
+                setSegmentPressed(R.id.segment13_2, false);
+                setSegmentPressed(R.id.segment14_1, false);
+                setSegmentPressed(R.id.segment14_2, false);
+                setSegmentPressed(R.id.segment15, true);
+
+                updateRelatedSegments(R.id.segment11, false);
+                updateRelatedSegments(R.id.segment12, true);
+                updateRelatedSegments(R.id.segment13_1, false);
+                updateRelatedSegments(R.id.segment13_2, false);
+                updateRelatedSegments(R.id.segment14_1, false);
+                updateRelatedSegments(R.id.segment14_2, false);
+                updateRelatedSegments(R.id.segment15, true);
+                break;
+            case 9:
+                setSegmentPressed(R.id.segment11, true);
+                setSegmentPressed(R.id.segment12, true);
+                setSegmentPressed(R.id.segment13_1, false);
+                setSegmentPressed(R.id.segment13_2, false);
+                setSegmentPressed(R.id.segment14_1, false);
+                setSegmentPressed(R.id.segment14_2, false);
+                setSegmentPressed(R.id.segment15, true);
+
+                updateRelatedSegments(R.id.segment11, true);
+                updateRelatedSegments(R.id.segment12, true);
+                updateRelatedSegments(R.id.segment13_1, false);
+                updateRelatedSegments(R.id.segment13_2, false);
+                updateRelatedSegments(R.id.segment14_1, false);
+                updateRelatedSegments(R.id.segment14_2, false);
+                updateRelatedSegments(R.id.segment15, true);
+                break;
+        }
+
+        switch(thousands){
+            case 0:
+                setSegmentPressed(R.id.segment16, false);
+                setSegmentPressed(R.id.segment17, false);
+                setSegmentPressed(R.id.segment18_1, false);
+                setSegmentPressed(R.id.segment18_2, false);
+                setSegmentPressed(R.id.segment19_1, false);
+                setSegmentPressed(R.id.segment19_2, false);
+                setSegmentPressed(R.id.segment20, false);
+
+                updateRelatedSegments(R.id.segment16, false);
+                updateRelatedSegments(R.id.segment17, false);
+                updateRelatedSegments(R.id.segment18_1, false);
+                updateRelatedSegments(R.id.segment18_2, false);
+                updateRelatedSegments(R.id.segment19_1, false);
+                updateRelatedSegments(R.id.segment19_2, false);
+                updateRelatedSegments(R.id.segment20, false);
+                break;
+            case 1:
+                setSegmentPressed(R.id.segment16, true);
+                setSegmentPressed(R.id.segment17, false);
+                setSegmentPressed(R.id.segment18_1, false);
+                setSegmentPressed(R.id.segment18_2, false);
+                setSegmentPressed(R.id.segment19_1, false);
+                setSegmentPressed(R.id.segment19_2, false);
+                setSegmentPressed(R.id.segment20, false);
+
+                updateRelatedSegments(R.id.segment16, true);
+                updateRelatedSegments(R.id.segment17, false);
+                updateRelatedSegments(R.id.segment18_1, false);
+                updateRelatedSegments(R.id.segment18_2, false);
+                updateRelatedSegments(R.id.segment19_1, false);
+                updateRelatedSegments(R.id.segment19_2, false);
+                updateRelatedSegments(R.id.segment20, false);
+                break;
+            case 2:
+                setSegmentPressed(R.id.segment16, false);
+                setSegmentPressed(R.id.segment17, true);
+                setSegmentPressed(R.id.segment18_1, false);
+                setSegmentPressed(R.id.segment18_2, false);
+                setSegmentPressed(R.id.segment19_1, false);
+                setSegmentPressed(R.id.segment19_2, false);
+                setSegmentPressed(R.id.segment20, false);
+
+                updateRelatedSegments(R.id.segment16, false);
+                updateRelatedSegments(R.id.segment17, true);
+                updateRelatedSegments(R.id.segment18_1, false);
+                updateRelatedSegments(R.id.segment18_2, false);
+                updateRelatedSegments(R.id.segment19_1, false);
+                updateRelatedSegments(R.id.segment19_2, false);
+                updateRelatedSegments(R.id.segment20, false);
+                break;
+            case 3:
+                setSegmentPressed(R.id.segment16, false);
+                setSegmentPressed(R.id.segment17, false);
+                setSegmentPressed(R.id.segment18_1, true);
+                setSegmentPressed(R.id.segment18_2, true);
+                setSegmentPressed(R.id.segment19_1, false);
+                setSegmentPressed(R.id.segment19_2, false);
+                setSegmentPressed(R.id.segment20, false);
+
+                updateRelatedSegments(R.id.segment16, false);
+                updateRelatedSegments(R.id.segment17, false);
+                updateRelatedSegments(R.id.segment18_1, true);
+                updateRelatedSegments(R.id.segment18_2, true);
+                updateRelatedSegments(R.id.segment19_1, false);
+                updateRelatedSegments(R.id.segment19_2, false);
+                updateRelatedSegments(R.id.segment20, false);
+                break;
+            case 4:
+                setSegmentPressed(R.id.segment16, false);
+                setSegmentPressed(R.id.segment17, false);
+                setSegmentPressed(R.id.segment18_1, false);
+                setSegmentPressed(R.id.segment18_2, false);
+                setSegmentPressed(R.id.segment19_1, true);
+                setSegmentPressed(R.id.segment19_2, true);
+                setSegmentPressed(R.id.segment20, false);
+
+                updateRelatedSegments(R.id.segment16, false);
+                updateRelatedSegments(R.id.segment17, false);
+                updateRelatedSegments(R.id.segment18_1, false);
+                updateRelatedSegments(R.id.segment18_2, false);
+                updateRelatedSegments(R.id.segment19_1, true);
+                updateRelatedSegments(R.id.segment19_2, true);
+                updateRelatedSegments(R.id.segment20, false);
+                break;
+            case 5:
+                setSegmentPressed(R.id.segment16, true);
+                setSegmentPressed(R.id.segment17, false);
+                setSegmentPressed(R.id.segment18_1, false);
+                setSegmentPressed(R.id.segment18_2, false);
+                setSegmentPressed(R.id.segment19_1, true);
+                setSegmentPressed(R.id.segment19_2, true);
+                setSegmentPressed(R.id.segment20, false);
+
+                updateRelatedSegments(R.id.segment16, true);
+                updateRelatedSegments(R.id.segment17, false);
+                updateRelatedSegments(R.id.segment18_1, false);
+                updateRelatedSegments(R.id.segment18_2, false);
+                updateRelatedSegments(R.id.segment19_1, true);
+                updateRelatedSegments(R.id.segment19_2, true);
+                updateRelatedSegments(R.id.segment20, false);
+                break;
+            case 6:
+                setSegmentPressed(R.id.segment16, false);
+                setSegmentPressed(R.id.segment17, false);
+                setSegmentPressed(R.id.segment18_1, false);
+                setSegmentPressed(R.id.segment18_2, false);
+                setSegmentPressed(R.id.segment19_1, false);
+                setSegmentPressed(R.id.segment19_2, false);
+                setSegmentPressed(R.id.segment20, true);
+
+                updateRelatedSegments(R.id.segment16, false);
+                updateRelatedSegments(R.id.segment17, false);
+                updateRelatedSegments(R.id.segment18_1, false);
+                updateRelatedSegments(R.id.segment18_2, false);
+                updateRelatedSegments(R.id.segment19_1, false);
+                updateRelatedSegments(R.id.segment19_2, false);
+                updateRelatedSegments(R.id.segment20, true);
+                break;
+            case 7:
+                setSegmentPressed(R.id.segment16, true);
+                setSegmentPressed(R.id.segment17, false);
+                setSegmentPressed(R.id.segment18_1, false);
+                setSegmentPressed(R.id.segment18_2, false);
+                setSegmentPressed(R.id.segment19_1, false);
+                setSegmentPressed(R.id.segment19_2, false);
+                setSegmentPressed(R.id.segment20, true);
+
+                updateRelatedSegments(R.id.segment16, true);
+                updateRelatedSegments(R.id.segment17, false);
+                updateRelatedSegments(R.id.segment18_1, false);
+                updateRelatedSegments(R.id.segment18_2, false);
+                updateRelatedSegments(R.id.segment19_1, false);
+                updateRelatedSegments(R.id.segment19_2, false);
+                updateRelatedSegments(R.id.segment20, true);
+                break;
+            case 8:
+                setSegmentPressed(R.id.segment16, false);
+                setSegmentPressed(R.id.segment17, true);
+                setSegmentPressed(R.id.segment18_1, false);
+                setSegmentPressed(R.id.segment18_2, false);
+                setSegmentPressed(R.id.segment19_1, false);
+                setSegmentPressed(R.id.segment19_2, false);
+                setSegmentPressed(R.id.segment20, true);
+
+                updateRelatedSegments(R.id.segment16, false);
+                updateRelatedSegments(R.id.segment17, true);
+                updateRelatedSegments(R.id.segment18_1, false);
+                updateRelatedSegments(R.id.segment18_2, false);
+                updateRelatedSegments(R.id.segment19_1, false);
+                updateRelatedSegments(R.id.segment19_2, false);
+                updateRelatedSegments(R.id.segment20, true);
+                break;
+            case 9:
+                setSegmentPressed(R.id.segment16, true);
+                setSegmentPressed(R.id.segment17, true);
+                setSegmentPressed(R.id.segment18_1, false);
+                setSegmentPressed(R.id.segment18_2, false);
+                setSegmentPressed(R.id.segment19_1, false);
+                setSegmentPressed(R.id.segment19_2, false);
+                setSegmentPressed(R.id.segment20, true);
+
+                updateRelatedSegments(R.id.segment16, true);
+                updateRelatedSegments(R.id.segment17, true);
+                updateRelatedSegments(R.id.segment18_1, false);
+                updateRelatedSegments(R.id.segment18_2, false);
+                updateRelatedSegments(R.id.segment19_1, false);
+                updateRelatedSegments(R.id.segment19_2, false);
+                updateRelatedSegments(R.id.segment20, true);
+                break;
+        }
+    }
+
+
+
+    /*
+     * Timer
+     */
+    private Handler conversionHandler = new Handler();
+    private Runnable conversionRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // Get the current converted Arabic number
+            int arabicNumber = convertCistercianToArabic();
+
+            // Add it to the history
+            // Assuming you have a method in ConversionHistoryManager to add just an integer
+            ConversionHistoryManager.getInstance().addConversion(arabicNumber);
+        }
+    };
+
+
+    // method to be called whenever a segment is interacted with
+    private void resetConversionTimer() {
+        conversionHandler.removeCallbacks(conversionRunnable);
+        conversionHandler.postDelayed(conversionRunnable, 5000); // 5 seconds
     }
 }
