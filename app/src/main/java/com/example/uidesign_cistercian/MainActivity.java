@@ -45,20 +45,24 @@ public class MainActivity extends AppCompatActivity {
         // Update the result initially
         updateResult();
 
-        Button openArabicConversionLayoutButton = findViewById(R.id.openArabicConversionLayoutButton);
+        /*Button openArabicConversionLayoutButton = findViewById(R.id.openArabicConversionLayoutButton);
         openArabicConversionLayoutButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ArabicConversionActivity.class);
             startActivity(intent);
         });
 
-        Button conversionButton = findViewById(R.id.cistArabConversionButton);
-        conversionButton.setOnClickListener(new View.OnClickListener() {
+         */
+
+        //Button conversionButton = findViewById(R.id.cistArabConversionButton);
+        /*conversionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int arabicNumber = convertCistercianToArabic();
                 displayArabicNumber(arabicNumber);
             }
         });
+
+         */
 
         Button historyButton = findViewById(R.id.historyButton);
         historyButton.setOnClickListener(v -> {
