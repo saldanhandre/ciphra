@@ -16,3 +16,6 @@ dependencyResolutionManagement {
 
 rootProject.name = 'UI Design - Cistercian'
 include(':app')
+include ':java'
+include ':openCV'
+include ':opencv'

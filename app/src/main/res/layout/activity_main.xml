@@ -623,6 +623,19 @@
                 app:layout_constraintStart_toStartOf="@+id/verticalGuideline11"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <TextView
+                android:id="@+id/resultTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:textColor="#000000"
+                android:textSize="45sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/verticalGuideline11"
+                app:layout_constraintStart_toStartOf="@+id/verticalGuideline11"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <Button
                 android:id="@+id/convertButton"
                 android:layout_width="0dp"
@@ -653,24 +666,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!--
-        <TextView
-        android:id="@+id/resultTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:gravity="center"
-        android:textColor="#000000"
-        android:textSize="50sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.273"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.087" />
-    -->
-
     <!--
     <Button
         android:id="@+id/openArabicConversionLayoutButton"

@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
         initializeSegmentRelations(); // Initialize the relationships
         initializeDiagonalSegmentPairs();
         initializeSegmentClickListeners(); // Set up the click listeners for each segment
