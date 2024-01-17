@@ -16,6 +16,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.ByteArrayOutputStream;
@@ -90,13 +91,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Utils.bitmapToMat(bitmap, matImage);
         // Convert to Grayscale
         Imgproc.cvtColor(matImage, matImage, Imgproc.COLOR_RGB2GRAY);
+        // Apply Gaussian Blur for noise reduction
+        Imgproc.GaussianBlur(matImage, matImage, new Size(5, 5), 0);
         // Convert back to Bitmap to display in ImageView or further processing
         Utils.matToBitmap(matImage, bitmap);
-        // Update the ImageView
-        runOnUiThread(() -> {
-            ImageView imageView = findViewById(R.id.image_display_view);
-            imageView.setImageBitmap(bitmap);
-        });
+
+        // Update ImageView
+        ImageView imageView = findViewById(R.id.image_display_view);
+        imageView.setImageBitmap(bitmap);
     }
 }
 
