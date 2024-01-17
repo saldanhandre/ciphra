@@ -1273,6 +1273,7 @@ public class MainActivity extends AppCompatActivity {
             bitmap = (Bitmap) data.getExtras().get("data");
             imageView.setImageBitmap(bitmap);
 
+
             mat = new Mat();
             Utils.bitmapToMat(bitmap, mat);
 
