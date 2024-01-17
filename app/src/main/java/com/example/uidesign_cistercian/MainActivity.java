@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.Manifest;
 
@@ -25,12 +26,14 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -151,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
         camera = findViewById(R.id.camera);
         select = findViewById(R.id.select);
-        imageView = findViewById(R.id.imageView);
+        //imageView = findViewById(R.id.image_display_view);
 
         select.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1250,37 +1253,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // select from photos
-        if(requestCode==SELECT_CODE && data!=null){
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
-                imageView.setImageBitmap(bitmap);
 
-                mat = new Mat();
-                Utils.bitmapToMat(bitmap, mat);
+        if (resultCode == RESULT_OK) {
+            Intent intent = new Intent(this, ImageDisplayActivity.class);
 
-                // making image in B&W
-                Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2GRAY);
-                Utils.matToBitmap(mat, bitmap);
-                imageView.setImageBitmap(bitmap);
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (requestCode == SELECT_CODE && data != null) {
+                Uri imageUri = data.getData();
+                intent.putExtra("imageUri", imageUri.toString());
+            } else if (requestCode == CAMERA_CODE && data != null) {
+                bitmap = (Bitmap) data.getExtras().get("data");
+                // Convert bitmap to byte array
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byte[] byteArray = stream.toByteArray();
+                intent.putExtra("imageBitmap", byteArray);
             }
-        }
-        // camera button
-        if(requestCode==CAMERA_CODE && data!=null){
-            bitmap = (Bitmap) data.getExtras().get("data");
-            imageView.setImageBitmap(bitmap);
 
-
-            mat = new Mat();
-            Utils.bitmapToMat(bitmap, mat);
-
-            // making image in B&W
-            Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2GRAY);
-            Utils.matToBitmap(mat, bitmap);
-            imageView.setImageBitmap(bitmap);
+            startActivity(intent);
         }
     }
 
