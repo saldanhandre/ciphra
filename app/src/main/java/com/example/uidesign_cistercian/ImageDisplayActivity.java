@@ -93,9 +93,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.cvtColor(matImage, matImage, Imgproc.COLOR_RGB2GRAY);
         // Apply Gaussian Blur for noise reduction
         Imgproc.GaussianBlur(matImage, matImage, new Size(5, 5), 0);
+        // Apply Binary Threshold
+        Imgproc.threshold(matImage, matImage, 155, 255, Imgproc.THRESH_BINARY);
         // Convert back to Bitmap to display in ImageView or further processing
         Utils.matToBitmap(matImage, bitmap);
-
         // Update ImageView
         ImageView imageView = findViewById(R.id.image_display_view);
         imageView.setImageBitmap(bitmap);
