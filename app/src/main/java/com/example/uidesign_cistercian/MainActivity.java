@@ -3,10 +3,17 @@ package com.example.uidesign_cistercian;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.Manifest;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -19,6 +26,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,13 +44,19 @@ public class MainActivity extends AppCompatActivity {
     private Map<Integer, Integer> diagonalSegmentPairs;
     TextView resultTextView;
     private EditText resultEditText;
+    Button select, camera;
+    ImageView imageView;
+    Bitmap bitmap;
+    int SELECT_CODE = 100, CAMERA_CODE = 101;
+    Mat mat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        if(OpenCVLoader.initDebug()) Log.d("LOADED", "success");
+        else Log.d("LOADED", "err");
 
         initializeSegmentRelations(); // Initialize the relationships
         initializeDiagonalSegmentPairs();
@@ -47,14 +66,16 @@ public class MainActivity extends AppCompatActivity {
         // Update the result initially
         updateResult();
 
-        /*Button openArabicConversionLayoutButton = findViewById(R.id.openArabicConversionLayoutButton);
+        // Get permissions such as the camera use
+        getPermission();
+
+        /*
+        Button openArabicConversionLayoutButton = findViewById(R.id.openArabicConversionLayoutButton);
         openArabicConversionLayoutButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ArabicConversionActivity.class);
             startActivity(intent);
         });
-
          */
-
         //Button conversionButton = findViewById(R.id.cistArabConversionButton);
         /*conversionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
                 displayArabicNumber(arabicNumber);
             }
         });
-
          */
 
         Button historyButton = findViewById(R.id.historyButton);
@@ -124,6 +144,29 @@ public class MainActivity extends AppCompatActivity {
                     updateResult();
                     resetConversionTimer();
                 }
+            }
+        });
+
+
+
+        camera = findViewById(R.id.camera);
+        select = findViewById(R.id.select);
+        imageView = findViewById(R.id.imageView);
+
+        select.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(intent, SELECT_CODE);
+            }
+        });
+
+        camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent, CAMERA_CODE);
             }
         });
     }
@@ -1196,5 +1239,66 @@ public class MainActivity extends AppCompatActivity {
     private void resetConversionTimer() {
         conversionHandler.removeCallbacks(conversionRunnable);
         conversionHandler.postDelayed(conversionRunnable, 5000); // 5 seconds
+    }
+
+
+
+    /*
+     * This method manages the buttons to add an image for processing, which may be
+     * through the photo gallery, or the camera
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // select from photos
+        if(requestCode==SELECT_CODE && data!=null){
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+                imageView.setImageBitmap(bitmap);
+
+                mat = new Mat();
+                Utils.bitmapToMat(bitmap, mat);
+
+                // making image in B&W
+                Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2GRAY);
+                Utils.matToBitmap(mat, bitmap);
+                imageView.setImageBitmap(bitmap);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // camera button
+        if(requestCode==CAMERA_CODE && data!=null){
+            bitmap = (Bitmap) data.getExtras().get("data");
+            imageView.setImageBitmap(bitmap);
+
+            mat = new Mat();
+            Utils.bitmapToMat(bitmap, mat);
+
+            // making image in B&W
+            Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2GRAY);
+            Utils.matToBitmap(mat, bitmap);
+            imageView.setImageBitmap(bitmap);
+        }
+    }
+
+
+
+    // Method to get the camera permission from the user
+    void getPermission(){
+        if(checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, 102);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 102 && grantResults.length > 0) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                getPermission();
+            }
+        }
     }
 }
