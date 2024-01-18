@@ -16,12 +16,15 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ImageDisplayActivity extends AppCompatActivity {
 
@@ -95,11 +98,19 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.GaussianBlur(matImage, matImage, new Size(5, 5), 0);
         // Apply Binary Threshold
         Imgproc.threshold(matImage, matImage, 155, 255, Imgproc.THRESH_BINARY);
+        // Apply Canny Edge Detection
+        Imgproc.Canny(matImage, matImage, 100, 200);
+        // Find Contours
+        List<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(matImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
         // Convert back to Bitmap to display in ImageView or further processing
         Utils.matToBitmap(matImage, bitmap);
         // Update ImageView
-        ImageView imageView = findViewById(R.id.image_display_view);
-        imageView.setImageBitmap(bitmap);
+        runOnUiThread(() -> {
+            ImageView imageView = findViewById(R.id.image_display_view);
+            imageView.setImageBitmap(bitmap);
+        });
     }
 }
 
