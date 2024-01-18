@@ -17,6 +17,8 @@ import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -24,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ImageDisplayActivity extends AppCompatActivity {
@@ -99,11 +102,28 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Apply Binary Threshold
         Imgproc.threshold(matImage, matImage, 155, 255, Imgproc.THRESH_BINARY);
         // Apply Canny Edge Detection
-        Imgproc.Canny(matImage, matImage, 100, 200);
+        // Imgproc.Canny(matImage, matImage, 100, 200);
         // Find Contours
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
         Imgproc.findContours(matImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+//        // Iterate over all detected contours
+//        for (MatOfPoint contour : contours) {
+//            // Convert contour to a different format
+//            MatOfPoint2f contourFloat = new MatOfPoint2f(contour.toArray());
+//
+//            // Calculate the perimeter of the contour
+//            double perimeter = Imgproc.arcLength(contourFloat, true);
+//
+//            // Approximate the contour to a polygon
+//            double epsilon = 0.02 * perimeter; // You might need to adjust this value
+//            MatOfPoint2f approxCurve = new MatOfPoint2f();
+//            Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
+//
+//            // Optional: Draw the approximated contour for visualization
+//            MatOfPoint points = new MatOfPoint(approxCurve.toArray());
+//            Imgproc.drawContours(matImage, Collections.singletonList(points), -1, new Scalar(255, 0, 0), 3);
+//        }
         // Convert back to Bitmap to display in ImageView or further processing
         Utils.matToBitmap(matImage, bitmap);
         // Update ImageView
