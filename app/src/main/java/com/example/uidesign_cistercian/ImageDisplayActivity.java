@@ -18,6 +18,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -102,8 +103,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Apply Binary Threshold
         Imgproc.threshold(matImage, matImage, 155, 255, Imgproc.THRESH_BINARY);
 
+
+        // Apply Canny Edge Detection
+        Imgproc.Canny(matImage, matImage, 100, 200);
+
         // Find Contours and approximate them
-        // findAndApproximateContours(matImage);
+        findAndApproximateContours(matImage);
+
 
         // Convert processed Mat back to Bitmap
         Utils.matToBitmap(matImage, bitmap);
@@ -129,13 +135,19 @@ public class ImageDisplayActivity extends AppCompatActivity {
             double perimeter = Imgproc.arcLength(contourFloat, true);
 
             // Approximate the contour to a polygon
-            double epsilon = 0.02 * perimeter;
+            double epsilon = 0.005 * perimeter;
             MatOfPoint2f approxCurve = new MatOfPoint2f();
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
 
             // Optional: Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
-            Imgproc.drawContours(image, Collections.singletonList(points), -1, new Scalar(255, 0, 0), 3);
+            Imgproc.drawContours(image, Collections.singletonList(points), -1, new Scalar(255, 0, 0), 2);
+
+            // Calculate bounding rectangle for each contour
+            Rect boundingRect = Imgproc.boundingRect(contour);
+            // Draw the bounding rectangle
+            Imgproc.rectangle(image, boundingRect.tl(), boundingRect.br(), new Scalar(255, 0, 0), 2);
+
         }
     }
 }
