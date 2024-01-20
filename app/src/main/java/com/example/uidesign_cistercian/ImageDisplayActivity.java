@@ -126,6 +126,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Mat hierarchy = new Mat();
         Imgproc.findContours(image, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
+        // List to hold all bounding rectangles
+        List<Rect> boundingRects = new ArrayList<>();
+
         // Iterate over all detected contours
         for (MatOfPoint contour : contours) {
             // Convert contour to a different format
@@ -139,15 +142,39 @@ public class ImageDisplayActivity extends AppCompatActivity {
             MatOfPoint2f approxCurve = new MatOfPoint2f();
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
 
-            // Optional: Draw the approximated contour for visualization
+            // Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
             Imgproc.drawContours(image, Collections.singletonList(points), -1, new Scalar(255, 0, 0), 2);
 
             // Calculate bounding rectangle for each contour
             Rect boundingRect = Imgproc.boundingRect(contour);
-            // Draw the bounding rectangle
-            Imgproc.rectangle(image, boundingRect.tl(), boundingRect.br(), new Scalar(255, 0, 0), 2);
-
+            boundingRects.add(boundingRect);
         }
+
+        // Filter out rectangles that are inside other rectangles
+        List<Rect> filteredRects = filterContainedRectangles(boundingRects);
+
+        // Draw the bounding rectangles that passed the filter
+        for (Rect rect : filteredRects) {
+            // Draw the bounding rectangle
+            Imgproc.rectangle(image, rect.tl(), rect.br(), new Scalar(255, 0, 0), 2);
+        }
+    }
+
+    private List<Rect> filterContainedRectangles(List<Rect> rects) {
+        List<Rect> filteredRects = new ArrayList<>();
+        for (Rect rect1 : rects) {
+            boolean isContained = false;
+            for (Rect rect2 : rects) {
+                if (rect1 != rect2 && rect2.contains(rect1.tl()) && rect2.contains(rect1.br())) {
+                    isContained = true;
+                    break;
+                }
+            }
+            if (!isContained) {
+                filteredRects.add(rect1);
+            }
+        }
+        return filteredRects;
     }
 }
