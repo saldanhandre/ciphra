@@ -14,10 +14,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -102,15 +104,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.GaussianBlur(matImage, matImage, new Size(5, 5), 0);
         // Apply Binary Threshold
         Imgproc.threshold(matImage, matImage, 155, 255, Imgproc.THRESH_BINARY);
-
-
         // Apply Canny Edge Detection
         Imgproc.Canny(matImage, matImage, 100, 200);
 
         // Find Contours and approximate them
         findAndApproximateContours(matImage);
-
-
         // Convert processed Mat back to Bitmap
         Utils.matToBitmap(matImage, bitmap);
 
@@ -141,6 +139,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             double epsilon = 0.005 * perimeter;
             MatOfPoint2f approxCurve = new MatOfPoint2f();
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
+
+            // Detect corners
+            detectCorners(image);
 
             // Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
@@ -177,4 +178,25 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
         return filteredRects;
     }
+
+
+    private void detectCorners(Mat image) {
+        MatOfPoint corners = new MatOfPoint();
+        int maxCorners = 100; // Maximum number of corners to detect
+        double qualityLevel = 1; // Quality level for corner detection
+        double minDistance = 1; // Minimum distance between corners
+
+        Mat img = new Mat();
+
+        // Detect corners
+        Imgproc.goodFeaturesToTrack(img, corners, maxCorners, qualityLevel, minDistance);
+
+        // Draw circles at detected corner points
+        List<Point> cornerPoints = corners.toList();
+        for (Point corner : cornerPoints) {
+            Imgproc.circle(image, corner, 4, new Scalar(255, 0, 0), -1); // Red color for corners
+        }
+    }
+
+
 }
