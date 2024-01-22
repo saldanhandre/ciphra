@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private Map<Integer, Integer> diagonalSegmentPairs;
     TextView resultTextView;
     private EditText resultEditText;
-    Button select, camera;
+    FrameLayout photo_gallery_button, camera_button;
     ImageView imageView;
     Bitmap bitmap;
     int SELECT_CODE = 100, CAMERA_CODE = 101;
@@ -89,8 +89,8 @@ public class MainActivity extends AppCompatActivity {
         });
          */
 
-        Button historyButton = findViewById(R.id.historyButton);
-        historyButton.setOnClickListener(v -> {
+        FrameLayout history_button = findViewById(R.id.history_button);
+        history_button.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
             startActivity(intent);
         });
@@ -152,11 +152,11 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        camera = findViewById(R.id.camera);
-        select = findViewById(R.id.select);
+        camera_button = findViewById(R.id.camera_button);
+        photo_gallery_button = findViewById(R.id.photo_gallery_button);
         //imageView = findViewById(R.id.image_display_view);
 
-        select.setOnClickListener(new View.OnClickListener() {
+        photo_gallery_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        camera.setOnClickListener(new View.OnClickListener() {
+        camera_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
