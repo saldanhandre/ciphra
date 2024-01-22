@@ -2,25 +2,25 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_selected="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/colorStateSelected"/>
+            <solid android:color="@color/segment_selected"/>
             <corners android:radius="15dp"/>
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/colorStateEnabledOrPressed"/>
+            <solid android:color="@color/segment_enabled_or_pressed"/>
             <corners android:radius="15dp"/>
         </shape>
     </item>
     <item android:state_enabled="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/colorStateEnabledOrPressed"/>
+            <solid android:color="@color/segment_enabled_or_pressed"/>
             <corners android:radius="15dp"/>
         </shape>
     </item>
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
-            <solid android:color="@color/colorStateNotEnabled"/>
+            <solid android:color="@color/segment_not_enabled"/>
             <corners android:radius="15dp"/>
         </shape>
     </item>

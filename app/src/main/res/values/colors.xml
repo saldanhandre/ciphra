@@ -11,7 +11,16 @@
     <color name="red">#FF0000</color>
     <color name="transparent">#00000000</color>
 
-    <color name="colorStateSelected">#C8000000</color>
-    <color name="colorStateEnabledOrPressed">#E0E0E0</color>
-    <color name="colorStateNotEnabled">#FB0909</color>
+    <color name="background">#131314</color>
+    <color name="bottom_bar_background">#303030</color>
+
+    <color name="button_selected">#175C86</color>
+    <color name="button_enabled">#004A76</color>
+
+    <color name="camera_button_selected">#95B4E9</color>
+    <color name="camera_button_enabled">#A8C7F9</color>
+
+    <color name="segment_selected">#C8000000</color>
+    <color name="segment_enabled_or_pressed">#E0E0E0</color>
+    <color name="segment_not_enabled">#FB0909</color>
 </resources>

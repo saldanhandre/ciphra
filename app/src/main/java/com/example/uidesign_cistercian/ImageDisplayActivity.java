@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -73,6 +74,17 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 processImage(bmp);
             }
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle the Up button click here
+        if (item.getItemId() == android.R.id.home) {
+            // Finish this activity and return to the parent activity (MainActivity)
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void convertToGrayscale(Uri imageUri) {

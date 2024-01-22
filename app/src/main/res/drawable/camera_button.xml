@@ -2,20 +2,20 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_selected="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/purple_200"/>
-            <corners android:radius="15dp"/>
+            <solid android:color="@color/camera_button_selected"/>
+            <corners android:radius="260dp"/>
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/teal_700"/>
-            <corners android:radius="15dp"/>
+            <solid android:color="@color/segment_enabled_or_pressed"/>
+            <corners android:radius="260dp"/>
         </shape>
     </item>
     <item android:state_enabled="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/segment_not_enabled"/>
-            <corners android:radius="15dp"/>
+            <solid android:color="@color/camera_button_enabled"/>
+            <corners android:radius="260dp"/>
         </shape>
     </item>
     <item android:state_enabled="false">
