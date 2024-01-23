@@ -153,7 +153,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
 
             // Detect corners
-            detectCorners(image);
+            detectCorners(image, approxCurve);
 
             // Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
@@ -192,21 +192,22 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
 
-    private void detectCorners(Mat image) {
-        MatOfPoint corners = new MatOfPoint();
-        int maxCorners = 100; // Maximum number of corners to detect
-        double qualityLevel = 1; // Quality level for corner detection
-        double minDistance = 1; // Minimum distance between corners
+    private void detectCorners(Mat image, MatOfPoint2f contour) {
 
+        int maxCorners = 12; // Maximum number of corners to detect
+        double qualityLevel = 0.01; // Quality level for corner detection
+        double minDistance = 10; // Minimum distance between corners
+
+        MatOfPoint corners = new MatOfPoint();
         Mat img = new Mat();
 
         // Detect corners
-        Imgproc.goodFeaturesToTrack(img, corners, maxCorners, qualityLevel, minDistance);
+        Imgproc.goodFeaturesToTrack(img, corners, maxCorners, qualityLevel, minDistance, new Mat(), 3, false, 0.04);
 
         // Draw circles at detected corner points
         List<Point> cornerPoints = corners.toList();
         for (Point corner : cornerPoints) {
-            Imgproc.circle(image, corner, 4, new Scalar(255, 0, 0), -1); // Red color for corners
+            Imgproc.circle(image, corner, 5, new Scalar(255, 0, 0), -1); // Red color for corners
         }
     }
 
