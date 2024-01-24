@@ -30,6 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -118,11 +119,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.threshold(matImage, matImage, 155, 255, Imgproc.THRESH_BINARY);
         // Apply Canny Edge Detection
         Imgproc.Canny(matImage, matImage, 100, 200);
-
+        // Convert matImage to 3 channels
+        Mat coloredMatImage = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC3);
+        Imgproc.cvtColor(matImage, coloredMatImage, Imgproc.COLOR_GRAY2BGR);
         // Find Contours and approximate them
-        findAndApproximateContours(matImage);
+        findAndApproximateContours(matImage, coloredMatImage);
         // Convert processed Mat back to Bitmap
-        Utils.matToBitmap(matImage, bitmap);
+        Utils.matToBitmap(coloredMatImage, bitmap);
 
         // Update ImageView with the processed Bitmap
         runOnUiThread(() -> {
@@ -131,33 +134,28 @@ public class ImageDisplayActivity extends AppCompatActivity {
         });
     }
 
-    private void findAndApproximateContours(Mat image) {
+    private void findAndApproximateContours(Mat singleChannelImage, Mat coloredImage) {
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
-        Imgproc.findContours(image, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(singleChannelImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // List to hold all bounding rectangles
         List<Rect> boundingRects = new ArrayList<>();
+        List<Rect> filteredRects = new ArrayList<>();
 
         // Iterate over all detected contours
         for (MatOfPoint contour : contours) {
             // Convert contour to a different format
             MatOfPoint2f contourFloat = new MatOfPoint2f(contour.toArray());
 
-            // Calculate the perimeter of the contour
-            double perimeter = Imgproc.arcLength(contourFloat, true);
-
             // Approximate the contour to a polygon
-            double epsilon = 0.005 * perimeter;
+            double epsilon = 0.0045 * Imgproc.arcLength(contourFloat, true);;
             MatOfPoint2f approxCurve = new MatOfPoint2f();
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
 
-            // Detect corners
-            detectCorners(image, approxCurve);
-
             // Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
-            Imgproc.drawContours(image, Collections.singletonList(points), -1, new Scalar(255, 0, 0), 2);
+            Imgproc.drawContours(coloredImage, Arrays.asList(points), -1, new Scalar(0, 69, 181), 2);
 
             // Calculate bounding rectangle for each contour
             Rect boundingRect = Imgproc.boundingRect(contour);
@@ -165,12 +163,48 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         // Filter out rectangles that are inside other rectangles
-        List<Rect> filteredRects = filterContainedRectangles(boundingRects);
+        filteredRects = filterContainedRectangles(boundingRects);
 
         // Draw the bounding rectangles that passed the filter
         for (Rect rect : filteredRects) {
             // Draw the bounding rectangle
-            Imgproc.rectangle(image, rect.tl(), rect.br(), new Scalar(255, 0, 0), 2);
+//            Imgproc.rectangle(coloredImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+
+            // Determine the longest side of the rectangle and draw the division line
+            if (rect.width > rect.height) {
+                // Rectangle is wider than tall, divide left and right
+                Point divisionPoint1 = new Point(rect.x, rect.y + rect.height / 2);
+                Point divisionPoint2 = new Point(rect.x + rect.width, rect.y + rect.height / 2);
+                Imgproc.line(coloredImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
+
+                // Create and draw smaller rectangle within the left half
+                int thirdWidth = rect.width / 3;
+                Rect smallRect1 = new Rect(rect.x, rect.y, thirdWidth, rect.height / 2);
+                Imgproc.rectangle(coloredImage, smallRect1.tl(), smallRect1.br(), new Scalar(255, 0, 0), 2);
+                Rect smallRect2 = new Rect(rect.x , rect.y + rect.height / 2, thirdWidth, rect.height / 2);
+                Imgproc.rectangle(coloredImage, smallRect2.tl(), smallRect2.br(), new Scalar(0, 255, 255), 2);
+                Rect smallRect3 = new Rect(rect.x + rect.width, rect.y, -thirdWidth, rect.height / 2);
+                Imgproc.rectangle(coloredImage, smallRect3.tl(), smallRect3.br(), new Scalar(255,255, 0), 2);
+                Rect smallRect4 = new Rect(rect.x + rect.width, rect.y + rect.height / 2, -thirdWidth, rect.height / 2);
+                Imgproc.rectangle(coloredImage, smallRect4.tl(), smallRect4.br(), new Scalar(255, 0, 255), 2);
+
+            } else {
+                // Rectangle is taller than wide, divide top and bottom
+                Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
+                Point divisionPoint2 = new Point(rect.x + rect.width / 2, rect.y + rect.height);
+                Imgproc.line(coloredImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
+
+                // Create and draw smaller rectangle within the top half
+                int thirdHeight = rect.height / 3;
+                Rect smallRect1 = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, thirdHeight);
+                Imgproc.rectangle(coloredImage, smallRect1.tl(), smallRect1.br(), new Scalar(255, 0, 0), 2);
+                Rect smallRect2 = new Rect(rect.x, rect.y, rect.width / 2, thirdHeight);
+                Imgproc.rectangle(coloredImage, smallRect2.tl(), smallRect2.br(), new Scalar(0, 255, 255), 2);
+                Rect smallRect3 = new Rect(rect.x + rect.width / 2, rect.y + rect.height, rect.width / 2, -thirdHeight);
+                Imgproc.rectangle(coloredImage, smallRect3.tl(), smallRect3.br(), new Scalar(255,255, 0), 2);
+                Rect smallRect4 = new Rect(rect.x, rect.y + rect.height, rect.width / 2, -thirdHeight);
+                Imgproc.rectangle(coloredImage, smallRect4.tl(), smallRect4.br(), new Scalar(255, 0, 255), 2);
+            }
         }
     }
 
@@ -195,17 +229,22 @@ public class ImageDisplayActivity extends AppCompatActivity {
     private void detectCorners(Mat image, MatOfPoint2f contour) {
 
         int maxCorners = 12; // Maximum number of corners to detect
-        double qualityLevel = 0.01; // Quality level for corner detection
+        double qualityLevel = 0.10; // Quality level for corner detection
         double minDistance = 10; // Minimum distance between corners
 
         MatOfPoint corners = new MatOfPoint();
-        Mat img = new Mat();
+
+        // Convert the contour Mat to an 8-bit single channel, as required by goodFeaturesToTrack
+        Mat mask = new Mat(image.size(), CvType.CV_8UC1, new Scalar(0));
+        MatOfPoint intContour = new MatOfPoint(contour.toArray());
+        Imgproc.fillPoly(mask, Arrays.asList(intContour), new Scalar(255));
 
         // Detect corners
-        Imgproc.goodFeaturesToTrack(img, corners, maxCorners, qualityLevel, minDistance, new Mat(), 3, false, 0.04);
+        Imgproc.goodFeaturesToTrack(mask, corners, maxCorners, qualityLevel, minDistance, new Mat(), 3, true, 0.04);
 
-        // Draw circles at detected corner points
+        // Convert corners MatOfPoint to List<Point> for drawing
         List<Point> cornerPoints = corners.toList();
+        // Draw circles on each corner
         for (Point corner : cornerPoints) {
             Imgproc.circle(image, corner, 5, new Scalar(255, 0, 0), -1); // Red color for corners
         }
