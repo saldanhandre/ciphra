@@ -154,7 +154,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
             // Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
-            Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 0, 255), 2);
+//            Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 0, 255), 2);
             // Calculate bounding rectangle for each contour
             Rect boundingRect = Imgproc.boundingRect(contour);
             boundingRects.add(boundingRect);
@@ -192,23 +192,23 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Create and draw smaller rectangle within the top half
         int thirdHeight = rect.height / 3;
-        Rect smallRectUnits = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, thirdHeight);
-        Imgproc.rectangle(coloredBinaryImage, smallRectUnits.tl(), smallRectUnits.br(), new Scalar(255, 0, 0), 2);
-        drawSubQuadrantsUnits(coloredBinaryImage, smallRectUnits);
+        Rect quadrantUnits = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, thirdHeight);
+//        Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
+        drawSubQuadrantsUnits(coloredBinaryImage, quadrantUnits);
 
-        Rect smallRectTens = new Rect(rect.x, rect.y, rect.width / 2, thirdHeight);
-        Imgproc.rectangle(coloredBinaryImage, smallRectTens.tl(), smallRectTens.br(), new Scalar(0, 255, 255), 2);
-        drawSubQuadrantsTens(coloredBinaryImage, smallRectTens);
+        Rect quadrantTens = new Rect(rect.x, rect.y, rect.width / 2, thirdHeight);
+//        Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
+        drawSubQuadrantsTens(coloredBinaryImage, quadrantTens);
 
-        Rect smallRectHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height, rect.width / 2, -thirdHeight);
-        Imgproc.rectangle(coloredBinaryImage, smallRectHundreds.tl(), smallRectHundreds.br(), new Scalar(255,255, 0), 2);
-        drawSubQuadrantsHundreds(coloredBinaryImage, smallRectHundreds);
+        Rect quadrantHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height, rect.width / 2, -thirdHeight);
+//        Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
+        drawSubQuadrantsHundreds(coloredBinaryImage, quadrantHundreds);
 
-        Rect smallRectThousands = new Rect(rect.x, rect.y + rect.height, rect.width / 2, -thirdHeight);
-        Imgproc.rectangle(coloredBinaryImage, smallRectThousands.tl(), smallRectThousands.br(), new Scalar(255, 0, 255), 2);
-        drawSubQuadrantsThousands(coloredBinaryImage, smallRectThousands);
-        drawFirstBlackPixelLine(coloredBinaryImage, smallRectThousands);
-        drawFirstContourPixelLine(coloredBinaryImage, smallRectThousands);
+        Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height, rect.width / 2, -thirdHeight);
+//        Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
+        drawSubQuadrantsThousands(coloredBinaryImage, quadrantThousands);
+//        drawFirstBlackPixelLine(coloredBinaryImage, quadrantThousands);
+//        drawFirstContourPixelLine(coloredBinaryImage, quadrantThousands);
     }
 
     private void drawFirstBlackPixelLine(Mat originalImage, Rect rect) {
@@ -220,7 +220,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
             for (int x = rect.x; x < rect.x + rect.width; x++) {
                 double[] pixel = imageWithContours.get(y, x);
 
-                // Assuming contour color is blue BGR: 255, 0, 0
                 if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
                     // Draw a vertical line at this position
                     Point lineStart = new Point(x, rect.y);
@@ -238,7 +237,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 double[] pixel = image.get(y, x);
 
                 // Check if pixel matches contour color BGR: 255, 0, 0
-                if (pixel[0] == 255 && pixel[1] == 0 && pixel[2] == 0) {
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
                     // Draw a vertical line
                     Imgproc.line(image, new Point(x, rect.y), new Point(x, rect.y + rect.height), new Scalar(255, 0, 0), 5);
                     return;
@@ -251,56 +250,95 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int subRectWidth = quadrant.width / 2;
         int subRectHeight = quadrant.height / 2;
 
-        Rect subQuadrant1 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant1.tl(), subQuadrant1.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant2 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant2.tl(), subQuadrant2.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant3 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant3.tl(), subQuadrant3.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant4.tl(), subQuadrant4.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantUnits1 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantUnits1.tl(), subQuadrantUnits1.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantUnits2 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantUnits2.tl(), subQuadrantUnits2.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantUnits3 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantUnits3.tl(), subQuadrantUnits3.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantUnits4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantUnits4.tl(), subQuadrantUnits4.br(), new Scalar(255, 0, 0), 2);
+
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits1, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits2, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits3, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits4, new Scalar(255, 0, 255));
     }
 
     private void drawSubQuadrantsTens(Mat coloredBinaryImage, Rect quadrant) {
         int subRectWidth = quadrant.width / 2;
         int subRectHeight = quadrant.height / 2;
 
-        Rect subQuadrant2 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant2.tl(), subQuadrant2.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant1 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant1.tl(), subQuadrant1.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant4 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant4.tl(), subQuadrant4.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant3 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant3.tl(), subQuadrant3.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantTens1 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantTens1.tl(), subQuadrantTens1.br(), new Scalar(0, 255, 255), 2);
+        Rect subQuadrantTens2 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantTens2.tl(), subQuadrantTens2.br(), new Scalar(0, 255, 255), 2);
+        Rect subQuadrantTens3 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantTens3.tl(), subQuadrantTens3.br(), new Scalar(0, 255, 255), 2);
+        Rect subQuadrantTens4 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantTens4.tl(), subQuadrantTens4.br(), new Scalar(0, 255, 255), 2);
+
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens1, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens2, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens3, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens4, new Scalar(255, 0, 255));
     }
 
     private void drawSubQuadrantsHundreds(Mat coloredBinaryImage, Rect quadrant) {
         int subRectWidth = quadrant.width / 2;
         int subRectHeight = quadrant.height / 2;
 
-        Rect subQuadrant1 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant1.tl(), subQuadrant1.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant2 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant2.tl(), subQuadrant2.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant3 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant3.tl(), subQuadrant3.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant4.tl(), subQuadrant4.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantHundreds1 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantHundreds1.tl(), subQuadrantHundreds1.br(), new Scalar(255,255, 0), 2);
+        Rect subQuadrantHundreds2 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantHundreds2.tl(), subQuadrantHundreds2.br(), new Scalar(255,255, 0), 2);
+        Rect subQuadrantHundreds3 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantHundreds3.tl(), subQuadrantHundreds3.br(), new Scalar(255,255, 0), 2);
+        Rect subQuadrantHundreds4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantHundreds4.tl(), subQuadrantHundreds4.br(), new Scalar(255,255, 0), 2);
+
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds1, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds2, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds3, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds4, new Scalar(255, 0, 255));
     }
 
     private void drawSubQuadrantsThousands(Mat coloredBinaryImage, Rect quadrant) {
         int subRectWidth = quadrant.width / 2;
         int subRectHeight = quadrant.height / 2;
 
-        Rect subQuadrant2 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant2.tl(), subQuadrant2.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant1 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant1.tl(), subQuadrant1.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant4 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant4.tl(), subQuadrant4.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrant3 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrant3.tl(), subQuadrant3.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantThousands1 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantThousands1.tl(), subQuadrantThousands1.br(), new Scalar(255, 0, 255), 2);
+        Rect subQuadrantThousands2 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantThousands2.tl(), subQuadrantThousands2.br(), new Scalar(255, 0, 255), 2);
+        Rect subQuadrantThousands3 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantThousands3.tl(), subQuadrantThousands3.br(), new Scalar(255, 0, 255), 2);
+        Rect subQuadrantThousands4 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrantThousands4.tl(), subQuadrantThousands4.br(), new Scalar(255, 0, 255), 2);
+
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantThousands1, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantThousands2, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantThousands3, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantThousands4, new Scalar(0, 0, 255));
+    }
+
+    private void analyzeAndLabelSubQuadrant(Mat coloredBinaryImage, Rect subQuadrant, Scalar textColor) {
+        int blackPixelCount = 0;
+
+        // iterate through each pixel
+        for (int y = subQuadrant.y; y < (subQuadrant.y + subQuadrant.height); y++) {
+            for (int x = subQuadrant.x; x < (subQuadrant.x + subQuadrant.width); x++) {
+                double[] pixel = coloredBinaryImage.get(y, x);
+                // check if pixel is black
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    blackPixelCount++;
+                }
+            }
+        }
+        // label count of black pixels on the image near the subquadrant
+        String label = String.valueOf(blackPixelCount);
+        Point labelPoint = new Point(subQuadrant.x + 5, subQuadrant.y + 20); // Adjust as needed for positioning
+        Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, textColor, 1);
     }
 
     private List<Rect> filterContainedRectangles(List<Rect> rects) {
