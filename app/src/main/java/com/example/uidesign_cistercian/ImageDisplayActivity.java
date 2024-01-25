@@ -202,12 +202,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
         drawSubQuadrantsTens(coloredBinaryImage, quadrantTens);
         blackPixelFinderLeftToRight(coloredBinaryImage, quadrantTens);
 
-        Rect quadrantHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height, rect.width / 2, -thirdHeight);
+        Rect quadrantHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height - thirdHeight, rect.width / 2, thirdHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
         drawSubQuadrantsHundreds(coloredBinaryImage, quadrantHundreds);
         blackPixelFinderRightToLeft(coloredBinaryImage, quadrantHundreds);
 
-        Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height, rect.width / 2, -thirdHeight);
+        Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - thirdHeight, rect.width / 2, thirdHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
         drawSubQuadrantsThousands(coloredBinaryImage, quadrantThousands);
         blackPixelFinderLeftToRight(coloredBinaryImage, quadrantThousands);
@@ -226,7 +226,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     // Draw a vertical line at this position
                     Point lineStart = new Point(x, rect.y);
                     Point lineEnd = new Point(x, rect.y + rect.height);
-                    Imgproc.line(originalImage, lineStart, lineEnd, new Scalar(0, 0, 225), 2);
+                    Imgproc.line(originalImage, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
                     return;
                 }
             }
@@ -246,7 +246,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     // Draw a vertical line at this position
                     Point lineStart = new Point(x, rect.y);
                     Point lineEnd = new Point(x, rect.y + rect.height);
-                    Imgproc.line(originalImage, lineStart, lineEnd, new Scalar(0, 0, 225), 2);
+                    Imgproc.line(originalImage, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
                     return;
                 }
             }
