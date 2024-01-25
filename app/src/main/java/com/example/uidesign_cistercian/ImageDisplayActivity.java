@@ -150,12 +150,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
             MatOfPoint2f contourFloat = new MatOfPoint2f(contour.toArray());
             // Approximate the contour to a polygon
             double epsilon = 0.0045 * Imgproc.arcLength(contourFloat, true);
-            ;
             MatOfPoint2f approxCurve = new MatOfPoint2f();
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
             // Draw the approximated contour for visualization
-//            MatOfPoint points = new MatOfPoint(approxCurve.toArray());
-//            Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 69, 181), 2);
+            MatOfPoint points = new MatOfPoint(approxCurve.toArray());
+            Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 0, 255), 2);
             // Calculate bounding rectangle for each contour
             Rect boundingRect = Imgproc.boundingRect(contour);
             boundingRects.add(boundingRect);
@@ -208,6 +207,44 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Rect smallRectThousands = new Rect(rect.x, rect.y + rect.height, rect.width / 2, -thirdHeight);
         Imgproc.rectangle(coloredBinaryImage, smallRectThousands.tl(), smallRectThousands.br(), new Scalar(255, 0, 255), 2);
         drawSubQuadrantsThousands(coloredBinaryImage, smallRectThousands);
+        drawFirstBlackPixelLine(coloredBinaryImage, smallRectThousands);
+        drawFirstContourPixelLine(coloredBinaryImage, smallRectThousands);
+    }
+
+    private void drawFirstBlackPixelLine(Mat originalImage, Rect rect) {
+        // Clone original image to ensure contours are present
+        Mat imageWithContours = originalImage.clone();
+
+        // iterate through the rectangle in the cloned image to find the first contour line
+        for (int y = rect.y; y < rect.y + rect.height; y++) {
+            for (int x = rect.x; x < rect.x + rect.width; x++) {
+                double[] pixel = imageWithContours.get(y, x);
+
+                // Assuming contour color is blue BGR: 255, 0, 0
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
+                    // Draw a vertical line at this position
+                    Point lineStart = new Point(x, rect.y);
+                    Point lineEnd = new Point(x, rect.y + rect.height);
+                    Imgproc.line(originalImage, lineStart, lineEnd, new Scalar(255, 0, 225), 5);
+                    return;
+                }
+            }
+        }
+    }
+
+    private void drawFirstContourPixelLine(Mat image, Rect rect) {
+        for (int y = rect.y; y < rect.y + rect.height; y++) {
+            for (int x = rect.x; x < rect.x + rect.width; x++) {
+                double[] pixel = image.get(y, x);
+
+                // Check if pixel matches contour color BGR: 255, 0, 0
+                if (pixel[0] == 255 && pixel[1] == 0 && pixel[2] == 0) {
+                    // Draw a vertical line
+                    Imgproc.line(image, new Point(x, rect.y), new Point(x, rect.y + rect.height), new Scalar(255, 0, 0), 5);
+                    return;
+                }
+            }
+        }
     }
 
     private void drawSubQuadrantsUnits(Mat coloredBinaryImage, Rect quadrant) {
