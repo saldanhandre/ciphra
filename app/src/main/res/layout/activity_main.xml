@@ -606,7 +606,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.25" />
+                app:layout_constraintGuide_percent="0.2" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/verticalGuideline11"
@@ -630,6 +630,7 @@
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:textSize="60sp"
+                android:maxLength="4"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/verticalGuideline11"
                 app:layout_constraintStart_toStartOf="@+id/verticalGuideline11"
@@ -648,6 +649,30 @@
                 app:layout_constraintStart_toStartOf="@+id/verticalGuideline11"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <FrameLayout
+                android:id="@+id/bin_button"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/bin_button"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="H,1:1"
+                app:layout_constraintEnd_toEndOf="@+id/verticalGuideline10"
+                app:layout_constraintHorizontal_bias="0.461"
+                app:layout_constraintStart_toStartOf="@+id/verticalGuideline10"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.507"
+                app:layout_constraintHeight_percent="0.4">
+
+                <ImageView
+                    android:id="@+id/bin_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/outline_delete_outline_24" />
+            </FrameLayout>
+
+            <!--
             <Button
                 android:id="@+id/convertButton"
                 android:layout_width="0dp"
@@ -661,7 +686,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.461"
                 app:layout_constraintWidth_percent="0.26" />
-
+            -->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

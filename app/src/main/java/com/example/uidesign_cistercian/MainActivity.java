@@ -47,11 +47,12 @@ public class MainActivity extends AppCompatActivity {
     private Map<Integer, Integer> diagonalSegmentPairs;
     TextView resultTextView;
     private EditText resultEditText;
-    FrameLayout photo_gallery_button, camera_button;
+    FrameLayout photo_gallery_button, camera_button, bin_button;
     ImageView imageView;
     Bitmap bitmap;
     int SELECT_CODE = 100, CAMERA_CODE = 101;
     Mat mat;
+    private boolean isProgrammaticChange = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,28 +67,8 @@ public class MainActivity extends AppCompatActivity {
         initializeSegmentClickListeners(); // Set up the click listeners for each segment
         resultTextView = findViewById(R.id.resultTextView); // Initialize the TextView for the result
 
-        // Update the result initially
-        updateResult();
-
-        // Get permissions such as the camera use
-        getPermission();
-
-        /*
-        Button openArabicConversionLayoutButton = findViewById(R.id.openArabicConversionLayoutButton);
-        openArabicConversionLayoutButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ArabicConversionActivity.class);
-            startActivity(intent);
-        });
-         */
-        //Button conversionButton = findViewById(R.id.cistArabConversionButton);
-        /*conversionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int arabicNumber = convertCistercianToArabic();
-                displayArabicNumber(arabicNumber);
-            }
-        });
-         */
+        updateResult();  // Update the result initially
+        getPermission(); // Get permissions such as the camera use
 
         FrameLayout history_button = findViewById(R.id.history_button);
         history_button.setOnClickListener(v -> {
@@ -96,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         resultEditText = findViewById(R.id.resultEditText);
+
+        resultEditText.setText("0000"); // Initialize with "0000"
+        resultEditText.setSelection(resultEditText.getText().length()); // Move cursor to end
         resultEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -103,57 +87,36 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-//                // Convert the input to Cistercian and update segments
-//                if (!s.toString().isEmpty()) {
-//                    int number = Integer.parseInt(s.toString());
-//
-//                    // Break down the number into thousands, hundreds, tens, and units
-//                    int thousands = number / 1000;
-//                    int hundreds = (number % 1000) / 100;
-//                    int tens = (number % 100) / 10;
-//                    int units = number % 10;
-//
-//                    updateCistercianSegments(thousands, hundreds, tens, units);
-//                    updateResult();
-//                } else {
-//                    // Handle empty input
-//                }
-            }
-        });
-
-        Button convertButton = findViewById(R.id.convertButton);
-        convertButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Get the text from resultEditText
-                String input = resultEditText.getText().toString();
-
-                // Check if the input is not empty
-                if (!input.isEmpty()) {
-                    int number = Integer.parseInt(input);
-
-                    // Break down the number into thousands, hundreds, tens, and units
-                    int thousands = number / 1000;
-                    int hundreds = (number % 1000) / 100;
-                    int tens = (number % 100) / 10;
-                    int units = number % 10;
-
-                    updateCistercianSegments(thousands, hundreds, tens, units);
-                    updateResult();
-                    resetConversionTimer();
-
+                if (s.length() == 0) {
+                    // Prevents deleting the last digit by setting it to "0"
+                    resultEditText.setText("0");
+                    // Position the cursor at the end of the text
+                    resultEditText.setSelection(resultEditText.getText().length());
                 } else {
-                    updateCistercianSegments(0, 0, 0, 0);
-                    updateResult();
-                    resetConversionTimer();
+                    // Normal processing for any other case
+                    try {
+                        int number = Integer.parseInt(s.toString());
+                        int thousands = number / 1000;
+                        int hundreds = (number % 1000) / 100;
+                        int tens = (number % 100) / 10;
+                        int units = number % 10;
+
+                        updateCistercianSegments(thousands, hundreds, tens, units);
+                    } catch (NumberFormatException e) {
+                        // Handle the case where the input is not a valid number
+                        clearCistercianSegments(); // Clear the segments in case of invalid number
+                    }
                 }
             }
         });
 
 
 
+
+
         camera_button = findViewById(R.id.camera_button);
         photo_gallery_button = findViewById(R.id.photo_gallery_button);
+        bin_button = findViewById(R.id.bin_button);
         //imageView = findViewById(R.id.image_display_view);
 
         photo_gallery_button.setOnClickListener(new View.OnClickListener() {
@@ -170,6 +133,15 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(intent, CAMERA_CODE);
+            }
+        });
+
+        bin_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                updateCistercianSegments(0,0,0,0);
+                updateResult();
+
             }
         });
     }
@@ -1219,6 +1191,37 @@ public class MainActivity extends AppCompatActivity {
                 updateRelatedSegments(R.id.segment20, true);
                 break;
         }
+    }
+
+    private void clearCistercianSegments(){
+        setSegmentPressed(R.id.segment1, false);
+        setSegmentPressed(R.id.segment2, false);
+        setSegmentPressed(R.id.segment3_1, false);
+        setSegmentPressed(R.id.segment3_2, false);
+        setSegmentPressed(R.id.segment4_1, false);
+        setSegmentPressed(R.id.segment4_2, false);
+        setSegmentPressed(R.id.segment5, false);
+        setSegmentPressed(R.id.segment6, false);
+        setSegmentPressed(R.id.segment7, false);
+        setSegmentPressed(R.id.segment8_1, false);
+        setSegmentPressed(R.id.segment8_2, false);
+        setSegmentPressed(R.id.segment9_1, false);
+        setSegmentPressed(R.id.segment9_2, false);
+        setSegmentPressed(R.id.segment10, false);
+        setSegmentPressed(R.id.segment11, false);
+        setSegmentPressed(R.id.segment12, false);
+        setSegmentPressed(R.id.segment13_1, false);
+        setSegmentPressed(R.id.segment13_2, false);
+        setSegmentPressed(R.id.segment14_1, false);
+        setSegmentPressed(R.id.segment14_2, false);
+        setSegmentPressed(R.id.segment15, false);
+        setSegmentPressed(R.id.segment16, false);
+        setSegmentPressed(R.id.segment17, false);
+        setSegmentPressed(R.id.segment18_1, false);
+        setSegmentPressed(R.id.segment18_2, false);
+        setSegmentPressed(R.id.segment19_1, false);
+        setSegmentPressed(R.id.segment19_2, false);
+        setSegmentPressed(R.id.segment20, false);
     }
 
 
