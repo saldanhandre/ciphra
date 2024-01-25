@@ -169,45 +169,101 @@ public class ImageDisplayActivity extends AppCompatActivity {
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
         // Draw the bounding rectangles that passed the filter
         for (Rect rect : filteredRects) {
+            Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
             // Draw the bounding rectangle
 //            Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
 
-            // Determine the longest side of the rectangle and draw the division line
             if (rect.width > rect.height) {
-                // Rectangle is wider than tall, divide left and right
-                Point divisionPoint1 = new Point(rect.x, rect.y + rect.height / 2);
-                Point divisionPoint2 = new Point(rect.x + rect.width, rect.y + rect.height / 2);
-                Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
-
-                // Create and draw smaller rectangle within the left half
-                int thirdWidth = rect.width / 3;
-                Rect smallRect1 = new Rect(rect.x, rect.y, thirdWidth, rect.height / 2);
-                Imgproc.rectangle(coloredBinaryImage, smallRect1.tl(), smallRect1.br(), new Scalar(255, 0, 0), 2);
-                Rect smallRect2 = new Rect(rect.x , rect.y + rect.height / 2, thirdWidth, rect.height / 2);
-                Imgproc.rectangle(coloredBinaryImage, smallRect2.tl(), smallRect2.br(), new Scalar(0, 255, 255), 2);
-                Rect smallRect3 = new Rect(rect.x + rect.width, rect.y, -thirdWidth, rect.height / 2);
-                Imgproc.rectangle(coloredBinaryImage, smallRect3.tl(), smallRect3.br(), new Scalar(255,255, 0), 2);
-                Rect smallRect4 = new Rect(rect.x + rect.width, rect.y + rect.height / 2, -thirdWidth, rect.height / 2);
-                Imgproc.rectangle(coloredBinaryImage, smallRect4.tl(), smallRect4.br(), new Scalar(255, 0, 255), 2);
-
+                // Rotate the image 90 degrees clockwise
+                Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_CLOCKWISE);
+                Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
+                processRectangle(rotatedImage, rotatedRect);
+                Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_COUNTERCLOCKWISE);
             } else {
-                // Rectangle is taller than wide, divide top and bottom
-                Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
-                Point divisionPoint2 = new Point(rect.x + rect.width / 2, rect.y + rect.height);
-                Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
-
-                // Create and draw smaller rectangle within the top half
-                int thirdHeight = rect.height / 3;
-                Rect smallRect1 = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, thirdHeight);
-                Imgproc.rectangle(coloredBinaryImage, smallRect1.tl(), smallRect1.br(), new Scalar(255, 0, 0), 2);
-                Rect smallRect2 = new Rect(rect.x, rect.y, rect.width / 2, thirdHeight);
-                Imgproc.rectangle(coloredBinaryImage, smallRect2.tl(), smallRect2.br(), new Scalar(0, 255, 255), 2);
-                Rect smallRect3 = new Rect(rect.x + rect.width / 2, rect.y + rect.height, rect.width / 2, -thirdHeight);
-                Imgproc.rectangle(coloredBinaryImage, smallRect3.tl(), smallRect3.br(), new Scalar(255,255, 0), 2);
-                Rect smallRect4 = new Rect(rect.x, rect.y + rect.height, rect.width / 2, -thirdHeight);
-                Imgproc.rectangle(coloredBinaryImage, smallRect4.tl(), smallRect4.br(), new Scalar(255, 0, 255), 2);
+                processRectangle(coloredBinaryImage, rect);
             }
         }
+    }
+
+    private void processRectangle(Mat coloredBinaryImage, Rect rect) {
+        // Rectangle is taller than wide, divide top and bottom
+        Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
+        Point divisionPoint2 = new Point(rect.x + rect.width / 2, rect.y + rect.height);
+        Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
+
+        // Create and draw smaller rectangle within the top half
+        int thirdHeight = rect.height / 3;
+        Rect smallRectUnits = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, thirdHeight);
+        Imgproc.rectangle(coloredBinaryImage, smallRectUnits.tl(), smallRectUnits.br(), new Scalar(255, 0, 0), 2);
+        drawSubQuadrantsUnits(coloredBinaryImage, smallRectUnits);
+
+        Rect smallRectTens = new Rect(rect.x, rect.y, rect.width / 2, thirdHeight);
+        Imgproc.rectangle(coloredBinaryImage, smallRectTens.tl(), smallRectTens.br(), new Scalar(0, 255, 255), 2);
+        drawSubQuadrantsTens(coloredBinaryImage, smallRectTens);
+
+        Rect smallRectHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height, rect.width / 2, -thirdHeight);
+        Imgproc.rectangle(coloredBinaryImage, smallRectHundreds.tl(), smallRectHundreds.br(), new Scalar(255,255, 0), 2);
+        drawSubQuadrantsHundreds(coloredBinaryImage, smallRectHundreds);
+
+        Rect smallRectThousands = new Rect(rect.x, rect.y + rect.height, rect.width / 2, -thirdHeight);
+        Imgproc.rectangle(coloredBinaryImage, smallRectThousands.tl(), smallRectThousands.br(), new Scalar(255, 0, 255), 2);
+        drawSubQuadrantsThousands(coloredBinaryImage, smallRectThousands);
+    }
+
+    private void drawSubQuadrantsUnits(Mat coloredBinaryImage, Rect quadrant) {
+        int subRectWidth = quadrant.width / 2;
+        int subRectHeight = quadrant.height / 2;
+
+        Rect subQuadrant1 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant1.tl(), subQuadrant1.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant2 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant2.tl(), subQuadrant2.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant3 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant3.tl(), subQuadrant3.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant4.tl(), subQuadrant4.br(), new Scalar(255, 0, 0), 2);
+    }
+
+    private void drawSubQuadrantsTens(Mat coloredBinaryImage, Rect quadrant) {
+        int subRectWidth = quadrant.width / 2;
+        int subRectHeight = quadrant.height / 2;
+
+        Rect subQuadrant2 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant2.tl(), subQuadrant2.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant1 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant1.tl(), subQuadrant1.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant4 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant4.tl(), subQuadrant4.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant3 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant3.tl(), subQuadrant3.br(), new Scalar(255, 0, 0), 2);
+    }
+
+    private void drawSubQuadrantsHundreds(Mat coloredBinaryImage, Rect quadrant) {
+        int subRectWidth = quadrant.width / 2;
+        int subRectHeight = quadrant.height / 2;
+
+        Rect subQuadrant1 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant1.tl(), subQuadrant1.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant2 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant2.tl(), subQuadrant2.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant3 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant3.tl(), subQuadrant3.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant4.tl(), subQuadrant4.br(), new Scalar(255, 0, 0), 2);
+    }
+
+    private void drawSubQuadrantsThousands(Mat coloredBinaryImage, Rect quadrant) {
+        int subRectWidth = quadrant.width / 2;
+        int subRectHeight = quadrant.height / 2;
+
+        Rect subQuadrant2 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant2.tl(), subQuadrant2.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant1 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant1.tl(), subQuadrant1.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant4 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant4.tl(), subQuadrant4.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrant3 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
+        Imgproc.rectangle(coloredBinaryImage, subQuadrant3.tl(), subQuadrant3.br(), new Scalar(255, 0, 0), 2);
     }
 
     private List<Rect> filterContainedRectangles(List<Rect> rects) {
