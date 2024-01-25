@@ -195,51 +195,58 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Rect quadrantUnits = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, thirdHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
         drawSubQuadrantsUnits(coloredBinaryImage, quadrantUnits);
+        blackPixelFinderRightToLeft(coloredBinaryImage, quadrantUnits);
 
         Rect quadrantTens = new Rect(rect.x, rect.y, rect.width / 2, thirdHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
         drawSubQuadrantsTens(coloredBinaryImage, quadrantTens);
+        blackPixelFinderLeftToRight(coloredBinaryImage, quadrantTens);
 
         Rect quadrantHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height, rect.width / 2, -thirdHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
         drawSubQuadrantsHundreds(coloredBinaryImage, quadrantHundreds);
+        blackPixelFinderRightToLeft(coloredBinaryImage, quadrantHundreds);
 
         Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height, rect.width / 2, -thirdHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
         drawSubQuadrantsThousands(coloredBinaryImage, quadrantThousands);
-//        drawFirstBlackPixelLine(coloredBinaryImage, quadrantThousands);
-//        drawFirstContourPixelLine(coloredBinaryImage, quadrantThousands);
+        blackPixelFinderLeftToRight(coloredBinaryImage, quadrantThousands);
     }
 
-    private void drawFirstBlackPixelLine(Mat originalImage, Rect rect) {
+    private void blackPixelFinderRightToLeft(Mat originalImage, Rect rect) {
         // Clone original image to ensure contours are present
         Mat imageWithContours = originalImage.clone();
 
         // iterate through the rectangle in the cloned image to find the first contour line
-        for (int y = rect.y; y < rect.y + rect.height; y++) {
-            for (int x = rect.x; x < rect.x + rect.width; x++) {
+        for (int x = rect.x+rect.width; x > rect.x; x--) {
+            for (int y = rect.y; y < rect.y + rect.height; y++) {
                 double[] pixel = imageWithContours.get(y, x);
 
                 if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
                     // Draw a vertical line at this position
                     Point lineStart = new Point(x, rect.y);
                     Point lineEnd = new Point(x, rect.y + rect.height);
-                    Imgproc.line(originalImage, lineStart, lineEnd, new Scalar(255, 0, 225), 5);
+                    Imgproc.line(originalImage, lineStart, lineEnd, new Scalar(0, 0, 225), 2);
                     return;
                 }
             }
         }
     }
 
-    private void drawFirstContourPixelLine(Mat image, Rect rect) {
-        for (int y = rect.y; y < rect.y + rect.height; y++) {
-            for (int x = rect.x; x < rect.x + rect.width; x++) {
-                double[] pixel = image.get(y, x);
+    private void blackPixelFinderLeftToRight(Mat originalImage, Rect rect) {
+        // Clone original image to ensure contours are present
+        Mat imageWithContours = originalImage.clone();
 
-                // Check if pixel matches contour color BGR: 255, 0, 0
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                    // Draw a vertical line
-                    Imgproc.line(image, new Point(x, rect.y), new Point(x, rect.y + rect.height), new Scalar(255, 0, 0), 5);
+        // iterate through the rectangle in the cloned image to find the first contour line
+        for (int x = rect.x; x < rect.x + rect.width; x++) {
+            for (int y = rect.y; y < rect.y + rect.height; y++) {
+                double[] pixel = imageWithContours.get(y, x);
+
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
+                    // Draw a vertical line at this position
+                    Point lineStart = new Point(x, rect.y);
+                    Point lineEnd = new Point(x, rect.y + rect.height);
+                    Imgproc.line(originalImage, lineStart, lineEnd, new Scalar(0, 0, 225), 2);
                     return;
                 }
             }
@@ -259,10 +266,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Rect subQuadrantUnits4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
         Imgproc.rectangle(coloredBinaryImage, subQuadrantUnits4.tl(), subQuadrantUnits4.br(), new Scalar(255, 0, 0), 2);
 
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits1, new Scalar(255, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits2, new Scalar(255, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits3, new Scalar(255, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits4, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits1, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits2, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits3, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits4, new Scalar(0, 0, 255));
     }
 
     private void drawSubQuadrantsTens(Mat coloredBinaryImage, Rect quadrant) {
@@ -278,10 +285,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Rect subQuadrantTens4 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
         Imgproc.rectangle(coloredBinaryImage, subQuadrantTens4.tl(), subQuadrantTens4.br(), new Scalar(0, 255, 255), 2);
 
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens1, new Scalar(255, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens2, new Scalar(255, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens3, new Scalar(255, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens4, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens1, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens2, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens3, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens4, new Scalar(0, 0, 255));
     }
 
     private void drawSubQuadrantsHundreds(Mat coloredBinaryImage, Rect quadrant) {
@@ -297,10 +304,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Rect subQuadrantHundreds4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
         Imgproc.rectangle(coloredBinaryImage, subQuadrantHundreds4.tl(), subQuadrantHundreds4.br(), new Scalar(255,255, 0), 2);
 
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds1, new Scalar(255, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds2, new Scalar(255, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds3, new Scalar(255, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds4, new Scalar(255, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds1, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds2, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds3, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds4, new Scalar(0, 0, 255));
     }
 
     private void drawSubQuadrantsThousands(Mat coloredBinaryImage, Rect quadrant) {
@@ -338,7 +345,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // label count of black pixels on the image near the subquadrant
         String label = String.valueOf(blackPixelCount);
         Point labelPoint = new Point(subQuadrant.x + 5, subQuadrant.y + 20); // Adjust as needed for positioning
-        Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, textColor, 1);
+        Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 1, textColor, 1);
     }
 
     private List<Rect> filterContainedRectangles(List<Rect> rects) {
