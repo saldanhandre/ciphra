@@ -174,10 +174,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             if (rect.width > rect.height) {
                 // Rotate the image 90 degrees clockwise
-                Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_CLOCKWISE);
+                Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_COUNTERCLOCKWISE);
                 Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
                 processRectangle(rotatedImage, rotatedRect);
-                Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_COUNTERCLOCKWISE);
+                Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_CLOCKWISE);
             } else {
                 processRectangle(coloredBinaryImage, rect);
             }
@@ -191,27 +191,28 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
 
         // Create and draw smaller rectangle within the top half
-        int thirdHeight = rect.height / 3;
-        Rect quadrantUnits = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, thirdHeight);
+        int quadrantHeight = rect.height / 3;
+        Rect quadrantUnits = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
         drawSubQuadrantsUnits(coloredBinaryImage, quadrantUnits);
         blackPixelFinderRightToLeft(coloredBinaryImage, quadrantUnits);
 
-        Rect quadrantTens = new Rect(rect.x, rect.y, rect.width / 2, thirdHeight);
+        Rect quadrantTens = new Rect(rect.x, rect.y, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
         drawSubQuadrantsTens(coloredBinaryImage, quadrantTens);
         blackPixelFinderLeftToRight(coloredBinaryImage, quadrantTens);
 
-        Rect quadrantHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height - thirdHeight, rect.width / 2, thirdHeight);
+        Rect quadrantHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height - quadrantHeight, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
         drawSubQuadrantsHundreds(coloredBinaryImage, quadrantHundreds);
         blackPixelFinderRightToLeft(coloredBinaryImage, quadrantHundreds);
 
-        Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - thirdHeight, rect.width / 2, thirdHeight);
+        Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
         drawSubQuadrantsThousands(coloredBinaryImage, quadrantThousands);
         blackPixelFinderLeftToRight(coloredBinaryImage, quadrantThousands);
     }
+
 
     private void blackPixelFinderRightToLeft(Mat originalImage, Rect rect) {
         // Clone original image to ensure contours are present

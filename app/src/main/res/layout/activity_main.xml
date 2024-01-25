@@ -606,7 +606,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.2" />
+                app:layout_constraintGuide_percent="0.18" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/verticalGuideline11"
@@ -662,7 +662,7 @@
                 app:layout_constraintStart_toStartOf="@+id/verticalGuideline10"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.507"
-                app:layout_constraintHeight_percent="0.4">
+                app:layout_constraintHeight_percent="0.48">
 
                 <ImageView
                     android:id="@+id/bin_icon"
@@ -744,7 +744,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/baseline_photo_camera_24" />
+                android:src="@drawable/outline_photo_camera_24" />
 
         </FrameLayout>
 
@@ -768,7 +768,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/baseline_photo_library_24" />
+                android:src="@drawable/outline_photo_library_24" />
 
         </FrameLayout>
         <FrameLayout

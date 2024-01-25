@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
         resultEditText = findViewById(R.id.resultEditText);
 
-        resultEditText.setText("0000"); // Initialize with "0000"
+        resultEditText.setText("0"); // Initialize with "0000"
         resultEditText.setSelection(resultEditText.getText().length()); // Move cursor to end
         resultEditText.addTextChangedListener(new TextWatcher() {
             @Override
