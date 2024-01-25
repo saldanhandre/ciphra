@@ -116,16 +116,18 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Apply Gaussian Blur for noise reduction
         Imgproc.GaussianBlur(matImage, matImage, new Size(5, 5), 0);
         // Apply Binary Threshold
-        Imgproc.threshold(matImage, matImage, 155, 255, Imgproc.THRESH_BINARY);
+        Mat binaryImage = new Mat(); // keep copy of binary image for future processing
+        Imgproc.threshold(matImage, binaryImage, 155, 255, Imgproc.THRESH_BINARY);
         // Apply Canny Edge Detection
-        Imgproc.Canny(matImage, matImage, 100, 200);
+        Mat edgeDetectedImage = new Mat();
+        Imgproc.Canny(binaryImage, edgeDetectedImage, 100, 200);
         // Convert matImage to 3 channels
-        Mat coloredMatImage = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC3);
-        Imgproc.cvtColor(matImage, coloredMatImage, Imgproc.COLOR_GRAY2BGR);
+        Mat coloredBinaryImage = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC3);
+        Imgproc.cvtColor(binaryImage, coloredBinaryImage, Imgproc.COLOR_GRAY2BGR);
         // Find Contours and approximate them
-        findAndApproximateContours(matImage, coloredMatImage);
+        findAndApproximateContours(edgeDetectedImage, coloredBinaryImage);
         // Convert processed Mat back to Bitmap
-        Utils.matToBitmap(coloredMatImage, bitmap);
+        Utils.matToBitmap(coloredBinaryImage, bitmap);
 
         // Update ImageView with the processed Bitmap
         runOnUiThread(() -> {
@@ -134,76 +136,76 @@ public class ImageDisplayActivity extends AppCompatActivity {
         });
     }
 
-    private void findAndApproximateContours(Mat singleChannelImage, Mat coloredImage) {
+    private void findAndApproximateContours(Mat edgeDetectedImage, Mat coloredBinaryImage) {
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
-        Imgproc.findContours(singleChannelImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(edgeDetectedImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // List to hold all bounding rectangles
         List<Rect> boundingRects = new ArrayList<>();
-        List<Rect> filteredRects = new ArrayList<>();
 
         // Iterate over all detected contours
         for (MatOfPoint contour : contours) {
             // Convert contour to a different format
             MatOfPoint2f contourFloat = new MatOfPoint2f(contour.toArray());
-
             // Approximate the contour to a polygon
-            double epsilon = 0.0045 * Imgproc.arcLength(contourFloat, true);;
+            double epsilon = 0.0045 * Imgproc.arcLength(contourFloat, true);
+            ;
             MatOfPoint2f approxCurve = new MatOfPoint2f();
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
-
             // Draw the approximated contour for visualization
-            MatOfPoint points = new MatOfPoint(approxCurve.toArray());
-            Imgproc.drawContours(coloredImage, Arrays.asList(points), -1, new Scalar(0, 69, 181), 2);
-
+//            MatOfPoint points = new MatOfPoint(approxCurve.toArray());
+//            Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 69, 181), 2);
             // Calculate bounding rectangle for each contour
             Rect boundingRect = Imgproc.boundingRect(contour);
             boundingRects.add(boundingRect);
         }
 
         // Filter out rectangles that are inside other rectangles
-        filteredRects = filterContainedRectangles(boundingRects);
+        List<Rect> filteredRects = filterContainedRectangles(boundingRects);
+        drawQuadrants(coloredBinaryImage, filteredRects);
+    }
 
+    private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
         // Draw the bounding rectangles that passed the filter
         for (Rect rect : filteredRects) {
             // Draw the bounding rectangle
-//            Imgproc.rectangle(coloredImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+//            Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
 
             // Determine the longest side of the rectangle and draw the division line
             if (rect.width > rect.height) {
                 // Rectangle is wider than tall, divide left and right
                 Point divisionPoint1 = new Point(rect.x, rect.y + rect.height / 2);
                 Point divisionPoint2 = new Point(rect.x + rect.width, rect.y + rect.height / 2);
-                Imgproc.line(coloredImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
+                Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
 
                 // Create and draw smaller rectangle within the left half
                 int thirdWidth = rect.width / 3;
                 Rect smallRect1 = new Rect(rect.x, rect.y, thirdWidth, rect.height / 2);
-                Imgproc.rectangle(coloredImage, smallRect1.tl(), smallRect1.br(), new Scalar(255, 0, 0), 2);
+                Imgproc.rectangle(coloredBinaryImage, smallRect1.tl(), smallRect1.br(), new Scalar(255, 0, 0), 2);
                 Rect smallRect2 = new Rect(rect.x , rect.y + rect.height / 2, thirdWidth, rect.height / 2);
-                Imgproc.rectangle(coloredImage, smallRect2.tl(), smallRect2.br(), new Scalar(0, 255, 255), 2);
+                Imgproc.rectangle(coloredBinaryImage, smallRect2.tl(), smallRect2.br(), new Scalar(0, 255, 255), 2);
                 Rect smallRect3 = new Rect(rect.x + rect.width, rect.y, -thirdWidth, rect.height / 2);
-                Imgproc.rectangle(coloredImage, smallRect3.tl(), smallRect3.br(), new Scalar(255,255, 0), 2);
+                Imgproc.rectangle(coloredBinaryImage, smallRect3.tl(), smallRect3.br(), new Scalar(255,255, 0), 2);
                 Rect smallRect4 = new Rect(rect.x + rect.width, rect.y + rect.height / 2, -thirdWidth, rect.height / 2);
-                Imgproc.rectangle(coloredImage, smallRect4.tl(), smallRect4.br(), new Scalar(255, 0, 255), 2);
+                Imgproc.rectangle(coloredBinaryImage, smallRect4.tl(), smallRect4.br(), new Scalar(255, 0, 255), 2);
 
             } else {
                 // Rectangle is taller than wide, divide top and bottom
                 Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
                 Point divisionPoint2 = new Point(rect.x + rect.width / 2, rect.y + rect.height);
-                Imgproc.line(coloredImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
+                Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
 
                 // Create and draw smaller rectangle within the top half
                 int thirdHeight = rect.height / 3;
                 Rect smallRect1 = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, thirdHeight);
-                Imgproc.rectangle(coloredImage, smallRect1.tl(), smallRect1.br(), new Scalar(255, 0, 0), 2);
+                Imgproc.rectangle(coloredBinaryImage, smallRect1.tl(), smallRect1.br(), new Scalar(255, 0, 0), 2);
                 Rect smallRect2 = new Rect(rect.x, rect.y, rect.width / 2, thirdHeight);
-                Imgproc.rectangle(coloredImage, smallRect2.tl(), smallRect2.br(), new Scalar(0, 255, 255), 2);
+                Imgproc.rectangle(coloredBinaryImage, smallRect2.tl(), smallRect2.br(), new Scalar(0, 255, 255), 2);
                 Rect smallRect3 = new Rect(rect.x + rect.width / 2, rect.y + rect.height, rect.width / 2, -thirdHeight);
-                Imgproc.rectangle(coloredImage, smallRect3.tl(), smallRect3.br(), new Scalar(255,255, 0), 2);
+                Imgproc.rectangle(coloredBinaryImage, smallRect3.tl(), smallRect3.br(), new Scalar(255,255, 0), 2);
                 Rect smallRect4 = new Rect(rect.x, rect.y + rect.height, rect.width / 2, -thirdHeight);
-                Imgproc.rectangle(coloredImage, smallRect4.tl(), smallRect4.br(), new Scalar(255, 0, 255), 2);
+                Imgproc.rectangle(coloredBinaryImage, smallRect4.tl(), smallRect4.br(), new Scalar(255, 0, 255), 2);
             }
         }
     }

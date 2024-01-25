@@ -367,8 +367,8 @@ public class MainActivity extends AppCompatActivity {
     /*
     This logic is the 2nd step in avoiding invalid combinations.
     Even after making some segments unavailable, it is possible for the user to write an invalid character while trying to achieve another one.
-    For example, when pressing the segments for the arabic number 9, the user can press segments 1->2->5.
-    This would be correct if the converted result is only seen after pressing a button, but by implementing real time updating of the result,
+    For example, when pressing the segments for the arabic number 9, the user may press segments 1->2->5.
+    This would be correct if the converted result is only seen after pressing a "CONVERT" button, but by implementing real time updating of the result,
     it leads to invalid combinations (in this case, before pressing segment5, only segments 1 and 2 are pressed, which is invalid.
 
     When a segment is pressed and forms an invalid combination, the next segment to form a valid combination is automatically pressed. If that segment
