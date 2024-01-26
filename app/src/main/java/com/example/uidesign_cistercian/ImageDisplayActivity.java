@@ -338,7 +338,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Resizing Bottom -> Top
         // Create guideline rectangle using the lines if both lines were drawn
         if (firstLineX != -1 && secondLineX != -1) {
-            guideline3Rect = new Rect(firstLineX, rect.y + (2*(rect.height/3)), secondLineX - firstLineX, rect.height/3);
+            guideline3Rect = new Rect(secondLineX, rect.y + (2*(rect.height/3)), firstLineX - secondLineX, rect.height/3);
             Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 0, 0), 2);
         }
 
@@ -360,8 +360,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     break; // Exit the outer loop as well after "drawing" the second line
             }
         }
-
-
     }
 
     private void resizing1LeftToRight(Mat image, Rect rect) {
