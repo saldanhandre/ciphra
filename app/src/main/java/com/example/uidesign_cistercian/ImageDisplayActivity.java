@@ -220,6 +220,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
     private void resizingUnits(Mat image, Rect rect) {
+        boolean firstLineDrawn = false; // Flag to indicate if a line has been drawn
+        boolean secondLineDrawn = false;
+        Point lineStart1 = null, lineEnd1 = null;
+        Point lineStart2 = null, lineEnd2 = null;
 
         // Resizing Stem -> Out
         int guideline1Height = rect.height / 15;
@@ -231,31 +235,43 @@ public class ImageDisplayActivity extends AppCompatActivity {
             for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
                 double[] pixel = image.get(y, x);
 
-                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255){
+                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                     // Draw a vertical line at this position
-                    Point lineStart = new Point(x + (guideline1Rect.width/35), rect.y);
-                    Point lineEnd = new Point(x + (guideline1Rect.width/35), rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                    return;
+                    lineStart1 = new Point(x + (guideline1Rect.width / 35), rect.y);
+                    lineEnd1 = new Point(x + (guideline1Rect.width / 35), rect.y + rect.height);
+                    Imgproc.line(image, lineStart1, lineEnd1, new Scalar(0, 0, 225), 1);
+                    firstLineDrawn = true; // Set flag to true since a line has been drawn
+                    break; // Exit the inner loop
                 }
             }
         }
+
         // Resizing Stem <- Out
-        // iterate through the rectangle in the cloned image to find the first contour line
-        for (int x = rect.x+rect.width; x > rect.x; x--) {
+        // Iterate through the rectangle in the cloned image to find the first black pixel
+        for (int x = rect.x + rect.width; x > rect.x; x--) {
             for (int y = rect.y; y < rect.y + rect.height; y++) {
                 double[] pixel = image.get(y, x);
-
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0 && !secondLineDrawn) {
                     // Draw a vertical line at this position
-                    Point lineStart = new Point(x, rect.y);
-                    Point lineEnd = new Point(x, rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                    return;
+                    lineStart2 = new Point(x, rect.y);
+                    lineEnd2 = new Point(x, rect.y + rect.height);
+                    Imgproc.line(image, lineStart2, lineEnd2, new Scalar(0, 0, 225), 1);
+                    secondLineDrawn = true;
+                    break; // Exit the method after drawing the line
                 }
             }
         }
+
+        // Draw a rectangle using the lines if both lines were drawn
+        if (lineStart1 != null && lineStart2 != null) {
+            // Use the y-coordinates from the line start/end points and the x-coordinates from the lines
+            Imgproc.rectangle(image, lineStart1, lineEnd2, new Scalar(0, 255, 0), 1); // Drawing the rectangle with a green line
+        }
+
+        //Rect guideline2Rect = new Rect(lineStart1.x + (rect.width/30), rect.y + (rect.height/2) - (guideline1Height/2), rect.width, guideline1Height);
+
     }
+
     private void resizing1LeftToRight(Mat image, Rect rect) {
         int guidelineHeight = rect.height / 15;
         Rect guidelineRect = new Rect(rect.x + (rect.width/30), rect.y + (rect.height/2) - (guidelineHeight/2), rect.width, guidelineHeight);
