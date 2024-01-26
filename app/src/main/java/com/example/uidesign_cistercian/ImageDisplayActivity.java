@@ -191,7 +191,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
 
         // Create and draw smaller rectangle within the top half
-        int quadrantHeight = rect.height / 3;
+        int quadrantHeight = 4 * (rect.height / 10);
 
         Rect quadrantUnits = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
@@ -202,8 +202,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Rect quadrantTens = new Rect(rect.x, rect.y, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
 //        drawSubQuadrantsTens(coloredBinaryImage, quadrantTens);
-        resizing1RightToLeft(coloredBinaryImage, quadrantTens);
-        resizing2LeftToRight(coloredBinaryImage, quadrantTens);
+        resizingTens(coloredBinaryImage, quadrantTens);
+//        resizing1RightToLeft(coloredBinaryImage, quadrantTens);
+//        resizing2LeftToRight(coloredBinaryImage, quadrantTens);
 
         Rect quadrantHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height - quadrantHeight, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
@@ -220,55 +221,146 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
     private void resizingUnits(Mat image, Rect rect) {
-        boolean firstLineDrawn = false; // Flag to indicate if a line has been drawn
-        boolean secondLineDrawn = false;
-        Point lineStart1 = null, lineEnd1 = null;
-        Point lineStart2 = null, lineEnd2 = null;
+        boolean firstLineDrawn = false;
+        int firstLineX = -1;
+        int secondLineX = -1;
+        int thirdLineY = -1;
+        Rect guideline3Rect = null;
 
         // Resizing Stem -> Out
         int guideline1Height = rect.height / 15;
-        Rect guideline1Rect = new Rect(rect.x + (rect.width/30), rect.y + (rect.height/2) - (guideline1Height/2), rect.width, guideline1Height);
-//        Imgproc.rectangle(image, guideline1Rect.tl(), guideline1Rect.br(), new Scalar(28, 252, 3), 2);
+        Rect guideline1Rect = new Rect(rect.x + (rect.width / 30), rect.y + (rect.height / 2) - (guideline1Height / 2), rect.width, guideline1Height);
 
-        // iterate through the rectangle in the cloned image to find the first white pixel
+        // iterate through the rectangle to find the first white pixel
         for (int x = guideline1Rect.x; x < guideline1Rect.x + guideline1Rect.width; x++) {
             for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
                 double[] pixel = image.get(y, x);
-
                 if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
-                    // Draw a vertical line at this position
-                    lineStart1 = new Point(x + (guideline1Rect.width / 35), rect.y);
-                    lineEnd1 = new Point(x + (guideline1Rect.width / 35), rect.y + rect.height);
-                    Imgproc.line(image, lineStart1, lineEnd1, new Scalar(0, 0, 225), 1);
-                    firstLineDrawn = true; // Set flag to true since a line has been drawn
-                    break; // Exit the inner loop
+                    firstLineX = x + (guideline1Rect.width / 35);
+                    Point lineStart = new Point(firstLineX, rect.y);
+                    Point lineEnd = new Point(firstLineX, rect.y + rect.height);
+                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
+                    firstLineDrawn = true;
+                    break;
                 }
             }
+            if (firstLineDrawn) break; // Exit the outer loop as well after drawing first line
         }
 
         // Resizing Stem <- Out
-        // Iterate through the rectangle in the cloned image to find the first black pixel
+        // iterate through the rectangle to find the first black pixel
         for (int x = rect.x + rect.width; x > rect.x; x--) {
             for (int y = rect.y; y < rect.y + rect.height; y++) {
                 double[] pixel = image.get(y, x);
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0 && !secondLineDrawn) {
-                    // Draw a vertical line at this position
-                    lineStart2 = new Point(x, rect.y);
-                    lineEnd2 = new Point(x, rect.y + rect.height);
-                    Imgproc.line(image, lineStart2, lineEnd2, new Scalar(0, 0, 225), 1);
-                    secondLineDrawn = true;
-                    break; // Exit the method after drawing the line
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    secondLineX = x;
+                    Point lineStart = new Point(secondLineX, rect.y);
+                    Point lineEnd = new Point(secondLineX, rect.y + rect.height);
+                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
+                    break;
                 }
+            }
+            if (secondLineX != -1) break; // Exit the outer loop as well after drawing second line
+        }
+
+        // Resizing Bottom -> Top
+        // Create guideline rectangle using the lines if both lines were drawn
+        if (firstLineX != -1 && secondLineX != -1) {
+            guideline3Rect = new Rect(firstLineX, rect.y + (2*(rect.height/3)), secondLineX - firstLineX, rect.height/3);
+            Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 0, 0), 2);
+        }
+
+        // iterate through the rectangle to find the first black pixel from the other side
+
+        if(guideline3Rect != null) {
+            for (int y = guideline3Rect.y + guideline3Rect.height; y > guideline3Rect.y; y--) {
+                for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Rect.width; x++) {
+                    double[] pixel = image.get(y, x);
+                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                        thirdLineY = y;
+                        Point lineStart = new Point(guideline3Rect.x, thirdLineY);
+                        Point lineEnd = new Point(guideline3Rect.x + guideline3Rect.width, thirdLineY);
+                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+                        break;
+                    }
+                }
+                if (thirdLineY != -1)
+                    break; // Exit the outer loop as well after "drawing" the second line
+            }
+        }
+    }
+
+    private void resizingTens(Mat image, Rect rect) {
+        boolean firstLineDrawn = false;
+        int firstLineX = -1;
+        int secondLineX = -1;
+        int thirdLineY = -1;
+        Rect guideline3Rect = null;
+
+        // Resizing Out <- Stem
+        int guideline1Height = rect.height / 15;
+        Rect guideline1Rect = new Rect(rect.x,rect.y + (rect.height / 2) - (guideline1Height / 2), rect.width - (rect.width/30), guideline1Height);
+
+        // iterate through the rectangle to find the first white pixel
+        for (int x = guideline1Rect.x + guideline1Rect.width; x > guideline1Rect.x; x--) {
+            for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
+                double[] pixel = image.get(y, x);
+                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
+                    firstLineX = x - (guideline1Rect.width / 35);
+                    Point lineStart = new Point(firstLineX, rect.y);
+                    Point lineEnd = new Point(firstLineX, rect.y + rect.height);
+                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
+                    firstLineDrawn = true;
+                    break;
+                }
+            }
+            if (firstLineDrawn) break; // Exit the outer loop as well after drawing first line
+        }
+
+
+        // Resizing Out -> Stem
+        // iterate through the rectangle to find the first black pixel
+        for (int x = rect.x; x < rect.x + rect.width; x++) {
+            for (int y = rect.y; y < rect.y + rect.height; y++) {
+                double[] pixel = image.get(y, x);
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    secondLineX = x;
+                    Point lineStart = new Point(secondLineX, rect.y);
+                    Point lineEnd = new Point(secondLineX, rect.y + rect.height);
+                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
+                    break;
+                }
+            }
+            if (secondLineX != -1) break; // Exit the outer loop as well after drawing second line
+        }
+
+
+        // Resizing Bottom -> Top
+        // Create guideline rectangle using the lines if both lines were drawn
+        if (firstLineX != -1 && secondLineX != -1) {
+            guideline3Rect = new Rect(firstLineX, rect.y + (2*(rect.height/3)), secondLineX - firstLineX, rect.height/3);
+            Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 0, 0), 2);
+        }
+
+        // iterate through the rectangle to find the first black pixel from the other side
+
+        if(guideline3Rect != null) {
+            for (int y = guideline3Rect.y + guideline3Rect.height; y > guideline3Rect.y; y--) {
+                for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Rect.width; x++) {
+                    double[] pixel = image.get(y, x);
+                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                        thirdLineY = y;
+                        Point lineStart = new Point(guideline3Rect.x, thirdLineY);
+                        Point lineEnd = new Point(guideline3Rect.x + guideline3Rect.width, thirdLineY);
+                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+                        break;
+                    }
+                }
+                if (thirdLineY != -1)
+                    break; // Exit the outer loop as well after "drawing" the second line
             }
         }
 
-        // Draw a rectangle using the lines if both lines were drawn
-        if (lineStart1 != null && lineStart2 != null) {
-            // Use the y-coordinates from the line start/end points and the x-coordinates from the lines
-            Imgproc.rectangle(image, lineStart1, lineEnd2, new Scalar(0, 255, 0), 1); // Drawing the rectangle with a green line
-        }
-
-        //Rect guideline2Rect = new Rect(lineStart1.x + (rect.width/30), rect.y + (rect.height/2) - (guideline1Height/2), rect.width, guideline1Height);
 
     }
 
