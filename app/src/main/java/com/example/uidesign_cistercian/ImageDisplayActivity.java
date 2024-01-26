@@ -192,36 +192,116 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Create and draw smaller rectangle within the top half
         int quadrantHeight = rect.height / 3;
+
         Rect quadrantUnits = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
-        drawSubQuadrantsUnits(coloredBinaryImage, quadrantUnits);
-        blackPixelFinderRightToLeft(coloredBinaryImage, quadrantUnits);
+//        drawSubQuadrantsUnits(coloredBinaryImage, quadrantUnits);
+        resizingUnits(coloredBinaryImage, quadrantUnits);
+//        resizing2RightToLeft(coloredBinaryImage, quadrantUnits);
 
         Rect quadrantTens = new Rect(rect.x, rect.y, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
-        drawSubQuadrantsTens(coloredBinaryImage, quadrantTens);
-        blackPixelFinderLeftToRight(coloredBinaryImage, quadrantTens);
+//        drawSubQuadrantsTens(coloredBinaryImage, quadrantTens);
+        resizing1RightToLeft(coloredBinaryImage, quadrantTens);
+        resizing2LeftToRight(coloredBinaryImage, quadrantTens);
 
         Rect quadrantHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height - quadrantHeight, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
-        drawSubQuadrantsHundreds(coloredBinaryImage, quadrantHundreds);
-        blackPixelFinderRightToLeft(coloredBinaryImage, quadrantHundreds);
+//        drawSubQuadrantsHundreds(coloredBinaryImage, quadrantHundreds);
+        resizing1LeftToRight(coloredBinaryImage, quadrantHundreds);
+        resizing2RightToLeft(coloredBinaryImage, quadrantHundreds);
 
         Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, rect.width / 2, quadrantHeight);
 //        Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
-        drawSubQuadrantsThousands(coloredBinaryImage, quadrantThousands);
-        blackPixelFinderLeftToRight(coloredBinaryImage, quadrantThousands);
+//        drawSubQuadrantsThousands(coloredBinaryImage, quadrantThousands);
+        resizing1RightToLeft(coloredBinaryImage, quadrantThousands);
+        resizing2LeftToRight(coloredBinaryImage, quadrantThousands);
     }
 
 
-    private void blackPixelFinderRightToLeft(Mat originalImage, Rect rect) {
-        // Clone original image to ensure contours are present
-        Mat imageWithContours = originalImage.clone();
+    private void resizingUnits(Mat image, Rect rect) {
 
+        // Resizing Stem -> Out
+        int guideline1Height = rect.height / 15;
+        Rect guideline1Rect = new Rect(rect.x + (rect.width/30), rect.y + (rect.height/2) - (guideline1Height/2), rect.width, guideline1Height);
+//        Imgproc.rectangle(image, guideline1Rect.tl(), guideline1Rect.br(), new Scalar(28, 252, 3), 2);
+
+        // iterate through the rectangle in the cloned image to find the first white pixel
+        for (int x = guideline1Rect.x; x < guideline1Rect.x + guideline1Rect.width; x++) {
+            for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
+                double[] pixel = image.get(y, x);
+
+                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255){
+                    // Draw a vertical line at this position
+                    Point lineStart = new Point(x + (guideline1Rect.width/35), rect.y);
+                    Point lineEnd = new Point(x + (guideline1Rect.width/35), rect.y + rect.height);
+                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                    return;
+                }
+            }
+        }
+        // Resizing Stem <- Out
         // iterate through the rectangle in the cloned image to find the first contour line
         for (int x = rect.x+rect.width; x > rect.x; x--) {
             for (int y = rect.y; y < rect.y + rect.height; y++) {
-                double[] pixel = imageWithContours.get(y, x);
+                double[] pixel = image.get(y, x);
+
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
+                    // Draw a vertical line at this position
+                    Point lineStart = new Point(x, rect.y);
+                    Point lineEnd = new Point(x, rect.y + rect.height);
+                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                    return;
+                }
+            }
+        }
+    }
+    private void resizing1LeftToRight(Mat image, Rect rect) {
+        int guidelineHeight = rect.height / 15;
+        Rect guidelineRect = new Rect(rect.x + (rect.width/30), rect.y + (rect.height/2) - (guidelineHeight/2), rect.width, guidelineHeight);
+//        Imgproc.rectangle(image, guidelineRect.tl(), guidelineRect.br(), new Scalar(28, 252, 3), 2);
+
+        // iterate through the rectangle in the cloned image to find the first white pixel
+        for (int x = guidelineRect.x; x < guidelineRect.x + guidelineRect.width; x++) {
+            for (int y = guidelineRect.y; y < guidelineRect.y + guidelineRect.height; y++) {
+                double[] pixel = image.get(y, x);
+
+                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255){
+                    // Draw a vertical line at this position
+                    Point lineStart = new Point(x + (guidelineRect.width/35), rect.y);
+                    Point lineEnd = new Point(x + (guidelineRect.width/35), rect.y + rect.height);
+                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                    return;
+                }
+            }
+        }
+    }
+    private void resizing1RightToLeft(Mat image, Rect rect) {
+        int guidelineHeight = rect.height / 15;
+        Rect guidelineRect = new Rect(rect.x, rect.y + (rect.height/2) - (guidelineHeight/2), rect.width - (rect.width/30), guidelineHeight);
+//        Imgproc.rectangle(image, guidelineRect.tl(), guidelineRect.br(), new Scalar(28, 252, 3), 2);
+
+        // iterate through the rectangle in the cloned image to find the first white pixel
+        for (int x = guidelineRect.x+guidelineRect.width; x > guidelineRect.x; x--) {
+            for (int y = guidelineRect.y; y < guidelineRect.y + guidelineRect.height; y++) {
+                double[] pixel = image.get(y, x);
+
+                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255){
+                    // Draw a vertical line at this position
+                    Point lineStart = new Point(x - (guidelineRect.width/35), rect.y);
+                    Point lineEnd = new Point(x - (guidelineRect.width/35), rect.y + rect.height);
+                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                    return;
+                }
+            }
+        }
+    }
+
+    private void resizing2RightToLeft(Mat originalImage, Rect rect) {
+        // iterate through the rectangle in the cloned image to find the first contour line
+        for (int x = rect.x+rect.width; x > rect.x; x--) {
+            for (int y = rect.y; y < rect.y + rect.height; y++) {
+                double[] pixel = originalImage.get(y, x);
 
                 if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
                     // Draw a vertical line at this position
@@ -234,14 +314,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
     }
 
-    private void blackPixelFinderLeftToRight(Mat originalImage, Rect rect) {
-        // Clone original image to ensure contours are present
-        Mat imageWithContours = originalImage.clone();
-
+    private void resizing2LeftToRight(Mat originalImage, Rect rect) {
         // iterate through the rectangle in the cloned image to find the first contour line
         for (int x = rect.x; x < rect.x + rect.width; x++) {
             for (int y = rect.y; y < rect.y + rect.height; y++) {
-                double[] pixel = imageWithContours.get(y, x);
+                double[] pixel = originalImage.get(y, x);
 
                 if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
                     // Draw a vertical line at this position
@@ -253,6 +330,28 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void resizing3TopToBottom(Mat image, Rect rect) {
+        int guidelineWidth = rect.height / 15;
+        Rect guidelineRect = new Rect(rect.x + (rect.width/30), rect.y + (rect.height/2) - (guidelineWidth/2), rect.width, guidelineWidth);
+//        Imgproc.rectangle(image, guidelineRect.tl(), guidelineRect.br(), new Scalar(28, 252, 3), 2);
+
+        // iterate through the rectangle in the cloned image to find the first white pixel
+        for (int x = guidelineRect.x; x < guidelineRect.x + guidelineRect.width; x++) {
+            for (int y = guidelineRect.y; y < guidelineRect.y + guidelineRect.height; y++) {
+                double[] pixel = image.get(y, x);
+
+                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255){
+                    // Draw a vertical line at this position
+                    Point lineStart = new Point(x + (guidelineRect.width/35), rect.y);
+                    Point lineEnd = new Point(x + (guidelineRect.width/35), rect.y + rect.height);
+                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                    return;
+                }
+            }
+        }
+    }
+
 
     private void drawSubQuadrantsUnits(Mat coloredBinaryImage, Rect quadrant) {
         int subRectWidth = quadrant.width / 2;
