@@ -270,7 +270,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Create guideline rectangle using the lines if both lines were drawn
         if (firstLineX != -1 && secondLineX != -1) {
             guideline3Rect = new Rect(firstLineX, rect.y + (2*(rect.height/3)), secondLineX - firstLineX, 4 * (rect.height/10));
-            Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 0, 0), 2);
+//            Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 0, 0), 2);
         }
 
         // iterate through the rectangle to find the first black pixel from the other side
@@ -297,6 +297,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
             }
         }
+
+        //Create Resized Quadrant
+
+
+        // Subdivide Resized Quadrants into Sub-quadrants
+        Rect subQuadrantUnits1 = new Rect(firstLineX, rect.y, (secondLineX-firstLineX)/3, (thirdLineY-rect.y)/3);
+        Imgproc.rectangle(image, subQuadrantUnits1.tl(), subQuadrantUnits1.br(), new Scalar(255, 0, 0), 2);
+
     }
 
     private void resizingTens(Mat image, Rect rect) {
@@ -347,7 +355,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Create guideline rectangle using the lines if both lines were drawn
         if (firstLineX != -1 && secondLineX != -1) {
             guideline3Rect = new Rect(secondLineX, rect.y + (2*(rect.height/3)), firstLineX - secondLineX, 4 * (rect.height/10));
-            Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 0, 0), 2);
+//            Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 0, 0), 2);
         }
 
         // iterate through the rectangle to find the first black pixel from the other side
@@ -428,9 +436,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         // iterate through the rectangle to find the first black pixel from the other side
-
         if(guideline3Rect != null) {
-            for (int y = guideline3Rect.y; y < guideline3Rect.height; y++) {
+            for (int y = guideline3Rect.y; y > guideline3Rect.height; y++) {
                 for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Rect.width; x++) {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
@@ -502,12 +509,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Create guideline rectangle using the lines if both lines were drawn
         if (firstLineX != -1 && secondLineX != -1) {
             guideline3Rect = new Rect(secondLineX, rect.y, firstLineX - secondLineX, 4 * (rect.height/10));
-            Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 0, 0), 2);
+//            Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 0, 0), 2);
         }
 
         // iterate through the rectangle to find the first black pixel from the other side
         if(guideline3Rect != null) {
-            for (int y = guideline3Rect.y; y < guideline3Rect.height; y++) {
+            for (int y = guideline3Rect.y; y > guideline3Rect.height; y++) {
                 for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Rect.width; x++) {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
@@ -537,111 +544,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
 
-
-
-
-
-
-
-
-
-    private void resizing1LeftToRight(Mat image, Rect rect) {
-        int guidelineHeight = rect.height / 15;
-        Rect guidelineRect = new Rect(rect.x + (rect.width/30), rect.y + (rect.height/2) - (guidelineHeight/2), rect.width, guidelineHeight);
-//        Imgproc.rectangle(image, guidelineRect.tl(), guidelineRect.br(), new Scalar(28, 252, 3), 2);
-
-        // iterate through the rectangle in the cloned image to find the first white pixel
-        for (int x = guidelineRect.x; x < guidelineRect.x + guidelineRect.width; x++) {
-            for (int y = guidelineRect.y; y < guidelineRect.y + guidelineRect.height; y++) {
-                double[] pixel = image.get(y, x);
-
-                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255){
-                    // Draw a vertical line at this position
-                    Point lineStart = new Point(x + (guidelineRect.width/35), rect.y);
-                    Point lineEnd = new Point(x + (guidelineRect.width/35), rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                    return;
-                }
-            }
-        }
-    }
-    private void resizing1RightToLeft(Mat image, Rect rect) {
-        int guidelineHeight = rect.height / 15;
-        Rect guidelineRect = new Rect(rect.x, rect.y + (rect.height/2) - (guidelineHeight/2), rect.width - (rect.width/30), guidelineHeight);
-//        Imgproc.rectangle(image, guidelineRect.tl(), guidelineRect.br(), new Scalar(28, 252, 3), 2);
-
-        // iterate through the rectangle in the cloned image to find the first white pixel
-        for (int x = guidelineRect.x+guidelineRect.width; x > guidelineRect.x; x--) {
-            for (int y = guidelineRect.y; y < guidelineRect.y + guidelineRect.height; y++) {
-                double[] pixel = image.get(y, x);
-
-                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255){
-                    // Draw a vertical line at this position
-                    Point lineStart = new Point(x - (guidelineRect.width/35), rect.y);
-                    Point lineEnd = new Point(x - (guidelineRect.width/35), rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                    return;
-                }
-            }
-        }
-    }
-
-    private void resizing2RightToLeft(Mat originalImage, Rect rect) {
-        // iterate through the rectangle in the cloned image to find the first contour line
-        for (int x = rect.x+rect.width; x > rect.x; x--) {
-            for (int y = rect.y; y < rect.y + rect.height; y++) {
-                double[] pixel = originalImage.get(y, x);
-
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
-                    // Draw a vertical line at this position
-                    Point lineStart = new Point(x, rect.y);
-                    Point lineEnd = new Point(x, rect.y + rect.height);
-                    Imgproc.line(originalImage, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                    return;
-                }
-            }
-        }
-    }
-
-    private void resizing2LeftToRight(Mat originalImage, Rect rect) {
-        // iterate through the rectangle in the cloned image to find the first contour line
-        for (int x = rect.x; x < rect.x + rect.width; x++) {
-            for (int y = rect.y; y < rect.y + rect.height; y++) {
-                double[] pixel = originalImage.get(y, x);
-
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
-                    // Draw a vertical line at this position
-                    Point lineStart = new Point(x, rect.y);
-                    Point lineEnd = new Point(x, rect.y + rect.height);
-                    Imgproc.line(originalImage, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                    return;
-                }
-            }
-        }
-    }
-
-    private void resizing3TopToBottom(Mat image, Rect rect) {
-        int guidelineWidth = rect.height / 15;
-        Rect guidelineRect = new Rect(rect.x + (rect.width/30), rect.y + (rect.height/2) - (guidelineWidth/2), rect.width, guidelineWidth);
-//        Imgproc.rectangle(image, guidelineRect.tl(), guidelineRect.br(), new Scalar(28, 252, 3), 2);
-
-        // iterate through the rectangle in the cloned image to find the first white pixel
-        for (int x = guidelineRect.x; x < guidelineRect.x + guidelineRect.width; x++) {
-            for (int y = guidelineRect.y; y < guidelineRect.y + guidelineRect.height; y++) {
-                double[] pixel = image.get(y, x);
-
-                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255){
-                    // Draw a vertical line at this position
-                    Point lineStart = new Point(x + (guidelineRect.width/35), rect.y);
-                    Point lineEnd = new Point(x + (guidelineRect.width/35), rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                    return;
-                }
-            }
-        }
-    }
-
-
     private void drawSubQuadrantsUnits(Mat coloredBinaryImage, Rect quadrant) {
         int subRectWidth = quadrant.width / 2;
         int subRectHeight = quadrant.height / 2;
@@ -655,6 +557,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Rect subQuadrantUnits4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
         Imgproc.rectangle(coloredBinaryImage, subQuadrantUnits4.tl(), subQuadrantUnits4.br(), new Scalar(255, 0, 0), 2);
 
+
         analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits1, new Scalar(0, 0, 255));
         analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits2, new Scalar(0, 0, 255));
         analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits3, new Scalar(0, 0, 255));
@@ -662,8 +565,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
     private void drawSubQuadrantsTens(Mat coloredBinaryImage, Rect quadrant) {
-        int subRectWidth = quadrant.width / 2;
-        int subRectHeight = quadrant.height / 2;
+        int subRectWidth = quadrant.width / 3;
+        int subRectHeight = quadrant.height / 3;
 
         Rect subQuadrantTens1 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
         Imgproc.rectangle(coloredBinaryImage, subQuadrantTens1.tl(), subQuadrantTens1.br(), new Scalar(0, 255, 255), 2);
