@@ -127,7 +127,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Find Contours and approximate them
         findAndApproximateContours(edgeDetectedImage, coloredBinaryImage);
         // Convert processed Mat back to Bitmap
-        Utils.matToBitmap(coloredBinaryImage, bitmap);
+        Utils.matToBitmap(binaryImage, bitmap);
 
         // Update ImageView with the processed Bitmap
         runOnUiThread(() -> {
@@ -136,7 +136,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
         });
     }
 
-    private void findAndApproximateContours(Mat edgeDetectedImage, Mat coloredBinaryImage) {
+    private void findAndApproximateContours(Mat edgeDetectedImage, Mat binaryImage) {
+        System.out.println("findAndApproximateContours");
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
         Imgproc.findContours(edgeDetectedImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -154,7 +155,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
             // Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
-//            Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 0, 255), 2);
+//            Imgproc.drawContours(binaryImage, Arrays.asList(points), -1, new Scalar(0, 0, 255), 2);
             // Calculate bounding rectangle for each contour
             Rect boundingRect = Imgproc.boundingRect(contour);
             boundingRects.add(boundingRect);
@@ -162,52 +163,57 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Filter out rectangles that are inside other rectangles
         List<Rect> filteredRects = filterContainedRectangles(boundingRects);
-        drawQuadrants(coloredBinaryImage, filteredRects);
+        drawQuadrants(binaryImage, filteredRects);
     }
 
-    private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
+    private void drawQuadrants(Mat binaryImage, List<Rect> filteredRects) {
+        System.out.println("drawQuadrants");
         // Draw the bounding rectangles that passed the filter
         for (Rect rect : filteredRects) {
-            Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
+            Mat rotatedImage = binaryImage.clone(); // Clone the image for rotation
+            System.out.println("clones rotated");
             // Draw the bounding rectangle
-//            Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+//            Imgproc.rectangle(binaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
 
             if (rect.width > rect.height) {
                 // Rotate the image 90 degrees clockwise
-                Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_COUNTERCLOCKWISE);
-                Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
+                System.out.println("rectangle was rotated");
+                Core.rotate(binaryImage, rotatedImage, Core.ROTATE_90_COUNTERCLOCKWISE);
+                Rect rotatedRect = new Rect(rect.y, binaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
                 processRectangle(rotatedImage, rotatedRect);
-                Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_CLOCKWISE);
+                Core.rotate(rotatedImage, binaryImage, Core.ROTATE_90_CLOCKWISE);
             } else {
-                processRectangle(coloredBinaryImage, rect);
+                System.out.println("rectangle was NOT rotated");
+                processRectangle(binaryImage, rect);
             }
         }
     }
 
-    private void processRectangle(Mat coloredBinaryImage, Rect rect) {
+    private void processRectangle(Mat binaryImage, Rect rect) {
         // Rectangle is taller than wide, divide top and bottom
         Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
         Point divisionPoint2 = new Point(rect.x + rect.width / 2, rect.y + rect.height);
-//        Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
+//        Imgproc.line(binaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
 
         // Create and draw smaller rectangle within the top half
         int quadrantHeight = 4 * (rect.height / 10);
 
         Rect quadrantUnits = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, quadrantHeight);
-//        Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
-        resizingUnits(coloredBinaryImage, quadrantUnits);
+//        Imgproc.rectangle(binaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
+        resizingUnits(binaryImage, quadrantUnits);
+        System.out.println("resizingUnits called");
 
         Rect quadrantTens = new Rect(rect.x, rect.y, rect.width / 2, quadrantHeight);
-//        Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
-        resizingTens(coloredBinaryImage, quadrantTens);
+//        Imgproc.rectangle(binaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
+        resizingTens(binaryImage, quadrantTens);
 
         Rect quadrantHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height - quadrantHeight, rect.width / 2, quadrantHeight);
-//        Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
-        resizingHundreds(coloredBinaryImage, quadrantHundreds);
+//        Imgproc.rectangle(binaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
+        resizingHundreds(binaryImage, quadrantHundreds);
 
         Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, rect.width / 2, quadrantHeight);
-//        Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
-        resizingThousands(coloredBinaryImage, quadrantThousands);
+//        Imgproc.rectangle(binaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
+        resizingThousands(binaryImage, quadrantThousands);
     }
 
 
@@ -225,7 +231,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (int x = guideline1Rect.x; x < guideline1Rect.x + guideline1Rect.width; x++) {
             for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
                 double[] pixel = image.get(y, x);
-                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
+                if (pixel[0] == 255 && !firstLineDrawn) {
                     firstLineX = x + (guideline1Rect.width / 35);
                     Point lineStart = new Point(firstLineX, rect.y);
                     Point lineEnd = new Point(firstLineX, rect.y + rect.height);
@@ -242,7 +248,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (int x = rect.x + rect.width; x > rect.x; x--) {
             for (int y = rect.y; y < rect.y + rect.height; y++) {
                 double[] pixel = image.get(y, x);
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                if (pixel[0] == 0) {
                     secondLineX = x;
                     Point lineStart = new Point(secondLineX, rect.y);
                     Point lineEnd = new Point(secondLineX, rect.y + rect.height);
@@ -265,7 +271,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             for (int y = guideline3Rect.y + guideline3Rect.height; y > guideline3Rect.y; y--) {
                 for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Rect.width; x++) {
                     double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    if (pixel[0] == 0) {
                         pixel1Found = true;
                         thirdLineY = y;
                         Point lineStart = new Point(guideline3Rect.x, thirdLineY);
@@ -297,7 +303,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             for (int y = guideline4Rect.y; y < guideline4Rect.height; y++) {
                 for (int x = guideline4Rect.x; x < guideline4Rect.x + guideline4Rect.width; x++) {
                     double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    if (pixel[0] == 0) {
                         pixel2Found = true;
                         fourthLineY = y;
                         Point lineStart = new Point(guideline4Rect.x, fourthLineY);
@@ -369,7 +375,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (int x = guideline1Rect.x + guideline1Rect.width; x > guideline1Rect.x; x--) {
             for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
                 double[] pixel = image.get(y, x);
-                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
+                if (pixel[0] == 255 && !firstLineDrawn) {
                     firstLineX = x - (guideline1Rect.width / 35);
                     Point lineStart = new Point(firstLineX, rect.y);
                     Point lineEnd = new Point(firstLineX, rect.y + rect.height);
@@ -386,7 +392,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (int x = rect.x; x < rect.x + rect.width; x++) {
             for (int y = rect.y; y < rect.y + rect.height; y++) {
                 double[] pixel = image.get(y, x);
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                if (pixel[0] == 0) {
                     secondLineX = x;
                     Point lineStart = new Point(secondLineX, rect.y);
                     Point lineEnd = new Point(secondLineX, rect.y + rect.height);
@@ -409,7 +415,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             for (int y = guideline3Rect.y + guideline3Rect.height; y > guideline3Rect.y; y--) {
                 for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Rect.width; x++) {
                     double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    if (pixel[0] == 0) {
                         pixel1Found = true;
                         thirdLineY = y;
                         Point lineStart = new Point(guideline3Rect.x, thirdLineY);
@@ -442,7 +448,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             for (int y = guideline4Rect.y; y < guideline4Rect.height; y++) {
                 for (int x = guideline4Rect.x; x < guideline4Rect.x + guideline4Rect.width; x++) {
                     double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    if (pixel[0] == 0) {
                         pixel2Found = true;
                         fourthLineY = y;
                         Point lineStart = new Point(guideline4Rect.x, fourthLineY);
@@ -513,7 +519,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (int x = guideline1Rect.x; x < guideline1Rect.x + guideline1Rect.width; x++) {
             for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
                 double[] pixel = image.get(y, x);
-                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
+                if (pixel[0] == 255 && !firstLineDrawn) {
                     firstLineX = x + (guideline1Rect.width / 35);
                     Point lineStart = new Point(firstLineX, rect.y);
                     Point lineEnd = new Point(firstLineX, rect.y + rect.height);
@@ -530,7 +536,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (int x = rect.x + rect.width; x > rect.x; x--) {
             for (int y = rect.y; y < rect.y + rect.height; y++) {
                 double[] pixel = image.get(y, x);
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                if (pixel[0] == 0) {
                     secondLineX = x;
                     Point lineStart = new Point(secondLineX, rect.y);
                     Point lineEnd = new Point(secondLineX, rect.y + rect.height);
@@ -553,7 +559,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             for (int y = guideline3Rect.y; y > guideline3Rect.height; y++) {
                 for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Rect.width; x++) {
                     double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    if (pixel[0] == 0) {
                         pixel1Found = true;
                         thirdLineY = y;
                         Point lineStart = new Point(guideline3Rect.x, thirdLineY);
@@ -586,7 +592,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             for (int y = guideline4Rect.y + guideline4Rect.height; y > guideline4Rect.y; y--) {
                 for (int x = guideline4Rect.x; x < guideline4Rect.x + guideline4Rect.width; x++) {
                     double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    if (pixel[0] == 0) {
                         pixel2Found = true;
                         fourthLineY = y;
                         Point lineStart = new Point(guideline4Rect.x, fourthLineY);
@@ -622,8 +628,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Rect subQuadrantHundreds9 = new Rect(firstLineX + 2*subQuadrantWidth, thirdLineY, subQuadrantWidth, subQuadrantHeight);
 
         Imgproc.rectangle(image, subQuadrantHundreds1.tl(), subQuadrantHundreds1.br(), new Scalar(255, 0, 0), 2);
+        System.out.println("first subquadrant drawn");
         Imgproc.rectangle(image, subQuadrantHundreds2.tl(), subQuadrantHundreds2.br(), new Scalar(255, 0, 0), 2);
+        System.out.println("second subquadrant drawn");
         Imgproc.rectangle(image, subQuadrantHundreds3.tl(), subQuadrantHundreds3.br(), new Scalar(255, 0, 0), 2);
+        System.out.println("third subquadrant drawn");
         Imgproc.rectangle(image, subQuadrantHundreds4.tl(), subQuadrantHundreds4.br(), new Scalar(255, 0, 0), 2);
         Imgproc.rectangle(image, subQuadrantHundreds5.tl(), subQuadrantHundreds5.br(), new Scalar(255, 0, 0), 2);
         Imgproc.rectangle(image, subQuadrantHundreds6.tl(), subQuadrantHundreds6.br(), new Scalar(255, 0, 0), 2);
@@ -659,7 +668,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (int x = guideline1Rect.x + guideline1Rect.width; x > guideline1Rect.x; x--) {
             for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
                 double[] pixel = image.get(y, x);
-                if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
+                if (pixel[0] == 255 && !firstLineDrawn) {
                     firstLineX = x - (guideline1Rect.width / 35);
                     Point lineStart = new Point(firstLineX, rect.y);
                     Point lineEnd = new Point(firstLineX, rect.y + rect.height);
@@ -676,7 +685,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (int x = rect.x; x < rect.x + rect.width; x++) {
             for (int y = rect.y; y < rect.y + rect.height; y++) {
                 double[] pixel = image.get(y, x);
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                if (pixel[0] == 0) {
                     secondLineX = x;
                     Point lineStart = new Point(secondLineX, rect.y);
                     Point lineEnd = new Point(secondLineX, rect.y + rect.height);
@@ -699,7 +708,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             for (int y = guideline3Rect.y; y > guideline3Rect.height; y++) {
                 for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Rect.width; x++) {
                     double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    if (pixel[0] == 0) {
                         pixel1Found = true;
                         thirdLineY = y;
                         Point lineStart = new Point(guideline3Rect.x, thirdLineY);
@@ -731,7 +740,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             for (int y = guideline4Rect.y + guideline4Rect.height; y > guideline4Rect.y; y--) {
                 for (int x = guideline4Rect.x; x < guideline4Rect.x + guideline4Rect.width; x++) {
                     double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    if (pixel[0] == 0) {
                         pixel2Found = true;
                         fourthLineY = y;
                         Point lineStart = new Point(guideline4Rect.x, fourthLineY);
@@ -788,15 +797,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
          */
     }
 
-    private void analyzeAndLabelSubQuadrant(Mat coloredBinaryImage, Rect subQuadrant, Scalar textColor) {
+    private void analyzeAndLabelSubQuadrant(Mat binaryImage, Rect subQuadrant, Scalar textColor) {
         int blackPixelCount = 0;
 
         // iterate through each pixel
         for (int y = subQuadrant.y; y < (subQuadrant.y + subQuadrant.height); y++) {
             for (int x = subQuadrant.x; x < (subQuadrant.x + subQuadrant.width); x++) {
-                double[] pixel = coloredBinaryImage.get(y, x);
+                double[] pixel = binaryImage.get(y, x);
                 // check if pixel is black
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                if (pixel[0] == 0) {
                     blackPixelCount++;
                 }
             }
@@ -804,7 +813,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // label count of black pixels on the image near the subquadrant
         String label = String.valueOf(blackPixelCount);
         Point labelPoint = new Point(subQuadrant.x + 5, subQuadrant.y + 20); // Adjust as needed for positioning
-        Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, textColor, 1);
+        Imgproc.putText(binaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, textColor, 1);
     }
 
     private List<Rect> filterContainedRectangles(List<Rect> rects) {
@@ -818,6 +827,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 }
             }
             if (!isContained) {
+                System.out.println("rectangle was added to filterContainedRectangles list");
                 filteredRects.add(rect1);
             }
         }
