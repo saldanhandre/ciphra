@@ -613,18 +613,18 @@ public class ImageDisplayActivity extends AppCompatActivity {
         subQuadrantHeight = ((rect.y + rect.height) - thirdLineY) / 3;
         subQuadrantWidth = (secondLineX - firstLineX) / 3;
 
-        Rect subQuadrantUnits3 = new Rect(firstLineX, thirdLineY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
-        Imgproc.rectangle(image, subQuadrantUnits3.tl(), subQuadrantUnits3.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantUnits1 = new Rect(firstLineX, thirdLineY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
+        Imgproc.rectangle(image, subQuadrantUnits1.tl(), subQuadrantUnits1.br(), new Scalar(255, 0, 0), 2);
         Rect subQuadrantUnits2 = new Rect(firstLineX + subQuadrantWidth, thirdLineY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
         Imgproc.rectangle(image, subQuadrantUnits2.tl(), subQuadrantUnits2.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrantUnits1 = new Rect(firstLineX + 2*subQuadrantWidth, thirdLineY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
-        Imgproc.rectangle(image, subQuadrantUnits1.tl(), subQuadrantUnits1.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrantUnits6 = new Rect(firstLineX, thirdLineY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
-        Imgproc.rectangle(image, subQuadrantUnits6.tl(), subQuadrantUnits6.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantUnits3 = new Rect(firstLineX + 2*subQuadrantWidth, thirdLineY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
+        Imgproc.rectangle(image, subQuadrantUnits3.tl(), subQuadrantUnits3.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantUnits4 = new Rect(firstLineX, thirdLineY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
+        Imgproc.rectangle(image, subQuadrantUnits4.tl(), subQuadrantUnits4.br(), new Scalar(255, 0, 0), 2);
         Rect subQuadrantUnits5 = new Rect(firstLineX + subQuadrantWidth, thirdLineY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
         Imgproc.rectangle(image, subQuadrantUnits5.tl(), subQuadrantUnits5.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrantUnits4 = new Rect(firstLineX + 2*subQuadrantWidth, thirdLineY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
-        Imgproc.rectangle(image, subQuadrantUnits4.tl(), subQuadrantUnits4.br(), new Scalar(255, 0, 0), 2);
+        Rect subQuadrantUnits6 = new Rect(firstLineX + 2*subQuadrantWidth, thirdLineY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
+        Imgproc.rectangle(image, subQuadrantUnits6.tl(), subQuadrantUnits6.br(), new Scalar(255, 0, 0), 2);
         Rect subQuadrantUnits7 = new Rect(firstLineX, thirdLineY, subQuadrantWidth, subQuadrantHeight);
         Imgproc.rectangle(image, subQuadrantUnits7.tl(), subQuadrantUnits7.br(), new Scalar(255, 0, 0), 2);
         Rect subQuadrantUnits8 = new Rect(firstLineX + subQuadrantWidth, thirdLineY, subQuadrantWidth, subQuadrantHeight);
