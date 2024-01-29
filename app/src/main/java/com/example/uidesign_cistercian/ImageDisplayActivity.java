@@ -188,7 +188,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Rectangle is taller than wide, divide top and bottom
         Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
         Point divisionPoint2 = new Point(rect.x + rect.width / 2, rect.y + rect.height);
-        Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
+//        Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
 
         // Create and draw smaller rectangle within the top half
         int quadrantHeight = 4 * (rect.height / 10);
@@ -244,7 +244,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     firstLineX = x + (guideline1Rect.width / 35);
                     Point lineStart = new Point(firstLineX, rect.y);
                     Point lineEnd = new Point(firstLineX, rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
+//                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
                     firstLineDrawn = true;
                     break;
                 }
@@ -261,7 +261,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     secondLineX = x;
                     Point lineStart = new Point(secondLineX, rect.y);
                     Point lineEnd = new Point(secondLineX, rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
+//                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
                     break;
                 }
             }
@@ -285,7 +285,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         thirdLineY = y;
                         Point lineStart = new Point(guideline3Rect.x, thirdLineY);
                         Point lineEnd = new Point(guideline3Rect.x + guideline3Rect.width, thirdLineY);
-                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+//                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
                         break;
                     }
                 }
@@ -296,7 +296,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 thirdLineY = guideline3Rect.y + guideline3Rect.height;
                 Point lineStart = new Point(guideline3Rect.x, thirdLineY);
                 Point lineEnd = new Point(guideline3Rect.x + guideline3Rect.width, thirdLineY);
-                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+//                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
             }
         }
 
@@ -323,6 +323,16 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.rectangle(image, subQuadrantUnits8.tl(), subQuadrantUnits8.br(), new Scalar(255, 0, 0), 2);
         Rect subQuadrantUnits9 = new Rect(firstLineX + 2*subQuadrantWidth, rect.y + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
         Imgproc.rectangle(image, subQuadrantUnits9.tl(), subQuadrantUnits9.br(), new Scalar(255, 0, 0), 2);
+
+        analyzeAndLabelSubQuadrant(image, subQuadrantUnits1, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(image, subQuadrantUnits2, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(image, subQuadrantUnits3, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(image, subQuadrantUnits4, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(image, subQuadrantUnits5, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(image, subQuadrantUnits6, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(image, subQuadrantUnits7, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(image, subQuadrantUnits8, new Scalar(0, 0, 255));
+        analyzeAndLabelSubQuadrant(image, subQuadrantUnits9, new Scalar(0, 0, 255));
     }
 
     private void resizingTens(Mat image, Rect rect) {
@@ -347,7 +357,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     firstLineX = x - (guideline1Rect.width / 35);
                     Point lineStart = new Point(firstLineX, rect.y);
                     Point lineEnd = new Point(firstLineX, rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
+//                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
                     firstLineDrawn = true;
                     break;
                 }
@@ -364,7 +374,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     secondLineX = x;
                     Point lineStart = new Point(secondLineX, rect.y);
                     Point lineEnd = new Point(secondLineX, rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
+//                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
                     break;
                 }
             }
@@ -388,7 +398,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         thirdLineY = y;
                         Point lineStart = new Point(guideline3Rect.x, thirdLineY);
                         Point lineEnd = new Point(guideline3Rect.x + guideline3Rect.width, thirdLineY);
-                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+//                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
                         break;
                     }
                 }
@@ -399,7 +409,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 thirdLineY = guideline3Rect.y + guideline3Rect.height;
                 Point lineStart = new Point(guideline3Rect.x, thirdLineY);
                 Point lineEnd = new Point(guideline3Rect.x + guideline3Rect.width, thirdLineY);
-                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+//                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
             }
         }
 
@@ -449,7 +459,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     firstLineX = x + (guideline1Rect.width / 35);
                     Point lineStart = new Point(firstLineX, rect.y);
                     Point lineEnd = new Point(firstLineX, rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
+//                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
                     firstLineDrawn = true;
                     break;
                 }
@@ -466,7 +476,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     secondLineX = x;
                     Point lineStart = new Point(secondLineX, rect.y);
                     Point lineEnd = new Point(secondLineX, rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
+//                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
                     break;
                 }
             }
@@ -490,7 +500,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         thirdLineY = y;
                         Point lineStart = new Point(guideline3Rect.x, thirdLineY);
                         Point lineEnd = new Point(guideline3Rect.x + guideline3Rect.width, thirdLineY);
-                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+//                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
                         break;
                     }
                 }
@@ -501,7 +511,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 thirdLineY = guideline3Rect.y;
                 Point lineStart = new Point(guideline3Rect.x, thirdLineY);
                 Point lineEnd = new Point(guideline3Rect.x + guideline3Rect.width, thirdLineY);
-                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+//                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
             }
         }
 
@@ -551,7 +561,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     firstLineX = x - (guideline1Rect.width / 35);
                     Point lineStart = new Point(firstLineX, rect.y);
                     Point lineEnd = new Point(firstLineX, rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
+//                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
                     firstLineDrawn = true;
                     break;
                 }
@@ -568,7 +578,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     secondLineX = x;
                     Point lineStart = new Point(secondLineX, rect.y);
                     Point lineEnd = new Point(secondLineX, rect.y + rect.height);
-                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
+//                    Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
                     break;
                 }
             }
@@ -588,12 +598,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Rect.width; x++) {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        System.out.println("pixel foi encontrado");
                         pixelFound = true;
                         thirdLineY = y;
                         Point lineStart = new Point(guideline3Rect.x, thirdLineY);
                         Point lineEnd = new Point(guideline3Rect.x + guideline3Rect.width, thirdLineY);
-                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+//                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
                         break;
                     }
                 }
@@ -601,11 +610,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     break; // Exit the outer loop as well after "drawing" the second line
             }
             if (!pixelFound) {
-                System.out.println("pixel não encontrado");
                 thirdLineY = guideline3Rect.y;
                 Point lineStart = new Point(guideline3Rect.x, thirdLineY);
                 Point lineEnd = new Point(guideline3Rect.x + guideline3Rect.width, thirdLineY);
-                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+//                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
             }
         }
 
@@ -633,87 +641,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.rectangle(image, subQuadrantUnits9.tl(), subQuadrantUnits9.br(), new Scalar(255, 0, 0), 2);
     }
 
-
-
-
-
-    private void drawSubQuadrantsUnits(Mat coloredBinaryImage, Rect quadrant) {
-        int subRectWidth = quadrant.width / 2;
-        int subRectHeight = quadrant.height / 2;
-
-        Rect subQuadrantUnits1 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantUnits1.tl(), subQuadrantUnits1.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrantUnits2 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantUnits2.tl(), subQuadrantUnits2.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrantUnits3 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantUnits3.tl(), subQuadrantUnits3.br(), new Scalar(255, 0, 0), 2);
-        Rect subQuadrantUnits4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantUnits4.tl(), subQuadrantUnits4.br(), new Scalar(255, 0, 0), 2);
-
-
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits1, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits2, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits3, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantUnits4, new Scalar(0, 0, 255));
-    }
-
-    private void drawSubQuadrantsTens(Mat coloredBinaryImage, Rect quadrant) {
-        int subRectWidth = quadrant.width / 3;
-        int subRectHeight = quadrant.height / 3;
-
-        Rect subQuadrantTens1 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantTens1.tl(), subQuadrantTens1.br(), new Scalar(0, 255, 255), 2);
-        Rect subQuadrantTens2 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantTens2.tl(), subQuadrantTens2.br(), new Scalar(0, 255, 255), 2);
-        Rect subQuadrantTens3 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantTens3.tl(), subQuadrantTens3.br(), new Scalar(0, 255, 255), 2);
-        Rect subQuadrantTens4 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantTens4.tl(), subQuadrantTens4.br(), new Scalar(0, 255, 255), 2);
-
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens1, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens2, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens3, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantTens4, new Scalar(0, 0, 255));
-    }
-
-    private void drawSubQuadrantsHundreds(Mat coloredBinaryImage, Rect quadrant) {
-        int subRectWidth = quadrant.width / 2;
-        int subRectHeight = quadrant.height / 2;
-
-        Rect subQuadrantHundreds1 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantHundreds1.tl(), subQuadrantHundreds1.br(), new Scalar(255,255, 0), 2);
-        Rect subQuadrantHundreds2 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantHundreds2.tl(), subQuadrantHundreds2.br(), new Scalar(255,255, 0), 2);
-        Rect subQuadrantHundreds3 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantHundreds3.tl(), subQuadrantHundreds3.br(), new Scalar(255,255, 0), 2);
-        Rect subQuadrantHundreds4 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantHundreds4.tl(), subQuadrantHundreds4.br(), new Scalar(255,255, 0), 2);
-
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds1, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds2, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds3, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantHundreds4, new Scalar(0, 0, 255));
-    }
-
-    private void drawSubQuadrantsThousands(Mat coloredBinaryImage, Rect quadrant) {
-        int subRectWidth = quadrant.width / 2;
-        int subRectHeight = quadrant.height / 2;
-
-        Rect subQuadrantThousands1 = new Rect(quadrant.x + subRectWidth, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantThousands1.tl(), subQuadrantThousands1.br(), new Scalar(255, 0, 255), 2);
-        Rect subQuadrantThousands2 = new Rect(quadrant.x, quadrant.y, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantThousands2.tl(), subQuadrantThousands2.br(), new Scalar(255, 0, 255), 2);
-        Rect subQuadrantThousands3 = new Rect(quadrant.x + subRectWidth, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantThousands3.tl(), subQuadrantThousands3.br(), new Scalar(255, 0, 255), 2);
-        Rect subQuadrantThousands4 = new Rect(quadrant.x, quadrant.y + subRectHeight, subRectWidth, subRectHeight);
-        Imgproc.rectangle(coloredBinaryImage, subQuadrantThousands4.tl(), subQuadrantThousands4.br(), new Scalar(255, 0, 255), 2);
-
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantThousands1, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantThousands2, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantThousands3, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(coloredBinaryImage, subQuadrantThousands4, new Scalar(0, 0, 255));
-    }
-
     private void analyzeAndLabelSubQuadrant(Mat coloredBinaryImage, Rect subQuadrant, Scalar textColor) {
         int blackPixelCount = 0;
 
@@ -730,7 +657,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // label count of black pixels on the image near the subquadrant
         String label = String.valueOf(blackPixelCount);
         Point labelPoint = new Point(subQuadrant.x + 5, subQuadrant.y + 20); // Adjust as needed for positioning
-        Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 1, textColor, 1);
+        Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, textColor, 1);
     }
 
     private List<Rect> filterContainedRectangles(List<Rect> rects) {
