@@ -676,31 +676,4 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
         return filteredRects;
     }
-
-
-    private void detectCorners(Mat image, MatOfPoint2f contour) {
-
-        int maxCorners = 12; // Maximum number of corners to detect
-        double qualityLevel = 0.10; // Quality level for corner detection
-        double minDistance = 10; // Minimum distance between corners
-
-        MatOfPoint corners = new MatOfPoint();
-
-        // Convert the contour Mat to an 8-bit single channel, as required by goodFeaturesToTrack
-        Mat mask = new Mat(image.size(), CvType.CV_8UC1, new Scalar(0));
-        MatOfPoint intContour = new MatOfPoint(contour.toArray());
-        Imgproc.fillPoly(mask, Arrays.asList(intContour), new Scalar(255));
-
-        // Detect corners
-        Imgproc.goodFeaturesToTrack(mask, corners, maxCorners, qualityLevel, minDistance, new Mat(), 3, true, 0.04);
-
-        // Convert corners MatOfPoint to List<Point> for drawing
-        List<Point> cornerPoints = corners.toList();
-        // Draw circles on each corner
-        for (Point corner : cornerPoints) {
-            Imgproc.circle(image, corner, 5, new Scalar(255, 0, 0), -1); // Red color for corners
-        }
-    }
-
-
 }
