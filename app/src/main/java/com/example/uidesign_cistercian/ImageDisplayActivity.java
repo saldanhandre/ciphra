@@ -228,6 +228,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int leftLimitX = -1, rightLimitX = -1, bottomLimitY = -1, topLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
+        List<Rect> subQuadrants = new ArrayList<>();
 
 
         // Guideline Rectangle 1, to find leftLimitX
@@ -374,8 +375,18 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantUnits8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantUnits9 = new Rect(leftLimitX + 2 * subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
 
-            drawSubQuadrants(image, subQuadrantUnits1, subQuadrantUnits2, subQuadrantUnits3, subQuadrantUnits4, subQuadrantUnits5, subQuadrantUnits6, subQuadrantUnits7, subQuadrantUnits8, subQuadrantUnits9);
-            labelSubQuadrants(image, subQuadrantUnits1, subQuadrantUnits2, subQuadrantUnits3, subQuadrantUnits4, subQuadrantUnits5, subQuadrantUnits6, subQuadrantUnits7, subQuadrantUnits8, subQuadrantUnits9);
+            subQuadrants.add(subQuadrantUnits1);
+            subQuadrants.add(subQuadrantUnits2);
+            subQuadrants.add(subQuadrantUnits3);
+            subQuadrants.add(subQuadrantUnits4);
+            subQuadrants.add(subQuadrantUnits5);
+            subQuadrants.add(subQuadrantUnits6);
+            subQuadrants.add(subQuadrantUnits7);
+            subQuadrants.add(subQuadrantUnits8);
+            subQuadrants.add(subQuadrantUnits9);
+
+            drawSubQuadrants(image, subQuadrants);
+            labelSubQuadrants(image, subQuadrants);
         }
     }
 
@@ -387,6 +398,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int rightLimitX = -1, leftLimitX = -1, bottomLimitY = -1, topLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
+        List<Rect> subQuadrants = new ArrayList<>();
 
 
         // Guideline Rectangle 1, to find rightLimitX
@@ -532,8 +544,18 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantTens8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantTens9 = new Rect(leftLimitX, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
 
-            drawSubQuadrants(image, subQuadrantTens1, subQuadrantTens2, subQuadrantTens3, subQuadrantTens4, subQuadrantTens5, subQuadrantTens6, subQuadrantTens7, subQuadrantTens8, subQuadrantTens9);
-            labelSubQuadrants(image, subQuadrantTens1, subQuadrantTens2, subQuadrantTens3, subQuadrantTens4, subQuadrantTens5, subQuadrantTens6, subQuadrantTens7, subQuadrantTens8, subQuadrantTens9);
+            subQuadrants.add(subQuadrantTens1);
+            subQuadrants.add(subQuadrantTens2);
+            subQuadrants.add(subQuadrantTens3);
+            subQuadrants.add(subQuadrantTens4);
+            subQuadrants.add(subQuadrantTens5);
+            subQuadrants.add(subQuadrantTens6);
+            subQuadrants.add(subQuadrantTens7);
+            subQuadrants.add(subQuadrantTens8);
+            subQuadrants.add(subQuadrantTens9);
+
+            drawSubQuadrants(image, subQuadrants);
+            labelSubQuadrants(image, subQuadrants);
         }
     }
 
@@ -545,6 +567,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int leftLimitX = -1, rightLimitX = -1, topLimitY = -1, bottomLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
+        List<Rect> subQuadrants = new ArrayList<>();
 
 
         // Guideline Rectangle 1, to find leftLimitX
@@ -689,8 +712,18 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantHundreds8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantHundreds9 = new Rect(leftLimitX + 2 * subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
 
-            drawSubQuadrants(image, subQuadrantHundreds1, subQuadrantHundreds2, subQuadrantHundreds3, subQuadrantHundreds4, subQuadrantHundreds5, subQuadrantHundreds6, subQuadrantHundreds7, subQuadrantHundreds8, subQuadrantHundreds9);
-            labelSubQuadrants(image, subQuadrantHundreds1, subQuadrantHundreds2, subQuadrantHundreds3, subQuadrantHundreds4, subQuadrantHundreds5, subQuadrantHundreds6, subQuadrantHundreds7, subQuadrantHundreds8, subQuadrantHundreds9);
+            subQuadrants.add(subQuadrantHundreds1);
+            subQuadrants.add(subQuadrantHundreds2);
+            subQuadrants.add(subQuadrantHundreds3);
+            subQuadrants.add(subQuadrantHundreds4);
+            subQuadrants.add(subQuadrantHundreds5);
+            subQuadrants.add(subQuadrantHundreds6);
+            subQuadrants.add(subQuadrantHundreds7);
+            subQuadrants.add(subQuadrantHundreds8);
+            subQuadrants.add(subQuadrantHundreds9);
+
+            drawSubQuadrants(image, subQuadrants);
+            labelSubQuadrants(image, subQuadrants);
         }
     }
 
@@ -702,6 +735,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int leftLimitX = -1, rightLimitX = -1, bottomLimitY = -1, topLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
+        List<Rect> subQuadrants = new ArrayList<>();
 
         // Guideline Rectangle 1, to find rightLimitX
         int guideline1Width = rect.width / 2;
@@ -845,35 +879,33 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantThousands8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantThousands9 = new Rect(leftLimitX, topLimitY, subQuadrantWidth, subQuadrantHeight);
 
-            drawSubQuadrants(image, subQuadrantThousands1, subQuadrantThousands2, subQuadrantThousands3, subQuadrantThousands4, subQuadrantThousands5, subQuadrantThousands6, subQuadrantThousands7, subQuadrantThousands8, subQuadrantThousands9);
-            labelSubQuadrants(image, subQuadrantThousands1, subQuadrantThousands2, subQuadrantThousands3, subQuadrantThousands4, subQuadrantThousands5, subQuadrantThousands6, subQuadrantThousands7, subQuadrantThousands8, subQuadrantThousands9);
+            subQuadrants.add(subQuadrantThousands1);
+            subQuadrants.add(subQuadrantThousands2);
+            subQuadrants.add(subQuadrantThousands3);
+            subQuadrants.add(subQuadrantThousands4);
+            subQuadrants.add(subQuadrantThousands5);
+            subQuadrants.add(subQuadrantThousands6);
+            subQuadrants.add(subQuadrantThousands7);
+            subQuadrants.add(subQuadrantThousands8);
+            subQuadrants.add(subQuadrantThousands9);
+
+            drawSubQuadrants(image, subQuadrants);
+            labelSubQuadrants(image, subQuadrants);
         }
     }
 
 // *******************************************************************************************************************
 
-    private void drawSubQuadrants(Mat image, Rect r1, Rect r2, Rect r3, Rect r4, Rect r5, Rect r6, Rect r7, Rect r8, Rect r9) {
-        Imgproc.rectangle(image, r1.tl(), r1.br(), new Scalar(255, 0, 0), 2);
-        Imgproc.rectangle(image, r2.tl(), r2.br(), new Scalar(255, 0, 0), 2);
-        Imgproc.rectangle(image, r3.tl(), r3.br(), new Scalar(255, 0, 0), 2);
-        Imgproc.rectangle(image, r4.tl(), r4.br(), new Scalar(255, 0, 0), 2);
-        Imgproc.rectangle(image, r5.tl(), r5.br(), new Scalar(255, 0, 0), 2);
-        Imgproc.rectangle(image, r6.tl(), r6.br(), new Scalar(255, 0, 0), 2);
-        Imgproc.rectangle(image, r7.tl(), r7.br(), new Scalar(255, 0, 0), 2);
-        Imgproc.rectangle(image, r8.tl(), r8.br(), new Scalar(255, 0, 0), 2);
-        Imgproc.rectangle(image, r9.tl(), r9.br(), new Scalar(255, 0, 0), 2);
+    private void drawSubQuadrants(Mat image, List<Rect> subQuadrants) {
+        for(Rect subQuadrant : subQuadrants) {
+            Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(255, 0, 0), 2);
+        }
     }
 
-    private void labelSubQuadrants(Mat image, Rect r1, Rect r2, Rect r3, Rect r4, Rect r5, Rect r6, Rect r7, Rect r8, Rect r9) {
-        labelSubQuadrant(image, r1, new Scalar(0, 0, 255));
-        labelSubQuadrant(image, r2, new Scalar(0, 0, 255));
-        labelSubQuadrant(image, r3, new Scalar(0, 0, 255));
-        labelSubQuadrant(image, r4, new Scalar(0, 0, 255));
-        labelSubQuadrant(image, r5, new Scalar(0, 0, 255));
-        labelSubQuadrant(image, r6, new Scalar(0, 0, 255));
-        labelSubQuadrant(image, r7, new Scalar(0, 0, 255));
-        labelSubQuadrant(image, r8, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(image, r9, new Scalar(0, 0, 255));
+    private void labelSubQuadrants(Mat image, List<Rect> subQuadrants) {
+        for(Rect subQuadrant : subQuadrants) {
+            labelSubQuadrant(image, subQuadrant, new Scalar(0, 0, 255));
+        }
     }
 
     private void labelSubQuadrant(Mat coloredBinaryImage, Rect subQuadrant, Scalar textColor) {
