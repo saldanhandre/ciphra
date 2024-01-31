@@ -166,7 +166,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         // Filter out rectangles that are inside other rectangles
-        List<Rect> filteredRects = filterContainedRectangles(boundingRects, imageHeight);
+        List<Rect> filteredRects = filterRectangles(boundingRects, imageHeight);
         drawQuadrants(coloredBinaryImage, filteredRects);
     }
 
@@ -899,14 +899,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, textColor, 1);
     }
 
-    private List<Rect> filterContainedRectangles(List<Rect> rects, int imageHeight) {
+    private List<Rect> filterRectangles(List<Rect> rects, int imageHeight) {
 
-        // List to hold rectangles that pass the initial size filter
-        List<Rect> sizeFilteredRects = new ArrayList<>();
-        // Threshold for the minimum height of a rectangle
-        double minHeightThreshold = 0.15 * imageHeight;
+        List<Rect> sizeFilteredRects = new ArrayList<>(); // List of rectangles that pass filter 1
+        List<Rect> uniqueFilteredRects = new ArrayList<>(); // List of rectangles that pass filters 1 and 2
+        Set<String> uniqueRectSignatures = new HashSet<>(); // Signatures for filter 2
+        List<Rect> finalFilteredRects = new ArrayList<>(); // Set of rectangles that pass filters 1, 2, and 3
 
-        // First, filter out rectangles that are too small based on their height
+        // Filter 1 - Filter out rectangles that are too small
+        double minHeightThreshold = 0.15 * imageHeight; // Minimum height of a rectangle
         for (Rect rect : rects) {
             if (rect.height >= minHeightThreshold) {
                 sizeFilteredRects.add(rect);
@@ -914,32 +915,23 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
 
-
-
-
-        // List to hold the unique and non-contained rectangles
-        List<Rect> filteredRects = new ArrayList<>();
-        // Set to track the unique signatures of rectangles to filter duplicates
-        Set<String> uniqueRectSignatures = new HashSet<>();
-
-        // First, filter out duplicates based on a unique signature of each rectangle
+        // Filter 2 - Filter out duplicates based on a unique signature of each rectangle
         for (Rect rect : sizeFilteredRects) {
             String signature = rect.tl().toString() + "-" + rect.br().toString(); // Create a unique signature
             if (uniqueRectSignatures.add(signature)) {
                 // If the signature is added successfully, it's not a duplicate
                 System.out.println("rectangle added as not duplicate with height = " + rect.height + " and tl = " + rect.tl() + " and br = " + rect.br());
-                        filteredRects.add(rect);
+                uniqueFilteredRects.add(rect);
             }
         }
 
-        // Now, filter out rectangles that are contained within others
-        List<Rect> finalFilteredRects = new ArrayList<>();
-        for (int i = 0; i < filteredRects.size(); i++) {
-            Rect rect1 = filteredRects.get(i);
+        // Filter 3 - Filter out rectangles that are contained within others
+        for (int i = 0; i < uniqueFilteredRects.size(); i++) {
+            Rect rect1 = uniqueFilteredRects.get(i);
             boolean isContained = false;
-            for (int j = 0; j < filteredRects.size(); j++) {
+            for (int j = 0; j < uniqueFilteredRects.size(); j++) {
                 if (i == j) continue; // Skip comparing the rectangle with itself
-                Rect rect2 = filteredRects.get(j);
+                Rect rect2 = uniqueFilteredRects.get(j);
 
                 if (rect2.contains(rect1.tl()) && rect2.contains(rect1.br())) {
                     // If rect1 is fully contained within rect2
