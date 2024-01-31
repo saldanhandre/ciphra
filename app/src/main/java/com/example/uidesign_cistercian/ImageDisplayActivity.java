@@ -222,26 +222,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 // *******************************************************************************************************************
 
-    // SubQuadrant class
-    private static class SubQuadrant {
-        Rect rect;
-        double blackPixelPercentage;
-
-        SubQuadrant(Rect rect, double blackPixelPercentage) {
-            this.rect = rect;
-            this.blackPixelPercentage = blackPixelPercentage;
-        }
-
-        public Rect getRect() {
-            return rect;
-        }
-
-        public double getBlackPixelPercentage() {
-            return blackPixelPercentage;
-        }
-    }
-// *******************************************************************************************************************
-
     private void resizingUnits(Mat image, Rect rect) {
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
@@ -263,7 +243,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                         pixel1Found = true;
-                        leftLimitX = x + (guideline1Rect.width / 35);
+                        leftLimitX = x + (guideline1Rect.width / 30);
                         Point lineStart = new Point(leftLimitX, rect.y);
                         Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
                         //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
@@ -433,7 +413,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                         pixel1Found = true;
-                        rightLimitX = x - (guideline1Rect.width / 35);
+                        rightLimitX = x - (guideline1Rect.width / 30);
                         Point lineStart = new Point(rightLimitX, rect.y);
                         Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
                         //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
@@ -602,7 +582,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                         pixel1Found = true;
-                        leftLimitX = x + (guideline1Rect.width / 35);
+                        leftLimitX = x + (guideline1Rect.width / 30);
                         Point lineStart = new Point(leftLimitX, rect.y);
                         Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
                         //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
@@ -769,7 +749,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                         pixel1Found = true;
-                        rightLimitX = x - (guideline1Rect.width / 35);
+                        rightLimitX = x - (guideline1Rect.width / 30);
                         Point lineStart = new Point(rightLimitX, rect.y);
                         Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
                         //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
@@ -923,12 +903,27 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
     private void labelSubQuadrants(Mat image, List<Rect> subQuadrants) {
+        List<Double> percentages = new ArrayList<>();
         for(Rect subQuadrant : subQuadrants) {
-            labelSubQuadrant(image, subQuadrant, new Scalar(0, 0, 255));
+            double percentage = calculateBlackPixelPercentage(image, subQuadrant);
+            percentages.add(percentage);
+        }
+        // Finding the guide value
+        double guideValue = Collections.max(percentages);
+
+        // Flagging subQuadrants within 5% of the guide value
+        for (int i = 0; i < subQuadrants.size(); i++) {
+            Rect subQuadrant = subQuadrants.get(i);
+            double percentage = percentages.get(i);
+
+            // Check if the percentage is within 5% of the guide value
+            if (Math.abs(percentage - guideValue) <= 12) {
+                Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(0, 255, 0), 2); // Using green for highlighting
+            }
         }
     }
 
-    private void labelSubQuadrant(Mat coloredBinaryImage, Rect subQuadrant, Scalar textColor) {
+    private double calculateBlackPixelPercentage(Mat coloredBinaryImage, Rect subQuadrant) {
         int blackPixelCount = 0;
         int totalPixels = subQuadrant.width * subQuadrant.height;
 
@@ -942,13 +937,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 }
             }
         }
-        // Calculate the percentage of black pixels
-        double blackPixelPercentage = (double) blackPixelCount / totalPixels * 100;
 
+        double blackPixelPercentage = (double) blackPixelCount / totalPixels * 100;
         // label percentage of black pixels on the image near the subQuadrant
         String label = String.format("%.2f%%", blackPixelPercentage); // Formats the percentage to 2 decimal places
         Point labelPoint = new Point(subQuadrant.x + 5, subQuadrant.y + 20);
-        Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, textColor, 1);
+        Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 255), 1);
+
+        return (double) blackPixelCount / totalPixels * 100;
     }
 
     private List<Rect> filterRectangles(List<Rect> rects, int imageHeight) {
@@ -999,5 +995,26 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         return finalFilteredRects;
+    }
+
+    // *******************************************************************************************************************
+
+    // SubQuadrant class
+    private static class SubQuadrant {
+        Rect rect;
+        double blackPixelPercentage;
+
+        SubQuadrant(Rect rect, double blackPixelPercentage) {
+            this.rect = rect;
+            this.blackPixelPercentage = blackPixelPercentage;
+        }
+
+        public Rect getRect() {
+            return rect;
+        }
+
+        public double getBlackPixelPercentage() {
+            return blackPixelPercentage;
+        }
     }
 }
