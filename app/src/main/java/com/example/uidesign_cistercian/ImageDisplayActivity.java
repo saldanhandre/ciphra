@@ -865,18 +865,18 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
     private void labelSubQuadrants(Mat image, Rect r1, Rect r2, Rect r3, Rect r4, Rect r5, Rect r6, Rect r7, Rect r8, Rect r9) {
-        analyzeAndLabelSubQuadrant(image, r1, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(image, r2, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(image, r3, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(image, r4, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(image, r5, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(image, r6, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(image, r7, new Scalar(0, 0, 255));
-        analyzeAndLabelSubQuadrant(image, r8, new Scalar(0, 0, 255));
+        labelSubQuadrant(image, r1, new Scalar(0, 0, 255));
+        labelSubQuadrant(image, r2, new Scalar(0, 0, 255));
+        labelSubQuadrant(image, r3, new Scalar(0, 0, 255));
+        labelSubQuadrant(image, r4, new Scalar(0, 0, 255));
+        labelSubQuadrant(image, r5, new Scalar(0, 0, 255));
+        labelSubQuadrant(image, r6, new Scalar(0, 0, 255));
+        labelSubQuadrant(image, r7, new Scalar(0, 0, 255));
+        labelSubQuadrant(image, r8, new Scalar(0, 0, 255));
         analyzeAndLabelSubQuadrant(image, r9, new Scalar(0, 0, 255));
     }
 
-    private void analyzeAndLabelSubQuadrant(Mat coloredBinaryImage, Rect subQuadrant, Scalar textColor) {
+    private void labelSubQuadrant(Mat coloredBinaryImage, Rect subQuadrant, Scalar textColor) {
         int blackPixelCount = 0;
         int totalPixels = subQuadrant.width * subQuadrant.height;
 
