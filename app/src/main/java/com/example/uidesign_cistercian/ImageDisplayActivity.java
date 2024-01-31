@@ -196,20 +196,21 @@ public class ImageDisplayActivity extends AppCompatActivity {
         //Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
 
         int quadrantHeight = 4 * (rect.height / 10);
+        int quadrantWidth = rect.width / 2;
 
-        Rect quadrantUnits = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, quadrantHeight);
+        Rect quadrantUnits = new Rect(rect.x + quadrantWidth, rect.y, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
         resizingUnits(coloredBinaryImage, quadrantUnits);
 
-        Rect quadrantTens = new Rect(rect.x, rect.y, rect.width / 2, quadrantHeight);
+        Rect quadrantTens = new Rect(rect.x, rect.y, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
         resizingTens(coloredBinaryImage, quadrantTens);
 
-        Rect quadrantHundreds = new Rect(rect.x + rect.width / 2, rect.y + rect.height - quadrantHeight, rect.width / 2, quadrantHeight);
+        Rect quadrantHundreds = new Rect(rect.x + quadrantWidth, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
         Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
         resizingHundreds(coloredBinaryImage, quadrantHundreds);
 
-        Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, rect.width / 2, quadrantHeight);
+        Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
         Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
         resizingThousands(coloredBinaryImage, quadrantThousands);
     }
@@ -369,7 +370,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantUnits9 = new Rect(leftLimitX + 2 * subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
 
             //drawSubQuadrants(image, subQuadrantUnits1, subQuadrantUnits2, subQuadrantUnits3, subQuadrantUnits4, subQuadrantUnits5, subQuadrantUnits6, subQuadrantUnits7, subQuadrantUnits8, subQuadrantUnits9);
-            //analyzeAndLabelSubQuadrants(image, subQuadrantUnits1, subQuadrantUnits2, subQuadrantUnits3, subQuadrantUnits4, subQuadrantUnits5, subQuadrantUnits6, subQuadrantUnits7, subQuadrantUnits8, subQuadrantUnits9);
+            //labelSubQuadrants(image, subQuadrantUnits1, subQuadrantUnits2, subQuadrantUnits3, subQuadrantUnits4, subQuadrantUnits5, subQuadrantUnits6, subQuadrantUnits7, subQuadrantUnits8, subQuadrantUnits9);
         }
     }
 
@@ -526,7 +527,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantTens9 = new Rect(leftLimitX, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
 
             //drawSubQuadrants(image, subQuadrantTens1, subQuadrantTens2, subQuadrantTens3, subQuadrantTens4, subQuadrantTens5, subQuadrantTens6, subQuadrantTens7, subQuadrantTens8, subQuadrantTens9);
-            //analyzeAndLabelSubQuadrants(image, subQuadrantTens1, subQuadrantTens2, subQuadrantTens3, subQuadrantTens4, subQuadrantTens5, subQuadrantTens6, subQuadrantTens7, subQuadrantTens8, subQuadrantTens9);
+            //labelSubQuadrants(image, subQuadrantTens1, subQuadrantTens2, subQuadrantTens3, subQuadrantTens4, subQuadrantTens5, subQuadrantTens6, subQuadrantTens7, subQuadrantTens8, subQuadrantTens9);
         }
     }
 
@@ -601,7 +602,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
 
-        /*
+/*
+
+
 
         // Guideline Rectangle 3, to find topLimitX
         int guideline3Width = rightLimitX - leftLimitX;
@@ -634,7 +637,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
             }
         }
-        */
+
+     */
+
 
 
 
@@ -649,13 +654,16 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         if (guideline3Rect != null) {
-            for (int y = guideline3Rect.y; y < guideline3Height; y++) {
+            for (int y = guideline3Rect.y; y < guideline3Rect.y + guideline3Height; y++) {
                 for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Width; x++) {
                     double[] pixel = image.get(y, x);
-                    if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255) {
+                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
                         System.out.println("FOUNDDD");
                         pixel3Found = true;
                         topLimitY = y;
+                        Point lineStart = new Point(guideline3Rect.x, topLimitY);
+                        Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
+                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
                         break;
                     }
                 }
@@ -665,9 +673,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 System.out.println("NOT FOUNDDD");
                 topLimitY = guideline3Rect.y;
             }
-            Point lineStart = new Point(guideline3Rect.x, topLimitY);
-            Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
-            Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
         }
 
         /*
@@ -725,7 +730,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantHundreds9 = new Rect(leftLimitX + 2 * subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
 
             //drawSubQuadrants(image, subQuadrantHundreds1, subQuadrantHundreds2, subQuadrantHundreds3, subQuadrantHundreds4, subQuadrantHundreds5, subQuadrantHundreds6, subQuadrantHundreds7, subQuadrantHundreds8, subQuadrantHundreds9);
-            //analyzeAndLabelSubQuadrants(image, subQuadrantHundreds1, subQuadrantHundreds2, subQuadrantHundreds3, subQuadrantHundreds4, subQuadrantHundreds5, subQuadrantHundreds6, subQuadrantHundreds7, subQuadrantHundreds8, subQuadrantHundreds9);
+            //labelSubQuadrants(image, subQuadrantHundreds1, subQuadrantHundreds2, subQuadrantHundreds3, subQuadrantHundreds4, subQuadrantHundreds5, subQuadrantHundreds6, subQuadrantHundreds7, subQuadrantHundreds8, subQuadrantHundreds9);
         }
     }
 
@@ -863,7 +868,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantThousands9 = new Rect(secondLineX, thirdLineY, subQuadrantWidth, subQuadrantHeight);
 
             //drawSubQuadrants(image, subQuadrantThousands1, subQuadrantThousands2, subQuadrantThousands3, subQuadrantThousands4, subQuadrantThousands5, subQuadrantThousands6, subQuadrantThousands7, subQuadrantThousands8, subQuadrantThousands9);
-            //analyzeAndLabelSubQuadrants((image, subQuadrantThousands1, subQuadrantThousands2, subQuadrantThousands3, subQuadrantThousands4, subQuadrantThousands5, subQuadrantThousands6, subQuadrantThousands7, subQuadrantThousands8, subQuadrantThousands9);
+            //labelSubQuadrants((image, subQuadrantThousands1, subQuadrantThousands2, subQuadrantThousands3, subQuadrantThousands4, subQuadrantThousands5, subQuadrantThousands6, subQuadrantThousands7, subQuadrantThousands8, subQuadrantThousands9);
         }
     }
 
@@ -884,7 +889,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.rectangle(image, r9.tl(), r9.br(), new Scalar(255, 0, 0), 2);
     }
 
-    private void analyzeAndLabelSubQuadrants(Mat image, Rect r1, Rect r2, Rect r3, Rect r4, Rect r5, Rect r6, Rect r7, Rect r8, Rect r9) {
+    private void labelSubQuadrants(Mat image, Rect r1, Rect r2, Rect r3, Rect r4, Rect r5, Rect r6, Rect r7, Rect r8, Rect r9) {
         analyzeAndLabelSubQuadrant(image, r1, new Scalar(0, 0, 255));
         analyzeAndLabelSubQuadrant(image, r2, new Scalar(0, 0, 255));
         analyzeAndLabelSubQuadrant(image, r3, new Scalar(0, 0, 255));
