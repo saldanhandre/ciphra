@@ -222,6 +222,26 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 // *******************************************************************************************************************
 
+    // SubQuadrant class
+    private static class SubQuadrant {
+        Rect rect;
+        double blackPixelPercentage;
+
+        SubQuadrant(Rect rect, double blackPixelPercentage) {
+            this.rect = rect;
+            this.blackPixelPercentage = blackPixelPercentage;
+        }
+
+        public Rect getRect() {
+            return rect;
+        }
+
+        public double getBlackPixelPercentage() {
+            return blackPixelPercentage;
+        }
+    }
+// *******************************************************************************************************************
+
     private void resizingUnits(Mat image, Rect rect) {
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
@@ -925,7 +945,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Calculate the percentage of black pixels
         double blackPixelPercentage = (double) blackPixelCount / totalPixels * 100;
 
-        // label percentage of black pixels on the image near the subquadrant
+        // label percentage of black pixels on the image near the subQuadrant
         String label = String.format("%.2f%%", blackPixelPercentage); // Formats the percentage to 2 decimal places
         Point labelPoint = new Point(subQuadrant.x + 5, subQuadrant.y + 20);
         Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, textColor, 1);
