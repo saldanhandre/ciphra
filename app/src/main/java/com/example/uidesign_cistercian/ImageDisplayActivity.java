@@ -207,11 +207,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
         resizingTens(coloredBinaryImage, quadrantTens);
 
         Rect quadrantHundreds = new Rect(rect.x + quadrantWidth, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
-        Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
+        //Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
         resizingHundreds(coloredBinaryImage, quadrantHundreds);
 
         Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
-        Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
+        //Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
         resizingThousands(coloredBinaryImage, quadrantThousands);
     }
 
@@ -602,48 +602,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
 
-/*
-
-
-
-        // Guideline Rectangle 3, to find topLimitX
-        int guideline3Width = rightLimitX - leftLimitX;
-        int guideline3Height = 4 * (rect.height / 10);
-        if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline3Rect = new Rect(leftLimitX, rect.y, guideline3Width, guideline3Height);
-            Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
-        }
-
-        if (guideline3Rect != null) {
-            for (int y = guideline3Rect.y; y < guideline3Height; y++) {
-                for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Width; x++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel3Found = true;
-                        topLimitY = y;
-                        Point lineStart = new Point(guideline3Rect.x, topLimitY);
-                        Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
-                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                        break;
-                    }
-                }
-                if (topLimitY != -1)
-                    break; // Exit the outer loop as well after drawing the 4th line
-            }
-            if (!pixel3Found) {
-                topLimitY = guideline3Rect.y;
-                Point lineStart = new Point(guideline3Rect.x, topLimitY);
-                Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
-                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
-
-     */
-
-
-
-
-
 
         // Guideline Rectangle 3, to find topLimitX
         int guideline3Width = rightLimitX - leftLimitX;
@@ -658,60 +616,56 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Width; x++) {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        System.out.println("FOUNDDD");
                         pixel3Found = true;
                         topLimitY = y;
                         Point lineStart = new Point(guideline3Rect.x, topLimitY);
                         Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
-                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
                         break;
                     }
                 }
                 if (topLimitY != -1) break; // Exit the outer loop as well after drawing the 3rd line
             }
             if (!pixel3Found) {
-                System.out.println("NOT FOUNDDD");
                 topLimitY = guideline3Rect.y;
+                Point lineStart = new Point(guideline3Rect.x, topLimitY);
+                Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
+                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
             }
         }
 
-        /*
-        //4th line
-        // Resizing Bottom -> Top
-        // Create guideline rectangle using the lines if both lines were drawn
-        if (leftLimitX != -1 && rightLimitX != -1) {
-            guideline4Rect = new Rect(leftLimitX, rect.y + (6 * (rect.height / 10)), rightLimitX - leftLimitX, 4 * (rect.height / 10));
+
+        // Guideline Rectangle 4, to find bottomLimitX
+        int guideline4Width = rightLimitX - leftLimitX;
+        int guideline4Height = 4 * (rect.height / 10);
+        if (rightLimitX != -1 && leftLimitX != -1) {
+            guideline4Rect = new Rect(leftLimitX, rect.y + rect.height - guideline4Height, guideline4Width, guideline4Height);
             //Imgproc.rectangle(image, guideline4Rect.tl(), guideline4Rect.br(), new Scalar(255, 150, 0), 2);
         }
 
-        // iterate through the rectangle to find the first black pixel from the other side
         if (guideline4Rect != null) {
-            for (int y = guideline4Rect.y + guideline4Rect.height; y > guideline4Rect.y; y--) {
-                for (int x = guideline4Rect.x; x < guideline4Rect.x + guideline4Rect.width; x++) {
+            for (int y = guideline4Rect.y + guideline4Height; y > guideline4Rect.y; y--) {
+                for (int x = guideline4Rect.x; x < guideline4Rect.x + guideline4Width; x++) {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
                         pixel4Found = true;
                         bottomLimitY = y;
                         Point lineStart = new Point(guideline4Rect.x, bottomLimitY);
-                        Point lineEnd = new Point(guideline4Rect.x + guideline4Rect.width, bottomLimitY);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+                        Point lineEnd = new Point(guideline4Rect.x + guideline4Width, bottomLimitY);
+                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
                         break;
                     }
                 }
                 if (bottomLimitY != -1)
-                    break; // Exit the outer loop as well after "drawing" the second line
+                    break; // Exit the outer loop as well after drawing the 4th line
             }
             if (!pixel4Found) {
-                System.out.println("Didnt work");
-                bottomLimitY = guideline4Rect.y + guideline4Rect.height;
+                bottomLimitY = guideline4Rect.y + guideline3Height;
                 Point lineStart = new Point(guideline4Rect.x, bottomLimitY);
-                Point lineEnd = new Point(guideline4Rect.x + guideline4Rect.width, bottomLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+                Point lineEnd = new Point(guideline4Rect.x + guideline4Width, bottomLimitY);
+                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
             }
         }
-
-         */
-
 
 
         if (leftLimitX != -1 && rightLimitX != -1 && topLimitY != -1 && bottomLimitY != -1) {
