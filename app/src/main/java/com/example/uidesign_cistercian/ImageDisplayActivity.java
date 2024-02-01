@@ -904,6 +904,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private void labelSubQuadrants(Mat image, List<Rect> subQuadrants) {
         List<Double> percentages = new ArrayList<>();
+        Set<Integer> initiallyFlagged = new HashSet<>(); // Track initially flagged subquadrants
+
         for(Rect subQuadrant : subQuadrants) {
             double percentage = calculateBlackPixelPercentage(image, subQuadrant);
             percentages.add(percentage);
@@ -911,15 +913,44 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Finding the guide value
         double guideValue = Collections.max(percentages);
 
-        // Flagging subQuadrants within 5% of the guide value
+        // Initially flagging subQuadrants within 10% of the guide value
         for (int i = 0; i < subQuadrants.size(); i++) {
             Rect subQuadrant = subQuadrants.get(i);
             double percentage = percentages.get(i);
 
-            // Check if the percentage is within 5% of the guide value
-            if (Math.abs(percentage - guideValue) <= 12) {
-                Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(0, 255, 0), 2); // Using green for highlighting
+            // Check if the percentage is within 10% of the guide value
+            if (Math.abs(percentage - guideValue) <= 10) {
+                //Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(0, 255, 0), 2); // Using green for highlighting
+                initiallyFlagged.add(i + 1);
             }
+        }
+
+        Set<Integer> toCheck = new HashSet<>();
+        if (initiallyFlagged.contains(3)) {
+            toCheck.addAll(Arrays.asList(1, 2, 5, 6, 7, 9));
+        }
+        if (initiallyFlagged.contains(9)) {
+            toCheck.addAll(Arrays.asList(1, 3, 5, 6, 7, 8));
+        }
+        if (initiallyFlagged.containsAll(Arrays.asList(3, 9))) {
+            toCheck.addAll(Arrays.asList(1, 2, 6, 7, 8));
+        }
+
+        // Check and flag additional subquadrants based on the rule
+        for (Integer index : toCheck) {
+            int i = index - 1; // Adjusting back to 0-based indexing
+            double percentage = percentages.get(i);
+            if (percentage >= guideValue * 0.4) {
+                initiallyFlagged.add(index); // Flagging based on the rule
+            }
+        }
+
+        // Final flagging including both initially and additionally flagged subquadrants
+        for (Integer index : initiallyFlagged) {
+            int i = index - 1; // Adjusting back to 0-based indexing
+            Rect subQuadrant = subQuadrants.get(i);
+            // Flagging the subquadrant
+            Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(0, 255, 0), 2);
         }
     }
 
