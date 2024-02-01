@@ -234,7 +234,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Guideline Rectangle 1, to find leftLimitX
         int guideline1Width = rect.width / 2;
         int guideline1Height = rect.height / 15;
-        guideline1Rect = new Rect(rect.x + (rect.width / 30), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
+        guideline1Rect = new Rect(rect.x + (rect.width / 25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
         //Imgproc.rectangle(image, guideline1Rect.tl(), guideline1Rect.br(), new Scalar(150, 100, 100), 2);
 
         if (guideline1Rect != null) {
@@ -243,7 +243,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                         pixel1Found = true;
-                        leftLimitX = x + (guideline1Rect.width / 30);
+                        leftLimitX = x + (guideline1Rect.width / 15);
                         Point lineStart = new Point(leftLimitX, rect.y);
                         Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
                         //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
@@ -254,7 +254,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 if (firstLineDrawn) break; // Exit the outer loop as well after drawing the 1st line
             }
             if (!pixel1Found) {
-                leftLimitX = rect.x + (rect.width / 30);
+                leftLimitX = rect.x + (rect.width / 15);
                 Point lineStart = new Point(leftLimitX, rect.y);
                 Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
                 //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
@@ -297,7 +297,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline3Width = rightLimitX - leftLimitX;
         int guideline3Height = 4 * (rect.height / 10);
         if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline3Rect = new Rect(leftLimitX, rect.y + rect.height - guideline3Height, guideline3Width, guideline3Height);
+            guideline3Rect = new Rect(leftLimitX + (guideline3Width/20), rect.y + rect.height - guideline3Height, guideline3Width, guideline3Height);
             //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
         }
 
@@ -404,7 +404,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Guideline Rectangle 1, to find rightLimitX
         int guideline1Width = rect.width / 2;
         int guideline1Height = rect.height / 15;
-        guideline1Rect = new Rect(rect.x + (rect.width/2) - (rect.width/30), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
+        guideline1Rect = new Rect(rect.x + (rect.width/2) - (rect.width/25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
         //Imgproc.rectangle(image, guideline1Rect.tl(), guideline1Rect.br(), new Scalar(150, 100, 100), 2);
 
         if (guideline1Rect != null) {
@@ -413,7 +413,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                         pixel1Found = true;
-                        rightLimitX = x - (guideline1Rect.width / 30);
+                        rightLimitX = x - (guideline1Rect.width / 15);
                         Point lineStart = new Point(rightLimitX, rect.y);
                         Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
                         //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
@@ -424,7 +424,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 if (firstLineDrawn) break; // Exit the outer loop as well after drawing first line
             }
             if (!pixel1Found) {
-                rightLimitX = rect.x + rect.width - (rect.width/30);
+                rightLimitX = rect.x + rect.width - (rect.width/15);
                 Point lineStart = new Point(rightLimitX, rect.y);
                 Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
                 //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
@@ -467,7 +467,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline3Width = rightLimitX - leftLimitX;
         int guideline3Height = 4 * (rect.height / 10);
         if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline3Rect = new Rect(leftLimitX, rect.y + rect.height - guideline3Height, guideline3Width, guideline3Height);
+            guideline3Rect = new Rect(leftLimitX - (guideline3Width/20), rect.y + rect.height - guideline3Height, guideline3Width, guideline3Height);
             //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
         }
 
@@ -573,7 +573,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Guideline Rectangle 1, to find leftLimitX
         int guideline1Width = rect.width / 2;
         int guideline1Height = rect.height / 15;
-        guideline1Rect = new Rect(rect.x + (rect.width / 30), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
+        guideline1Rect = new Rect(rect.x + (rect.width / 25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
         //Imgproc.rectangle(image, guideline1Rect.tl(), guideline1Rect.br(), new Scalar(150, 100, 100), 2);
 
         if (guideline1Rect != null) {
@@ -582,7 +582,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                         pixel1Found = true;
-                        leftLimitX = x + (guideline1Rect.width / 30);
+                        leftLimitX = x + (guideline1Rect.width / 15);
                         Point lineStart = new Point(leftLimitX, rect.y);
                         Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
                         //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
@@ -593,7 +593,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 if (firstLineDrawn) break; // Exit the outer loop as well after drawing the 1st line
             }
             if (!pixel1Found) {
-                leftLimitX = rect.x + (rect.width / 30);
+                leftLimitX = rect.x + (rect.width / 15);
                 Point lineStart = new Point(leftLimitX, rect.y);
                 Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
                 //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
@@ -636,7 +636,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline3Width = rightLimitX - leftLimitX;
         int guideline3Height = 4 * (rect.height / 10);
         if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline3Rect = new Rect(leftLimitX, rect.y, guideline3Width, guideline3Height);
+            guideline3Rect = new Rect(leftLimitX + (guideline3Width/20), rect.y, guideline3Width, guideline3Height);
             //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
         }
 
@@ -740,7 +740,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Guideline Rectangle 1, to find rightLimitX
         int guideline1Width = rect.width / 2;
         int guideline1Height = rect.height / 15;
-        guideline1Rect = new Rect(rect.x + (rect.width/2) - (rect.width/30), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
+        guideline1Rect = new Rect(rect.x + (rect.width/2) - (rect.width/25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
         //Imgproc.rectangle(image, guideline1Rect.tl(), guideline1Rect.br(), new Scalar(150, 100, 100), 2);
 
         if (guideline1Rect != null) {
@@ -749,7 +749,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     double[] pixel = image.get(y, x);
                     if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                         pixel1Found = true;
-                        rightLimitX = x - (guideline1Rect.width / 30);
+                        rightLimitX = x - (guideline1Rect.width / 15);
                         Point lineStart = new Point(rightLimitX, rect.y);
                         Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
                         //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
@@ -760,7 +760,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 if (firstLineDrawn) break; // Exit the outer loop as well after drawing first line
             }
             if (!pixel1Found) {
-                rightLimitX = rect.x + rect.width - (rect.width/30);
+                rightLimitX = rect.x + rect.width - (rect.width/15);
                 Point lineStart = new Point(rightLimitX, rect.y);
                 Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
                 //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
@@ -803,7 +803,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline3Width = rightLimitX - leftLimitX;
         int guideline3Height = 4 * (rect.height / 10);
         if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline3Rect = new Rect(leftLimitX, rect.y, guideline3Width, guideline3Height);
+            guideline3Rect = new Rect(leftLimitX - (guideline3Width/20), rect.y, guideline3Width, guideline3Height);
             //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
         }
 
@@ -913,6 +913,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Finding the guide value
         double guideValue = Collections.max(percentages);
 
+        // Check if guideValue is below the minimum threshold
+        if (guideValue < 7) {
+            System.out.println("All subquadrants are empty or almost empty, skipping flagging.");
+            return;
+        }
+
         // Initially flagging subQuadrants within 10% of the guide value
         for (int i = 0; i < subQuadrants.size(); i++) {
             Rect subQuadrant = subQuadrants.get(i);
@@ -934,6 +940,18 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
         if (initiallyFlagged.containsAll(Arrays.asList(3, 9))) {
             toCheck.addAll(Arrays.asList(1, 2, 6, 7, 8));
+        }
+        if (initiallyFlagged.containsAll(Arrays.asList(5, 7))) {
+            toCheck.add(3);
+        }
+        if (initiallyFlagged.containsAll(Arrays.asList(1, 5))) {
+            toCheck.add(9);
+        }
+        if (initiallyFlagged.containsAll(Arrays.asList(1, 6))) {
+            toCheck.add(9);
+        }
+        if (initiallyFlagged.containsAll(Arrays.asList(6, 9))) {
+            toCheck.add(1);
         }
 
         // Check and flag additional subquadrants based on the rule
