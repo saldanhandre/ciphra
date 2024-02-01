@@ -170,31 +170,82 @@ public class ImageDisplayActivity extends AppCompatActivity {
         drawQuadrants(coloredBinaryImage, filteredRects);
     }
 
+    private List<Rect> filterRectangles(List<Rect> rects, int imageHeight) {
+
+        List<Rect> sizeFilteredRects = new ArrayList<>(); // List of rectangles that pass filter 1
+        List<Rect> uniqueFilteredRects = new ArrayList<>(); // List of rectangles that pass filters 1 and 2
+        Set<String> uniqueRectSignatures = new HashSet<>(); // Signatures for filter 2
+        List<Rect> finalFilteredRects = new ArrayList<>(); // Set of rectangles that pass filters 1, 2, and 3
+
+        // Filter 1 - Filter out rectangles that are too small
+        double minHeightThreshold = 0.15 * imageHeight; // Minimum height of a rectangle
+        for (Rect rect : rects) {
+            if (rect.height >= minHeightThreshold) {
+                sizeFilteredRects.add(rect);
+                System.out.println("rectangle added as not small with height = " + rect.height + " (img height = " + imageHeight + ")");
+            }
+        }
+
+        // Filter 2 - Filter out duplicates based on a unique signature of each rectangle
+        for (Rect rect : sizeFilteredRects) {
+            String signature = rect.tl().toString() + "-" + rect.br().toString(); // Create a unique signature
+            if (uniqueRectSignatures.add(signature)) {
+                // If the signature is added successfully, it's not a duplicate
+                System.out.println("rectangle added as not duplicate with height = " + rect.height + " and tl = " + rect.tl() + " and br = " + rect.br());
+                uniqueFilteredRects.add(rect);
+            }
+        }
+
+        // Filter 3 - Filter out rectangles that are contained within others
+        for (int i = 0; i < uniqueFilteredRects.size(); i++) {
+            Rect rect1 = uniqueFilteredRects.get(i);
+            boolean isContained = false;
+            for (int j = 0; j < uniqueFilteredRects.size(); j++) {
+                if (i == j) continue; // Skip comparing the rectangle with itself
+                Rect rect2 = uniqueFilteredRects.get(j);
+
+                if (rect2.contains(rect1.tl()) && rect2.contains(rect1.br())) {
+                    // If rect1 is fully contained within rect2
+                    isContained = true;
+                    break;
+                }
+            }
+            if (!isContained) {
+                // If rect1 is not contained within any other rectangle, add it to the final list
+                finalFilteredRects.add(rect1);
+                System.out.println("rectangle added as not contained");
+            }
+        }
+
+        return finalFilteredRects;
+    }
+
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
-        System.out.println("drawQuadrants called");
+        //System.out.println("drawQuadrants called");
         // Draw the bounding rectangles that passed the filter
 
         for (Rect rect : filteredRects) {
             Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
-            System.out.println("clones rotated");
+            //System.out.println("clones rotated");
             // Draw the bounding rectangle
             //Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
 
             if (rect.width > rect.height) {
                 // Rotate the image 90 degrees clockwise
-                System.out.println("rectangle was rotated");
+                //System.out.println("rectangle was rotated");
                 Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_COUNTERCLOCKWISE);
                 Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
                 processRectangle(rotatedImage, rotatedRect);
                 Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_CLOCKWISE);
             } else {
-                System.out.println("rectangle was NOT rotated");
+                //System.out.println("rectangle was NOT rotated");
                 processRectangle(coloredBinaryImage, rect);
             }
         }
     }
 
-    private void processRectangle(Mat coloredBinaryImage, Rect rect) {
+    private int processRectangle(Mat coloredBinaryImage, Rect rect) {
+        int arabicResult = 0;
         // Find Stem
         Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
         Point divisionPoint2 = new Point(rect.x + rect.width / 2, rect.y + rect.height);
@@ -205,30 +256,57 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         Rect quadrantUnits = new Rect(rect.x + quadrantWidth, rect.y, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
-        resizingUnits(coloredBinaryImage, quadrantUnits);
+        int unitsDigit = resizingUnits(coloredBinaryImage, quadrantUnits);
 
         Rect quadrantTens = new Rect(rect.x, rect.y, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
-        resizingTens(coloredBinaryImage, quadrantTens);
+        int tensDigit = resizingTens(coloredBinaryImage, quadrantTens);
 
         Rect quadrantHundreds = new Rect(rect.x + quadrantWidth, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
-        resizingHundreds(coloredBinaryImage, quadrantHundreds);
+        int hundredsDigit = resizingHundreds(coloredBinaryImage, quadrantHundreds);
 
         Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
-        resizingThousands(coloredBinaryImage, quadrantThousands);
+        int thousandsDigit = resizingThousands(coloredBinaryImage, quadrantThousands);
+
+        arabicResult = thousandsDigit*1000 + hundredsDigit*100 + tensDigit*10 + unitsDigit;
+        System.out.println("FINAL ARABIC RESULT IS " + arabicResult);
+
+        return arabicResult;
+    }
+
+    // *******************************************************************************************************************
+
+    // SubQuadrant class
+    private static class SubQuadrant {
+        Rect rect;
+        double blackPixelPercentage;
+
+        SubQuadrant(Rect rect, double blackPixelPercentage) {
+            this.rect = rect;
+            this.blackPixelPercentage = blackPixelPercentage;
+        }
+
+        public Rect getRect() {
+            return rect;
+        }
+
+        public double getBlackPixelPercentage() {
+            return blackPixelPercentage;
+        }
     }
 
 // *******************************************************************************************************************
 
-    private void resizingUnits(Mat image, Rect rect) {
+    private int resizingUnits(Mat image, Rect rect) {
+        int unitsDigitResult = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
         int leftLimitX = -1, rightLimitX = -1, bottomLimitY = -1, topLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
-        List<Rect> subQuadrants = new ArrayList<>();
+        List<Rect> subQuadrantsUnits = new ArrayList<>();
 
 
         // Guideline Rectangle 1, to find leftLimitX
@@ -375,30 +453,33 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantUnits8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantUnits9 = new Rect(leftLimitX + 2 * subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
 
-            subQuadrants.add(subQuadrantUnits1);
-            subQuadrants.add(subQuadrantUnits2);
-            subQuadrants.add(subQuadrantUnits3);
-            subQuadrants.add(subQuadrantUnits4);
-            subQuadrants.add(subQuadrantUnits5);
-            subQuadrants.add(subQuadrantUnits6);
-            subQuadrants.add(subQuadrantUnits7);
-            subQuadrants.add(subQuadrantUnits8);
-            subQuadrants.add(subQuadrantUnits9);
+            subQuadrantsUnits.add(subQuadrantUnits1);
+            subQuadrantsUnits.add(subQuadrantUnits2);
+            subQuadrantsUnits.add(subQuadrantUnits3);
+            subQuadrantsUnits.add(subQuadrantUnits4);
+            subQuadrantsUnits.add(subQuadrantUnits5);
+            subQuadrantsUnits.add(subQuadrantUnits6);
+            subQuadrantsUnits.add(subQuadrantUnits7);
+            subQuadrantsUnits.add(subQuadrantUnits8);
+            subQuadrantsUnits.add(subQuadrantUnits9);
 
-            drawSubQuadrants(image, subQuadrants);
-            detectValidSubQuadrants(image, subQuadrants);
+            //drawSubQuadrants(image, subQuadrantsUnits);
+            unitsDigitResult = detectValidSubQuadrants(image, subQuadrantsUnits);
+            //System.out.println("THE NUMBER IN UNITS IS " + unitsDigitResult);
         }
+        return unitsDigitResult;
     }
 
 // *******************************************************************************************************************
 
-    private void resizingTens(Mat image, Rect rect) {
+    private int resizingTens(Mat image, Rect rect) {
+        int tensDigitResult = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
         int rightLimitX = -1, leftLimitX = -1, bottomLimitY = -1, topLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
-        List<Rect> subQuadrants = new ArrayList<>();
+        List<Rect> subQuadrantsTens = new ArrayList<>();
 
 
         // Guideline Rectangle 1, to find rightLimitX
@@ -544,30 +625,33 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantTens8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantTens9 = new Rect(leftLimitX, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
 
-            subQuadrants.add(subQuadrantTens1);
-            subQuadrants.add(subQuadrantTens2);
-            subQuadrants.add(subQuadrantTens3);
-            subQuadrants.add(subQuadrantTens4);
-            subQuadrants.add(subQuadrantTens5);
-            subQuadrants.add(subQuadrantTens6);
-            subQuadrants.add(subQuadrantTens7);
-            subQuadrants.add(subQuadrantTens8);
-            subQuadrants.add(subQuadrantTens9);
+            subQuadrantsTens.add(subQuadrantTens1);
+            subQuadrantsTens.add(subQuadrantTens2);
+            subQuadrantsTens.add(subQuadrantTens3);
+            subQuadrantsTens.add(subQuadrantTens4);
+            subQuadrantsTens.add(subQuadrantTens5);
+            subQuadrantsTens.add(subQuadrantTens6);
+            subQuadrantsTens.add(subQuadrantTens7);
+            subQuadrantsTens.add(subQuadrantTens8);
+            subQuadrantsTens.add(subQuadrantTens9);
 
-            drawSubQuadrants(image, subQuadrants);
-            detectValidSubQuadrants(image, subQuadrants);
+            //drawSubQuadrants(image, subQuadrantsTens);
+            tensDigitResult = detectValidSubQuadrants(image, subQuadrantsTens);
+            //System.out.println("THE NUMBER IN TENS IS " + tensDigitResult);
         }
+        return tensDigitResult;
     }
 
 // *******************************************************************************************************************
 
-    private void resizingHundreds(Mat image, Rect rect) {
+    private int resizingHundreds(Mat image, Rect rect) {
+        int hundredsDigitResult = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
         int leftLimitX = -1, rightLimitX = -1, topLimitY = -1, bottomLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
-        List<Rect> subQuadrants = new ArrayList<>();
+        List<Rect> subQuadrantsHundreds = new ArrayList<>();
 
 
         // Guideline Rectangle 1, to find leftLimitX
@@ -712,30 +796,33 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantHundreds8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantHundreds9 = new Rect(leftLimitX + 2 * subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
 
-            subQuadrants.add(subQuadrantHundreds1);
-            subQuadrants.add(subQuadrantHundreds2);
-            subQuadrants.add(subQuadrantHundreds3);
-            subQuadrants.add(subQuadrantHundreds4);
-            subQuadrants.add(subQuadrantHundreds5);
-            subQuadrants.add(subQuadrantHundreds6);
-            subQuadrants.add(subQuadrantHundreds7);
-            subQuadrants.add(subQuadrantHundreds8);
-            subQuadrants.add(subQuadrantHundreds9);
+            subQuadrantsHundreds.add(subQuadrantHundreds1);
+            subQuadrantsHundreds.add(subQuadrantHundreds2);
+            subQuadrantsHundreds.add(subQuadrantHundreds3);
+            subQuadrantsHundreds.add(subQuadrantHundreds4);
+            subQuadrantsHundreds.add(subQuadrantHundreds5);
+            subQuadrantsHundreds.add(subQuadrantHundreds6);
+            subQuadrantsHundreds.add(subQuadrantHundreds7);
+            subQuadrantsHundreds.add(subQuadrantHundreds8);
+            subQuadrantsHundreds.add(subQuadrantHundreds9);
 
-            drawSubQuadrants(image, subQuadrants);
-            detectValidSubQuadrants(image, subQuadrants);
+            //drawSubQuadrants(image, subQuadrantsHundreds);
+            hundredsDigitResult = detectValidSubQuadrants(image, subQuadrantsHundreds);
+            //System.out.println("THE NUMBER IN HUNDREDS IS " + hundredsDigitResult);
         }
+        return hundredsDigitResult;
     }
 
 // *******************************************************************************************************************
 
-    private void resizingThousands(Mat image, Rect rect) {
+    private int resizingThousands(Mat image, Rect rect) {
+        int thousandsDigitResult = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
         int leftLimitX = -1, rightLimitX = -1, bottomLimitY = -1, topLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
-        List<Rect> subQuadrants = new ArrayList<>();
+        List<Rect> subQuadrantsThousands = new ArrayList<>();
 
         // Guideline Rectangle 1, to find rightLimitX
         int guideline1Width = rect.width / 2;
@@ -879,19 +966,21 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantThousands8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantThousands9 = new Rect(leftLimitX, topLimitY, subQuadrantWidth, subQuadrantHeight);
 
-            subQuadrants.add(subQuadrantThousands1);
-            subQuadrants.add(subQuadrantThousands2);
-            subQuadrants.add(subQuadrantThousands3);
-            subQuadrants.add(subQuadrantThousands4);
-            subQuadrants.add(subQuadrantThousands5);
-            subQuadrants.add(subQuadrantThousands6);
-            subQuadrants.add(subQuadrantThousands7);
-            subQuadrants.add(subQuadrantThousands8);
-            subQuadrants.add(subQuadrantThousands9);
+            subQuadrantsThousands.add(subQuadrantThousands1);
+            subQuadrantsThousands.add(subQuadrantThousands2);
+            subQuadrantsThousands.add(subQuadrantThousands3);
+            subQuadrantsThousands.add(subQuadrantThousands4);
+            subQuadrantsThousands.add(subQuadrantThousands5);
+            subQuadrantsThousands.add(subQuadrantThousands6);
+            subQuadrantsThousands.add(subQuadrantThousands7);
+            subQuadrantsThousands.add(subQuadrantThousands8);
+            subQuadrantsThousands.add(subQuadrantThousands9);
 
-            drawSubQuadrants(image, subQuadrants);
-            detectValidSubQuadrants(image, subQuadrants);
+            //drawSubQuadrants(image, subQuadrantsThousands);
+            thousandsDigitResult = detectValidSubQuadrants(image, subQuadrantsThousands);
+            //System.out.println("THE NUMBER IN THOUSANDS IS " + thousandsDigitResult);
         }
+        return thousandsDigitResult;
     }
 
 // *******************************************************************************************************************
@@ -902,9 +991,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
     }
 
-    private void detectValidSubQuadrants(Mat image, List<Rect> subQuadrants) {
+    private Integer detectValidSubQuadrants(Mat image, List<Rect> subQuadrants) {
         List<Double> percentages = new ArrayList<>();
-        Set<Integer> initiallyFlagged = new HashSet<>(); // Track initially flagged subquadrants
+        Set<Integer> initiallyFlagged = new HashSet<>(); // Track initially flagged subQuadrants
 
         for(Rect subQuadrant : subQuadrants) {
             double percentage = calculateBlackPixelPercentage(image, subQuadrant);
@@ -916,14 +1005,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Check if guideValue is below the minimum threshold
         if (guideValue < 7) {
             System.out.println("All subquadrants are empty or almost empty, skipping flagging.");
-            return;
+            return 0;
         }
 
         // Initially flagging subQuadrants within 10% of the guide value
         for (int i = 0; i < subQuadrants.size(); i++) {
             Rect subQuadrant = subQuadrants.get(i);
             double percentage = percentages.get(i);
-
             // Check if the percentage is within 10% of the guide value
             if (Math.abs(percentage - guideValue) <= 10) {
                 //Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(0, 255, 0), 2); // Using green for highlighting
@@ -931,6 +1019,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
 
+        // Additional logic to flag based on certain rules
         Set<Integer> toCheck = new HashSet<>();
         if (initiallyFlagged.contains(3)) {
             toCheck.addAll(Arrays.asList(1, 2, 5, 6, 7, 9));
@@ -953,6 +1042,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
         if (initiallyFlagged.containsAll(Arrays.asList(6, 9))) {
             toCheck.add(1);
         }
+        if (initiallyFlagged.contains(1)) {
+            toCheck.addAll(Arrays.asList(2, 3));
+        }
+        if (initiallyFlagged.contains(7)) {
+            toCheck.addAll(Arrays.asList(8, 9));
+        }
 
         // Check and flag additional subquadrants based on the rule
         for (Integer index : toCheck) {
@@ -968,8 +1063,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
             int i = index - 1; // Adjusting back to 0-based indexing
             Rect subQuadrant = subQuadrants.get(i);
             // Flagging the subquadrant
-            Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(0, 255, 0), 2);
+            //Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(0, 255, 0), 2);
         }
+
+        // Interpretation of flagged subquadrants to number
+        Integer detectedNumber = mapFlaggedSubQuadrantsToNumber(initiallyFlagged);
+        //System.out.println("Detected Number: " + detectedNumber);
+        // Here you can add further logic to act based on the detected number
+
+        return detectedNumber;
     }
 
     private double calculateBlackPixelPercentage(Mat coloredBinaryImage, Rect subQuadrant) {
@@ -991,79 +1093,43 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // label percentage of black pixels on the image near the subQuadrant
         String label = String.format("%.2f%%", blackPixelPercentage); // Formats the percentage to 2 decimal places
         Point labelPoint = new Point(subQuadrant.x + 5, subQuadrant.y + 20);
-        Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 255), 1);
+        //Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 255), 1);
 
         return (double) blackPixelCount / totalPixels * 100;
     }
 
-    private List<Rect> filterRectangles(List<Rect> rects, int imageHeight) {
+    private int mapFlaggedSubQuadrantsToNumber(Set<Integer> flaggedSubQuadrants) {
+        // Define patterns corresponding to numbers
+        Set<Integer> patternForNumber1 = new HashSet<>(Arrays.asList(1, 2, 3));
+        Set<Integer> patternForNumber2 = new HashSet<>(Arrays.asList(7, 8, 9));
+        Set<Integer> patternForNumber3 = new HashSet<>(Arrays.asList(1, 5, 9));
+        Set<Integer> patternForNumber4 = new HashSet<>(Arrays.asList(3, 5, 7));
+        Set<Integer> patternForNumber5 = new HashSet<>(Arrays.asList(1, 2, 3, 5, 7));
+        Set<Integer> patternForNumber6 = new HashSet<>(Arrays.asList(3, 6, 9));
+        Set<Integer> patternForNumber7 = new HashSet<>(Arrays.asList(1, 2, 3, 6, 9));
+        Set<Integer> patternForNumber8 = new HashSet<>(Arrays.asList(3, 6, 7, 8, 9));
+        Set<Integer> patternForNumber9 = new HashSet<>(Arrays.asList(1, 2, 3, 6, 7, 8, 9));
 
-        List<Rect> sizeFilteredRects = new ArrayList<>(); // List of rectangles that pass filter 1
-        List<Rect> uniqueFilteredRects = new ArrayList<>(); // List of rectangles that pass filters 1 and 2
-        Set<String> uniqueRectSignatures = new HashSet<>(); // Signatures for filter 2
-        List<Rect> finalFilteredRects = new ArrayList<>(); // Set of rectangles that pass filters 1, 2, and 3
-
-        // Filter 1 - Filter out rectangles that are too small
-        double minHeightThreshold = 0.15 * imageHeight; // Minimum height of a rectangle
-        for (Rect rect : rects) {
-            if (rect.height >= minHeightThreshold) {
-                sizeFilteredRects.add(rect);
-                System.out.println("rectangle added as not small with height = " + rect.height + " (img height = " + imageHeight + ")");
-            }
+        // Check against each pattern
+        if (flaggedSubQuadrants.equals(patternForNumber1)) {
+            return 1; // Matches pattern for Number 1
+        } else if (flaggedSubQuadrants.equals(patternForNumber2)) {
+            return 2; // Matches pattern for Number 2
+        } else if (flaggedSubQuadrants.equals(patternForNumber3)) {
+            return 3; // Matches pattern for Number 3
+        } else if (flaggedSubQuadrants.equals(patternForNumber4)) {
+            return 4; // Matches pattern for Number 4
+        } else if (flaggedSubQuadrants.equals(patternForNumber5)) {
+            return 5; // Matches pattern for Number 5
+        } else if (flaggedSubQuadrants.equals(patternForNumber6)) {
+            return 6; // Matches pattern for Number 6
+        } else if (flaggedSubQuadrants.equals(patternForNumber7)) {
+            return 7; // Matches pattern for Number 7
+        } else if (flaggedSubQuadrants.equals(patternForNumber8)) {
+            return 8; // Matches pattern for Number 8
+        } else if (flaggedSubQuadrants.equals(patternForNumber9)) {
+            return 9; // Matches pattern for Number 9
         }
-
-        // Filter 2 - Filter out duplicates based on a unique signature of each rectangle
-        for (Rect rect : sizeFilteredRects) {
-            String signature = rect.tl().toString() + "-" + rect.br().toString(); // Create a unique signature
-            if (uniqueRectSignatures.add(signature)) {
-                // If the signature is added successfully, it's not a duplicate
-                System.out.println("rectangle added as not duplicate with height = " + rect.height + " and tl = " + rect.tl() + " and br = " + rect.br());
-                uniqueFilteredRects.add(rect);
-            }
-        }
-
-        // Filter 3 - Filter out rectangles that are contained within others
-        for (int i = 0; i < uniqueFilteredRects.size(); i++) {
-            Rect rect1 = uniqueFilteredRects.get(i);
-            boolean isContained = false;
-            for (int j = 0; j < uniqueFilteredRects.size(); j++) {
-                if (i == j) continue; // Skip comparing the rectangle with itself
-                Rect rect2 = uniqueFilteredRects.get(j);
-
-                if (rect2.contains(rect1.tl()) && rect2.contains(rect1.br())) {
-                    // If rect1 is fully contained within rect2
-                    isContained = true;
-                    break;
-                }
-            }
-            if (!isContained) {
-                // If rect1 is not contained within any other rectangle, add it to the final list
-                finalFilteredRects.add(rect1);
-                System.out.println("rectangle added as not contained");
-            }
-        }
-
-        return finalFilteredRects;
-    }
-
-    // *******************************************************************************************************************
-
-    // SubQuadrant class
-    private static class SubQuadrant {
-        Rect rect;
-        double blackPixelPercentage;
-
-        SubQuadrant(Rect rect, double blackPixelPercentage) {
-            this.rect = rect;
-            this.blackPixelPercentage = blackPixelPercentage;
-        }
-
-        public Rect getRect() {
-            return rect;
-        }
-
-        public double getBlackPixelPercentage() {
-            return blackPixelPercentage;
-        }
+        return 0; // No pattern matches - it's 0
     }
 }
