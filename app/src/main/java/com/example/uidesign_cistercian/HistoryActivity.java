@@ -26,9 +26,7 @@ public class HistoryActivity extends AppCompatActivity {
         // Reverse the list
         Collections.reverse(history);
 
-        // Use an ArrayAdapter to show the history in the ListView
-        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, history);
+        HistoryItemAdapter adapter = new HistoryItemAdapter(this, history);
         historyListView.setAdapter(adapter);
     }
 
