@@ -8,6 +8,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -40,6 +41,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private Mat matImage;
     private int imageHeight;
+    private List<Integer> arabicResults = new ArrayList<>();
 
     // Load openCV library
     static {
@@ -273,6 +275,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
         arabicResult = thousandsDigit*1000 + hundredsDigit*100 + tensDigit*10 + unitsDigit;
         System.out.println("FINAL ARABIC RESULT IS " + arabicResult);
 
+        arabicResults.add(arabicResult);
+        updateResultsDisplay(); // Refresh the display with the new list of results
         return arabicResult;
     }
 
@@ -1131,5 +1135,16 @@ public class ImageDisplayActivity extends AppCompatActivity {
             return 9; // Matches pattern for Number 9
         }
         return 0; // No pattern matches - it's 0
+    }
+
+
+
+    private void updateResultsDisplay() {
+        TextView resultsView = findViewById(R.id.results);
+        StringBuilder resultsText = new StringBuilder("Results:\n");
+        for (int result : arabicResults) {
+            resultsText.append(result).append(", "); // Append each result on a new line
+        }
+        resultsView.setText(resultsText.toString());
     }
 }
