@@ -386,7 +386,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrants.add(subQuadrantUnits9);
 
             drawSubQuadrants(image, subQuadrants);
-            labelSubQuadrants(image, subQuadrants);
+            detectValidSubQuadrants(image, subQuadrants);
         }
     }
 
@@ -555,7 +555,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrants.add(subQuadrantTens9);
 
             drawSubQuadrants(image, subQuadrants);
-            labelSubQuadrants(image, subQuadrants);
+            detectValidSubQuadrants(image, subQuadrants);
         }
     }
 
@@ -723,7 +723,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrants.add(subQuadrantHundreds9);
 
             drawSubQuadrants(image, subQuadrants);
-            labelSubQuadrants(image, subQuadrants);
+            detectValidSubQuadrants(image, subQuadrants);
         }
     }
 
@@ -890,7 +890,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrants.add(subQuadrantThousands9);
 
             drawSubQuadrants(image, subQuadrants);
-            labelSubQuadrants(image, subQuadrants);
+            detectValidSubQuadrants(image, subQuadrants);
         }
     }
 
@@ -902,7 +902,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
     }
 
-    private void labelSubQuadrants(Mat image, List<Rect> subQuadrants) {
+    private void detectValidSubQuadrants(Mat image, List<Rect> subQuadrants) {
         List<Double> percentages = new ArrayList<>();
         Set<Integer> initiallyFlagged = new HashSet<>(); // Track initially flagged subquadrants
 
