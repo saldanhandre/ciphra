@@ -111,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
                         clearCistercianSegments(); // Clear the segments in case of invalid number
                     }
                 }
+                resetConversionTimer();
             }
         });
 
