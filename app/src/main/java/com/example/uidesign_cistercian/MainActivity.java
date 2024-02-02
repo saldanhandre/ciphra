@@ -92,7 +92,11 @@ public class MainActivity extends AppCompatActivity {
                     resultEditText.setText("0");
                     // Position the cursor at the end of the text
                     resultEditText.setSelection(resultEditText.getText().length());
-                } else {
+
+                }
+                //else if(s.length() == 2 && s(1) == 0) {
+
+                else {
                     // Normal processing for any other case
                     try {
                         int number = Integer.parseInt(s.toString());
@@ -1244,9 +1248,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void resetConversionTimer() {
         conversionHandler.removeCallbacks(conversionRunnable);
-        conversionHandler.postDelayed(conversionRunnable, 5000); // 5 seconds
+        conversionHandler.postDelayed(conversionRunnable, 2500); // 5 seconds
     }
-
 
 
     /*

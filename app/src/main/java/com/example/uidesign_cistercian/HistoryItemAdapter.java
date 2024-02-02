@@ -3,6 +3,8 @@ package com.example.uidesign_cistercian;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import org.opencv.core.Rect;
 
 import java.util.List;
 
@@ -33,20 +37,14 @@ public class HistoryItemAdapter extends ArrayAdapter<Integer> {
         }
 
         TextView tvArabicNumber = convertView.findViewById(R.id.tvArabicNumber);
-        ImageView ivThumbnail = convertView.findViewById(R.id.ivThumbnail);
+        CistercianThumbnailView ivThumbnail = convertView.findViewById(R.id.ivThumbnail);
 
         Integer item = historyItems.get(position);
         tvArabicNumber.setText(String.valueOf(item));
 
-        // Assuming you have a method to generate a Bitmap from the number
-        Bitmap thumbnail = generateThumbnailForNumber(item);
-        ivThumbnail.setImageBitmap(thumbnail);
+        // Set the number on your CistercianThumbnailView
+        ivThumbnail.setNumber(item);
 
         return convertView;
-    }
-
-    private Bitmap generateThumbnailForNumber(int number) {
-
-
     }
 }

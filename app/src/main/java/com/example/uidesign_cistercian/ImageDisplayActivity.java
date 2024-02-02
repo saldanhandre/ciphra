@@ -1138,12 +1138,17 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
 
-
+//CHECK
     private void updateResultsDisplay() {
         TextView resultsView = findViewById(R.id.results);
         StringBuilder resultsText = new StringBuilder("Results:\n");
         for (int result : arabicResults) {
-            resultsText.append(result).append(", "); // Append each result on a new line
+            if(arabicResults.size() > 1) {
+                resultsText.append(result).append(", ");
+            }
+            else {
+                resultsText.append(result).append("");
+            }
         }
         resultsView.setText(resultsText.toString());
     }
