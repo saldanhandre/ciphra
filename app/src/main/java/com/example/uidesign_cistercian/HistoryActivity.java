@@ -1,7 +1,11 @@
 package com.example.uidesign_cistercian;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.view.MenuItem;
@@ -28,6 +32,21 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
 
         // Initial history update
         updateHistory();
+
+        // Set an onItemClickListener to the ListView
+        historyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get the selected number from the adapter
+                int selectedNumber = adapter.getItem(position);
+
+                // Create an Intent to start MainActivity
+                Intent intent = new Intent(HistoryActivity.this, MainActivity.class);
+                intent.putExtra("selectedNumber", selectedNumber);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent); // Directly use startActivity here
+            }
+        });
     }
 
     @Override

@@ -117,8 +117,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
         camera_button = findViewById(R.id.camera_button);
         photo_gallery_button = findViewById(R.id.photo_gallery_button);
         bin_button = findViewById(R.id.bin_button);
@@ -149,6 +147,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+
+        // Handle incoming intent at the creation of the activity
+        handleIntent(getIntent());
     }
 
     private void initializeSegmentRelations() {
@@ -1298,4 +1300,29 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void handleIntent(Intent intent) {
+        if (intent != null && intent.hasExtra("selectedNumber")) {
+            int selectedNumber = intent.getIntExtra("selectedNumber", 0);
+            resultEditText.setText(String.valueOf(selectedNumber));
+            updateCistercianFromNumber(selectedNumber);
+        }
+    }
+
+    private void updateCistercianFromNumber(int number) {
+        // Assuming you have this logic in place
+        int thousands = number / 1000;
+        int hundreds = (number % 1000) / 100;
+        int tens = (number % 100) / 10;
+        int units = number % 10;
+        updateCistercianSegments(thousands, hundreds, tens, units);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // Update the activity's intent to the new intent
+        handleIntent(intent); // Handle the new intent
+    }
+
 }
