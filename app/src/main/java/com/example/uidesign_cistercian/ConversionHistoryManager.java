@@ -60,9 +60,11 @@ public class ConversionHistoryManager {
 
     // Method to add a new entry to the history
     public void addConversion(int arabicNumber) {
-        conversionHistory.add(arabicNumber);
-        saveHistory();
-        notifyHistoryUpdated();
+        if (arabicNumber != 0) {
+            conversionHistory.add(arabicNumber);
+            saveHistory();
+            notifyHistoryUpdated();
+        }
     }
 
     // Method to register a listener
