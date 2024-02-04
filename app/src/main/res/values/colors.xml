@@ -13,11 +13,12 @@
 
     <color name="background">#ffffff</color>
     <color name="bottom_bar_background">#f2f2f2</color>
+    <color name="top_bar_background">#f2f2f2</color>
 
     <color name="button_pressed">#accfe9</color>
     <color name="button_enabled">#c1e6fe</color>
 
-    <color name="camera_button_pressed">#296bd7</color>
+    <color name="camera_button_pressed">#296BD7</color>
     <color name="camera_button_enabled">#0A57CF</color>
 
     <color name="segment_selected">#C8000000</color>

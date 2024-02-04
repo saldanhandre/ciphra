@@ -1,6 +1,8 @@
 package com.example.uidesign_cistercian;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,9 +29,13 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
         // Register as a listener
         ConversionHistoryManager.getInstance(getApplicationContext()).addHistoryUpdateListener(this);
 
-        // Enable back button
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
         }
 
         // Initial history update
@@ -72,10 +78,11 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            // Finish this activity and return to the MainActivity
-            finish();
-            return true;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // Respond to the action bar's Up/Home button
+                finish();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
