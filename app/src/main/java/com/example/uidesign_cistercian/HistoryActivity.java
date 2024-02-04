@@ -9,6 +9,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.view.MenuItem;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 public class HistoryActivity extends AppCompatActivity implements ConversionHistoryManager.HistoryUpdateListener {
@@ -23,7 +25,7 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
         historyListView = findViewById(R.id.historyListView);
 
         // Register as a listener
-        ConversionHistoryManager.getInstance().addHistoryUpdateListener(this);
+        ConversionHistoryManager.getInstance(getApplicationContext()).addHistoryUpdateListener(this);
 
         // Enable back button
         if (getSupportActionBar() != null) {
@@ -40,7 +42,6 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
                 // Get the selected number from the adapter
                 int selectedNumber = adapter.getItem(position);
 
-                // Create an Intent to start MainActivity
                 Intent intent = new Intent(HistoryActivity.this, MainActivity.class);
                 intent.putExtra("selectedNumber", selectedNumber);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -51,15 +52,15 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
 
     @Override
     public void onHistoryUpdated() {
-        updateHistory();
+        runOnUiThread(this::updateHistory);
     }
 
     // Method to update history and refresh the ListView
     public void updateHistory() {
-        List<Integer> history = ConversionHistoryManager.getInstance().getConversionHistory();
-        Collections.reverse(history); // Reverse the list if required
+        List<Integer> history = new ArrayList<>(ConversionHistoryManager.getInstance(getApplicationContext()).getConversionHistory());
+        Collections.reverse(history);
 
-        if(adapter == null) {
+        if (adapter == null) {
             adapter = new HistoryItemAdapter(this, history);
             historyListView.setAdapter(adapter);
         } else {
@@ -71,9 +72,8 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle the Up button click here
         if (item.getItemId() == android.R.id.home) {
-            // Finish this activity and return to the parent activity (MainActivity)
+            // Finish this activity and return to the MainActivity
             finish();
             return true;
         }
@@ -83,6 +83,6 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ConversionHistoryManager.getInstance().removeHistoryUpdateListener(this);
+        ConversionHistoryManager.getInstance(getApplicationContext()).removeHistoryUpdateListener(this);
     }
 }

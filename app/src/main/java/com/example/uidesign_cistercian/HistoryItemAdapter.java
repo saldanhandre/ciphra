@@ -42,7 +42,7 @@ public class HistoryItemAdapter extends ArrayAdapter<Integer> {
         Integer item = historyItems.get(position);
         tvArabicNumber.setText(String.valueOf(item));
 
-        // Set the number on your CistercianThumbnailView
+        // Set the number on the CistercianThumbnailView
         ivThumbnail.setNumber(item);
 
         return convertView;

@@ -1244,8 +1244,7 @@ public class MainActivity extends AppCompatActivity {
             int arabicNumber = convertCistercianToArabic();
 
             // Add it to the history
-            // Assuming you have a method in ConversionHistoryManager to add just an integer
-            ConversionHistoryManager.getInstance().addConversion(arabicNumber);
+            ConversionHistoryManager.getInstance(getApplicationContext()).addConversion(arabicNumber);
         }
     };
 
@@ -1310,7 +1309,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateCistercianFromNumber(int number) {
-        // Assuming you have this logic in place
         int thousands = number / 1000;
         int hundreds = (number % 1000) / 100;
         int tens = (number % 100) / 10;
