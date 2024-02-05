@@ -51,7 +51,7 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
                 Intent intent = new Intent(HistoryActivity.this, MainActivity.class);
                 intent.putExtra("selectedNumber", selectedNumber);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent); // Directly use startActivity here
+                startActivity(intent);
             }
         });
     }
