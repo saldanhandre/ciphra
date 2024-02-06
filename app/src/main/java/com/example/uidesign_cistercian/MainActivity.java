@@ -1282,7 +1282,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     // Method to get the camera permission from the user
     void getPermission(){
         if(checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
