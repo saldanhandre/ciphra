@@ -33,8 +33,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ImageDisplayActivity extends AppCompatActivity {
@@ -245,9 +248,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
+        //List<Double> percentages1stCheck = new ArrayList<>();
+        //List<Double> percentages2ndCheck = new ArrayList<>();
+
+
         //System.out.println("drawQuadrants called");
         // Draw the bounding rectangles that passed the filter
-    /*
+
+        /*
+
         for (Rect rect : filteredRects) {
             // Find Stem
             Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
@@ -300,7 +309,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 currentAngle += angleIncrement;
             }
         }
-        */
+
+         */
+
 
         /*
 
@@ -338,18 +349,113 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
         for (Rect rect : filteredRects) {
+            Map<Line, Double> percentages1stCheck = new HashMap<>();
+            Map<Line, Double> percentages2ndCheck = new HashMap<>();
+
             Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
-            //System.out.println("clones rotated");
             // Draw the bounding rectangle
-            //Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+            Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+            boolean stemFound = false;
+            boolean firstCheckDone = false;
+            boolean secondCheckDone = false;
+
+            if(!stemFound) {
+                for (int a = 0; a <= 50; a++) {
+                    Point divisionPoint1 = new Point(rect.x, rect.y + a * (rect.height / 50.0));
+                    Point divisionPoint2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 50.0)));
+                    Line stemCandidate = new Line(divisionPoint1, divisionPoint2, new Scalar(255, 0, 0), 1);
+
+                    double percentage = stemCandidate.getBlackPixelPercentage(coloredBinaryImage);
+                    percentages1stCheck.put(stemCandidate, percentage);
+
+                    if (percentage >= 90) {
+                        stemCandidate.draw(coloredBinaryImage);
+                        stemFound = true;
+                        break;
+                    }
+
+                    //stemCandidate.draw(coloredBinaryImage);
+                }
+                firstCheckDone = true;
+            }
+            if(!stemFound && firstCheckDone) {
+                for (int a = 0; a <= 50; a++) {
+                    Point divisionPoint1 = new Point(rect.x + rect.width - (a * (rect.width / 50.0)), rect.y);
+                    Point divisionPoint2 = new Point(rect.x + a * (rect.width / 50.0), rect.y + rect.height);
+                    Line stemCandidate = new Line(divisionPoint1, divisionPoint2, new Scalar(200, 0, 100), 1);
+
+                    double percentage = stemCandidate.getBlackPixelPercentage(coloredBinaryImage);
+                    percentages2ndCheck.put(stemCandidate, percentage);
+
+                    if (percentage >= 90) {
+                        stemCandidate.draw(coloredBinaryImage);
+                        stemFound = true;
+                        break;
+                    }
+
+                    //stemCandidate.draw(coloredBinaryImage);
+                }
+                secondCheckDone = true;
+            }
+            if(!stemFound && firstCheckDone && secondCheckDone) {
+                //Map.Entry<Line, Double> biggestPercent1stCheck = Collections.max(percentages1stCheck.entrySet(), Map.Entry.comparingByValue());
+                //Map.Entry<Line, Double> biggestPercent2ndCheck = Collections.max(percentages2ndCheck.entrySet(), Map.Entry.comparingByValue());
+
+                // For 1st check
+                // create list with the map entries of the percentages
+                List<Map.Entry<Line, Double>> sortedEntries1 = new ArrayList<>(percentages1stCheck.entrySet());
+                // Sort the list in descending order
+                sortedEntries1.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+                Map.Entry<Line, Double> biggestPercent1stCheck1 = null;
+                Map.Entry<Line, Double> biggestPercent1stCheck2 = null;
+
+                if (!sortedEntries1.isEmpty()) {
+                    biggestPercent1stCheck1 = sortedEntries1.get(0); // largest percentage in the 1st check
+                    if (sortedEntries1.size() > 1) {
+                        biggestPercent1stCheck2 = sortedEntries1.get(1); // second largest percentage in the 1st check
+                    }
+                }
+
+                // For 2nd check
+                // create list with the map entries of the percentages
+                List<Map.Entry<Line, Double>> sortedEntries2 = new ArrayList<>(percentages2ndCheck.entrySet());
+                // Sort the list in descending order
+                sortedEntries2.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+                Map.Entry<Line, Double> biggestPercent2ndCheck1 = null;
+                Map.Entry<Line, Double> biggestPercent2ndCheck2 = null;
+
+                if (!sortedEntries2.isEmpty()) {
+                    biggestPercent2ndCheck1 = sortedEntries2.get(0); // largest percentage in the 2nd check
+                    if (sortedEntries2.size() > 1) {
+                        biggestPercent2ndCheck2 = sortedEntries2.get(1); // second largest percentage in the 2nd check
+                    }
+                }
+
+                biggestPercent1stCheck.getKey().draw(coloredBinaryImage);
+                biggestPercent2ndCheck.getKey().draw(coloredBinaryImage);
+            }
+
+
+
+
 
             if (rect.width > rect.height) {
+
+
+                /*
                 // Rotate the image 90 degrees clockwise
                 //System.out.println("rectangle was rotated");
                 Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_COUNTERCLOCKWISE);
                 Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
                 processRectangle(rotatedImage, rotatedRect);
                 Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_CLOCKWISE);
+
+
+
+                 */
+
             } else {
                 //System.out.println("rectangle was NOT rotated");
                 processRectangle(coloredBinaryImage, rect);
@@ -1194,7 +1300,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Interpretation of flagged subquadrants to number
         Integer detectedNumber = mapFlaggedSubQuadrantsToNumber(initiallyFlagged);
         //System.out.println("Detected Number: " + detectedNumber);
-        // Here you can add further logic to act based on the detected number
 
         return detectedNumber;
     }
@@ -1222,6 +1327,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         return (double) blackPixelCount / totalPixels * 100;
     }
+
+
 
     private int mapFlaggedSubQuadrantsToNumber(Set<Integer> flaggedSubQuadrants) {
         // Define patterns corresponding to numbers
