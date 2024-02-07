@@ -94,8 +94,11 @@ public class MainActivity extends AppCompatActivity {
                     resultEditText.setSelection(resultEditText.getText().length());
 
                 }
-                //else if(s.length() == 2 && s(1) == 0) {
-
+                else if (s.length() == 2 && s.charAt(0) == '0') {
+                    // If the first digit is 0, remove it
+                    resultEditText.setText(s.subSequence(1, 2));
+                    resultEditText.setSelection(resultEditText.getText().length());
+                }
                 else {
                     // Normal processing for any other case
                     try {
