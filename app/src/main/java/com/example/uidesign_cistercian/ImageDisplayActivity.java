@@ -351,6 +351,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (Rect rect : filteredRects) {
             Map<Line, Double> percentages1stCheck = new HashMap<>();
             Map<Line, Double> percentages2ndCheck = new HashMap<>();
+            Map<Line, Double> percentagesTop4 = new HashMap<>();
 
             Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
             // Draw the bounding rectangle
@@ -407,6 +408,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 // Sort the list in descending order
                 sortedEntries1.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
 
+                // Initialize the largest percentages of the 1st Check
                 Map.Entry<Line, Double> biggestPercent1stCheck1 = null;
                 Map.Entry<Line, Double> biggestPercent1stCheck2 = null;
 
@@ -415,7 +417,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     if (sortedEntries1.size() > 1) {
                         biggestPercent1stCheck2 = sortedEntries1.get(1); // second largest percentage in the 1st check
                     }
+
                 }
+
+                // Add the largest 2 percentages to the Top 4 Map
+                percentagesTop4.put(biggestPercent1stCheck1.getKey(), biggestPercent1stCheck1.getValue());
+                percentagesTop4.put(biggestPercent1stCheck2.getKey(), biggestPercent1stCheck2.getValue());
+
 
                 // For 2nd check
                 // create list with the map entries of the percentages
@@ -423,6 +431,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 // Sort the list in descending order
                 sortedEntries2.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
 
+                // Initialize the largest percentages of the 2nd Check
                 Map.Entry<Line, Double> biggestPercent2ndCheck1 = null;
                 Map.Entry<Line, Double> biggestPercent2ndCheck2 = null;
 
@@ -433,8 +442,24 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     }
                 }
 
-                biggestPercent1stCheck.getKey().draw(coloredBinaryImage);
-                biggestPercent2ndCheck.getKey().draw(coloredBinaryImage);
+                // Add the largest 2 percentages to the Top 4 Map
+                percentagesTop4.put(biggestPercent2ndCheck1.getKey(), biggestPercent2ndCheck1.getValue());
+                percentagesTop4.put(biggestPercent2ndCheck2.getKey(), biggestPercent2ndCheck2.getValue());
+
+                // Initialize the largest percentages
+                Map.Entry<Line, Double> largestPercentage = null;
+                Map.Entry<Line, Double> secondLargestPercentage = null;
+
+                if (!percentagesTop4.isEmpty()) {
+                    largestPercentage = sortedEntries2.get(0); // largest percentage
+                    if (percentagesTop4.size() > 1) {
+                        secondLargestPercentage = sortedEntries2.get(1); // second largest percentage
+                    }
+                }
+
+                // draw the 2 largest percentages of the rectangle
+                largestPercentage.getKey().draw(coloredBinaryImage);
+                secondLargestPercentage.getKey().draw(coloredBinaryImage);
             }
 
 

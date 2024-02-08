@@ -35,8 +35,8 @@ public class CistercianThumbnailView extends View {
 
         // Set up paint
         Paint paint = new Paint();
-        paint.setColor(Color.BLACK); // Change as needed
-        paint.setStrokeWidth(3); // Change thickness as needed
+        paint.setColor(Color.BLACK);
+        paint.setStrokeWidth(3); 
         paint.setStyle(Paint.Style.STROKE);
 
         // Central stem for all numbers
