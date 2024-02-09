@@ -248,106 +248,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
-        //List<Double> percentages1stCheck = new ArrayList<>();
-        //List<Double> percentages2ndCheck = new ArrayList<>();
-
-
-        //System.out.println("drawQuadrants called");
-        // Draw the bounding rectangles that passed the filter
-
-        /*
-
-        for (Rect rect : filteredRects) {
-            // Find Stem
-            Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
-            Point divisionPoint2 = new Point(rect.x + rect.width / 2, rect.y + rect.height);
-            Line stemCandidate = new Line(divisionPoint1, divisionPoint2, new Scalar(255, 0, 0), 2);
-
-                        int guideWidth = rect.width / 20;
-                        int guideHeight = rect.height;
-                        Point rectCenter = new Point(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
-
-            // Calculate the rotation increment and start angle
-            double angleIncrement = 1.0;
-            double currentAngle = 0.0;
-            boolean stemFound = false;
-
-            // Rotate guide rectangle in small increments checking for the stem
-            while (currentAngle < 360.0 && !stemFound) {
-                // Calculate the new coordinates for the guide rectangle after rotation
-                Point newCenter = rotatePoint(rectCenter, currentAngle, guideWidth, guideHeight);
-                Rect guideRect = new Rect(
-                        (int) (newCenter.x - guideWidth / 2.0),
-                        (int) (newCenter.y - guideHeight / 2.0),
-                        guideWidth,
-                        guideHeight
-                );
-                if (currentAngle == 10.0 || currentAngle == 20.0 || currentAngle == 40.0 || currentAngle == 70.0 || currentAngle == 110.0 || currentAngle == 150.0 ||currentAngle == 180.0 || currentAngle == 250.0 || currentAngle == 300.0) {
-                    stemCandidate.draw(coloredBinaryImage);
-                }
-
-                // Calculate the percentage of black pixels within the rotated guide rectangle
-                double blackPixelPercentage = calculateBlackPixelPercentage(coloredBinaryImage, guideRect);
-
-                if (blackPixelPercentage > 60) {
-                    // If the stem is found, rotate the image once to process it
-                    Mat rotatedImage = new Mat();
-                    Mat rotationMatrix = Imgproc.getRotationMatrix2D(rectCenter, currentAngle, 1.0);
-                    Imgproc.warpAffine(coloredBinaryImage, rotatedImage, rotationMatrix, coloredBinaryImage.size());
-
-                    // Draw and process the rotated rectangle
-                    Imgproc.rectangle(rotatedImage, guideRect.tl(), guideRect.br(), new Scalar(0, 255, 0), 2);
-                    processRectangle(rotatedImage, rect);
-
-                    // Optionally, rotate back if needed to show the original image orientation
-                    Mat reverseRotationMatrix = Imgproc.getRotationMatrix2D(rectCenter, -currentAngle, 1.0); // This will reverse the rotation
-                    Imgproc.warpAffine(rotatedImage, coloredBinaryImage, reverseRotationMatrix, coloredBinaryImage.size());
-                    stemFound = true; // Exit the loop as stem is found
-                }
-
-                // Increment the angle for the next iteration
-                currentAngle += angleIncrement;
-            }
-        }
-
-         */
-
-
-        /*
-
-        for (Rect rect : filteredRects) {
-            Rect guidelineRectStem = null;
-
-            // Guideline Rectangle 1, to find Stem
-            int guidelineRectStemWidth = rect.width / 45;
-            int guidelineRectStemHeight = rect.height;
-            guidelineRectStem = new Rect(rect.x + (rect.width / 2) - (guidelineRectStemWidth / 2), rect.y, guidelineRectStemWidth, guidelineRectStemHeight);
-            Imgproc.rectangle(coloredBinaryImage, guidelineRectStem.tl(), guidelineRectStem.br(), new Scalar(150, 100, 100), 2);
-
-            double percentage = 0;
-
-            Mat subImage = coloredBinaryImage.submat(rect);
-            Mat rotatedImage = new Mat();
-            double angleIncrement = 1.0;
-            double currentAngle = 0.0;
-
-            while (currentAngle < 90.0) {
-                percentage = calculateBlackPixelPercentage(rotatedImage, guidelineRectStem);
-                Mat rotationMatrix = Imgproc.getRotationMatrix2D(new Point(rect.width/2, rect.height/2), currentAngle, 1.0);
-                Imgproc.warpAffine(subImage, rotatedImage, rotationMatrix, subImage.size());
-
-                if (percentage >= 40) {
-                    Imgproc.rectangle(coloredBinaryImage, guidelineRectStem.tl(), guidelineRectStem.br(), new Scalar(0, 255, 0), 2);
-                    processRectangle(rotatedImage, new Rect(0, 0, rotatedImage.width(), rotatedImage.height()));
-                    break;
-                }
-                currentAngle += angleIncrement;
-            }
-        }
-
-         */
-
-
         for (Rect rect : filteredRects) {
             Map<Line, Double> percentages1stCheck = new HashMap<>();
             Map<Line, Double> percentages2ndCheck = new HashMap<>();
@@ -365,18 +265,16 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 for (int a = 0; a <= 40; a++) {
                     Point divisionPoint1 = new Point(rect.x, rect.y + a * (rect.height / 40.0));
                     Point divisionPoint2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 40.0)));
-                    Line stemCandidate = new Line(divisionPoint1, divisionPoint2, new Scalar(255, 0, 0), 1);
+                    Line stem = new Line(divisionPoint1, divisionPoint2, new Scalar(255, 0, 0), 1);
 
-                    double percentage = stemCandidate.getBlackPixelPercentage(coloredBinaryImage);
-                    percentages1stCheck.put(stemCandidate, percentage);
+                    double percentage = stem.getBlackPixelPercentage(coloredBinaryImage);
+                    percentages1stCheck.put(stem, percentage);
 
                     if (percentage >= 90) {
-                        stemCandidate.draw(coloredBinaryImage);
+                        stem.draw(coloredBinaryImage);
                         stemFound = true;
                         break;
                     }
-
-                    //stemCandidate.draw(coloredBinaryImage);
                 }
                 firstCheckDone = true;
             }
@@ -384,13 +282,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 for (int a = 0; a <= 40; a++) {
                     Point divisionPoint1 = new Point(rect.x + rect.width - (a * (rect.width / 40.0)), rect.y);
                     Point divisionPoint2 = new Point(rect.x + a * (rect.width / 40.0), rect.y + rect.height);
-                    Line stemCandidate = new Line(divisionPoint1, divisionPoint2, new Scalar(200, 0, 100), 1);
+                    Line stem = new Line(divisionPoint1, divisionPoint2, new Scalar(200, 0, 100), 1);
 
-                    double percentage = stemCandidate.getBlackPixelPercentage(coloredBinaryImage);
-                    percentages2ndCheck.put(stemCandidate, percentage);
+                    double percentage = stem.getBlackPixelPercentage(coloredBinaryImage);
+                    percentages2ndCheck.put(stem, percentage);
 
                     if (percentage >= 90) {
-                        stemCandidate.draw(coloredBinaryImage);
+                        stem.draw(coloredBinaryImage);
                         stemFound = true;
                         break;
                     }
@@ -400,9 +298,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 secondCheckDone = true;
             }
             if(!stemFound && firstCheckDone && secondCheckDone) {
-                //Map.Entry<Line, Double> biggestPercent1stCheck = Collections.max(percentages1stCheck.entrySet(), Map.Entry.comparingByValue());
-                //Map.Entry<Line, Double> biggestPercent2ndCheck = Collections.max(percentages2ndCheck.entrySet(), Map.Entry.comparingByValue());
-
                 // For 1st check
                 // create list with the map entries of the percentages
                 List<Map.Entry<Line, Double>> sortedEntries1 = new ArrayList<>(percentages1stCheck.entrySet());
@@ -418,7 +313,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     if (sortedEntries1.size() > 1) {
                         secondBiggestPercent1stCheck = sortedEntries1.get(1); // second largest percentage in the 1st check
                     }
-
                 }
 
                 // Add the largest 2 percentages to the Top 4 Map
@@ -430,8 +324,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 //secondBiggestPercent1stCheck.getKey().draw(coloredBinaryImage);
 
 
-                // For 2nd check
 
+                // For 2nd check
                 // create list with the map entries of the percentages
                 List<Map.Entry<Line, Double>> sortedEntries2 = new ArrayList<>(percentages2ndCheck.entrySet());
                 // Sort the list in descending order
@@ -499,7 +393,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 Line stemGuideline = new Line(stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint), stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint), new Scalar(0, 0, 255), 1);
                 // draw it
                 stemGuideline.draw(coloredBinaryImage);
-
 
             }
 
