@@ -36,8 +36,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 public class ImageDisplayActivity extends AppCompatActivity {
@@ -253,7 +255,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Map<Line, Double> percentages2ndCheck = new HashMap<>();
             Map<Line, Double> percentagesTop4 = new HashMap<>();
 
-            Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
+            Point rectMiddlePoint = new Point(rect.x + rect.width/2.00, rect.y + rect.height/2.00);
+
+            // Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
             // Draw the bounding rectangle
             Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
             boolean stemFound = false;
@@ -265,7 +269,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 for (int a = 0; a <= 40; a++) {
                     Point divisionPoint1 = new Point(rect.x, rect.y + a * (rect.height / 40.0));
                     Point divisionPoint2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 40.0)));
-                    Line stem = new Line(divisionPoint1, divisionPoint2, new Scalar(255, 0, 0), 1);
+                    Line stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
 
                     double percentage = stem.getBlackPixelPercentage(coloredBinaryImage);
                     percentages1stCheck.put(stem, percentage);
@@ -282,7 +286,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 for (int a = 0; a <= 40; a++) {
                     Point divisionPoint1 = new Point(rect.x + rect.width - (a * (rect.width / 40.0)), rect.y);
                     Point divisionPoint2 = new Point(rect.x + a * (rect.width / 40.0), rect.y + rect.height);
-                    Line stem = new Line(divisionPoint1, divisionPoint2, new Scalar(200, 0, 100), 1);
+                    Line stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0 , 0, 255), 1);
 
                     double percentage = stem.getBlackPixelPercentage(coloredBinaryImage);
                     percentages2ndCheck.put(stem, percentage);
@@ -324,7 +328,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 //secondBiggestPercent1stCheck.getKey().draw(coloredBinaryImage);
 
 
-
                 // For 2nd check
                 // create list with the map entries of the percentages
                 List<Map.Entry<Line, Double>> sortedEntries2 = new ArrayList<>(percentages2ndCheck.entrySet());
@@ -359,7 +362,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 Map.Entry<Line, Double> largestPercentage = null;
                 Map.Entry<Line, Double> secondLargestPercentage = null;
 
-                if (Math.abs(biggestPercent2ndCheck.getValue()-biggestPercent1stCheck.getValue()) <= 9) {
+                if (Math.abs(biggestPercent2ndCheck.getValue() - biggestPercent1stCheck.getValue()) <= 9) {
                     similarPercentages = true;
                 }
 
@@ -368,15 +371,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     if (percentagesTop4.size() > 1) {
                         secondLargestPercentage = top4List.get(1); // second largest percentage
                     }
-                }
-                else if (!percentagesTop4.isEmpty() && similarPercentages) {
+                } else if (!percentagesTop4.isEmpty() && similarPercentages) {
                     largestPercentage = biggestPercent1stCheck;
                     secondLargestPercentage = biggestPercent2ndCheck;
                 }
 
                 // draw the 2 largest percentages of the rectangle
-                largestPercentage.getKey().draw(coloredBinaryImage);
-                secondLargestPercentage.getKey().draw(coloredBinaryImage);
+                 //largestPercentage.getKey().draw(coloredBinaryImage);
+                 //secondLargestPercentage.getKey().draw(coloredBinaryImage);
 
                 Point intersectionPoint = new Point();
                 intersectionPoint = largestPercentage.getKey().getIntersectionPoint(secondLargestPercentage.getKey());
@@ -384,23 +386,59 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 // Create the 2 candidates for Stem, by making lines between opposite corners of the 2 largestPercentage lines
                 Line stemCandidate1 = new Line(largestPercentage.getKey().getPt1(), secondLargestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
                 Line stemCandidate2 = new Line(secondLargestPercentage.getKey().getPt1(), largestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
+                if (stemCandidate1.getLength() < largestPercentage.getKey().getLength()) {
+                    stemCandidate1 = new Line(largestPercentage.getKey().getPt1(), secondLargestPercentage.getKey().getPt1(), new Scalar(255, 50, 50), 2);
+                    stemCandidate2 = new Line(secondLargestPercentage.getKey().getPt2(), largestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
+                }
 
                 // draw the 2 stem candidates
-                stemCandidate1.draw(coloredBinaryImage);
-                stemCandidate2.draw(coloredBinaryImage);
+                 stemCandidate1.draw(coloredBinaryImage);
+                 stemCandidate2.draw(coloredBinaryImage);
 
                 // Create a line that unites the intersection point with the candidates - stem guideline
                 Line stemGuideline = new Line(stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint), stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint), new Scalar(0, 0, 255), 1);
                 // draw it
-                stemGuideline.draw(coloredBinaryImage);
+                //stemGuideline.draw(coloredBinaryImage);
 
+                Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(coloredBinaryImage);
+                Line stem = stemGuideline.getStemLine(coloredBinaryImage, stemMiddlePoint);
+                stem.draw(coloredBinaryImage);
             }
+
+
+
+            double angle = 48; // Rotation angle in degrees
+
+            // Calculate the center of the image (rotation center)
+            //Point center = new Point(coloredBinaryImage.cols() / 2.0, coloredBinaryImage.rows() / 2.0);
+
+            // Get the rotation matrix for the specified angle and center
+            Mat rotationMatrix = Imgproc.getRotationMatrix2D(rectMiddlePoint, angle, 1);
+
+            // Determine the size of the rotated image
+            Size rotatedSize = new Size(coloredBinaryImage.cols(), coloredBinaryImage.rows());
+
+            // Perform the rotation
+            Mat rotatedImage = new Mat();
+            Imgproc.warpAffine(coloredBinaryImage, rotatedImage, rotationMatrix, rotatedSize, Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS);
+
+            Rect rotatedRect = findBoundingRectangleWithRadiusExpansion(rotatedImage, rectMiddlePoint, 70, coloredBinaryImage);
+            //processRectangle(rotatedImage, rotatedRect);
+
+            // To rotate the image back rotate by -angle
+            //Mat rotationMatrixInverse = Imgproc.getRotationMatrix2D(rectMiddlePoint, -angle, 1);
+            //Mat originalOrientationImage = new Mat();
+            //Imgproc.warpAffine(rotatedImage, originalOrientationImage, rotationMatrixInverse, rotatedSize, Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS);
+
+
+
 
 
 
 
 
             if (rect.width > rect.height) {
+
 
 
                 /*
@@ -411,15 +449,69 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 processRectangle(rotatedImage, rotatedRect);
                 Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_CLOCKWISE);
 
-
-
                  */
+
+
+
+
 
             } else {
                 //System.out.println("rectangle was NOT rotated");
                 processRectangle(coloredBinaryImage, rect);
             }
         }
+    }
+
+    private Rect findBoundingRectangleWithRadiusExpansion(Mat image, Point startPoint, int stepSize, Mat visualizationImage) {
+        // Initialize variables to define the search area, starting from the startPoint
+        int left = (int) startPoint.x;
+        int right = (int) startPoint.x;
+        int top = (int) startPoint.y;
+        int bottom = (int) startPoint.y;
+
+        boolean foundBlackPixel = true;
+        Scalar boxColor = new Scalar(0, 255, 0); // Green color for visualization boxes
+
+        // Continue expanding the search area as long as black pixels are found
+        while (foundBlackPixel) {
+            foundBlackPixel = false; // Reset flag for each expansion step
+
+            // Temporarily store the expanded bounds
+            int newLeft = Math.max(left - stepSize, 0);
+            int newRight = Math.min(right + stepSize, image.cols() - 1);
+            int newTop = Math.max(top - stepSize, 0);
+            int newBottom = Math.min(bottom + stepSize, image.rows() - 1);
+
+            // Draw the current bounding box for visualization
+            Imgproc.rectangle(visualizationImage, new Point(newLeft, newTop), new Point(newRight, newBottom), boxColor, 2);
+
+            // Scan the expanded area for black pixels
+            for (int x = newLeft; x <= newRight; x++) {
+                for (int y = newTop; y <= newBottom; y++) {
+                    // Only check the perimeter of the expanded area to reduce calculations
+                    if (x == newLeft || x == newRight || y == newTop || y == newBottom) {
+                        double[] pixelValue = image.get(y, x);
+                        if (pixelValue != null && pixelValue[0] == 0) { // Assuming a binary image where black pixels have a value of 0
+                            // Update the search area bounds if a black pixel is found
+                            left = newLeft;
+                            right = newRight;
+                            top = newTop;
+                            bottom = newBottom;
+                            foundBlackPixel = true;
+                            break; // Exit the loop early if a black pixel is found
+                        }
+                    }
+                }
+                if (foundBlackPixel) break; // Exit the outer loop early if a black pixel is found
+            }
+        }
+
+        // Calculate the width and height of the bounding rectangle
+        int width = right - left + 1;
+        int height = bottom - top + 1;
+
+        // Create and return the bounding rectangle
+        return new Rect(left, top, width, height);
     }
 
     private Point rotatePoint(Point center, double angleDegrees, int width, int height) {
