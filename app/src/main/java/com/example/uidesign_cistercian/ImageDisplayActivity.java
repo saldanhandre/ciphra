@@ -250,6 +250,32 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
+        //System.out.println("drawQuadrants called");
+        // Draw the bounding rectangles that passed the filter
+
+        for (Rect rect : filteredRects) {
+            Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
+            //System.out.println("clones rotated");
+            // Draw the bounding rectangle
+            //Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+
+            if (rect.width > rect.height) {
+                // Rotate the image 90 degrees clockwise
+                //System.out.println("rectangle was rotated");
+                Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_COUNTERCLOCKWISE);
+                Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
+                processRectangle(rotatedImage, rotatedRect);
+                Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_CLOCKWISE);
+            } else {
+                //System.out.println("rectangle was NOT rotated");
+                processRectangle(coloredBinaryImage, rect);
+            }
+        }
+
+        // ***************** TRY TO MAKE IT DETECT DIAGONAL CIPHERS ************************
+
+        /*
+
         for (Rect rect : filteredRects) {
             Map<Line, Double> percentages1stCheck = new HashMap<>();
             Map<Line, Double> percentages2ndCheck = new HashMap<>();
@@ -257,19 +283,21 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             Point rectMiddlePoint = new Point(rect.x + rect.width/2.00, rect.y + rect.height/2.00);
 
-            // Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
             // Draw the bounding rectangle
-            Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+            //Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+
             boolean stemFound = false;
             boolean firstCheckDone = false;
             boolean secondCheckDone = false;
             boolean similarPercentages = false;
 
+            Line stem = null;
+
             if(!stemFound) {
                 for (int a = 0; a <= 40; a++) {
                     Point divisionPoint1 = new Point(rect.x, rect.y + a * (rect.height / 40.0));
                     Point divisionPoint2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 40.0)));
-                    Line stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
+                    stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
 
                     double percentage = stem.getBlackPixelPercentage(coloredBinaryImage);
                     percentages1stCheck.put(stem, percentage);
@@ -286,7 +314,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 for (int a = 0; a <= 40; a++) {
                     Point divisionPoint1 = new Point(rect.x + rect.width - (a * (rect.width / 40.0)), rect.y);
                     Point divisionPoint2 = new Point(rect.x + a * (rect.width / 40.0), rect.y + rect.height);
-                    Line stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0 , 0, 255), 1);
+                    stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0 , 0, 255), 1);
 
                     double percentage = stem.getBlackPixelPercentage(coloredBinaryImage);
                     percentages2ndCheck.put(stem, percentage);
@@ -326,7 +354,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 // draw the 2 largest percentages of the check 1
                 //biggestPercent1stCheck.getKey().draw(coloredBinaryImage);
                 //secondBiggestPercent1stCheck.getKey().draw(coloredBinaryImage);
-
 
                 // For 2nd check
                 // create list with the map entries of the percentages
@@ -392,8 +419,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 }
 
                 // draw the 2 stem candidates
-                 stemCandidate1.draw(coloredBinaryImage);
-                 stemCandidate2.draw(coloredBinaryImage);
+                // stemCandidate1.draw(coloredBinaryImage);
+                // stemCandidate2.draw(coloredBinaryImage);
 
                 // Create a line that unites the intersection point with the candidates - stem guideline
                 Line stemGuideline = new Line(stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint), stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint), new Scalar(0, 0, 255), 1);
@@ -401,66 +428,249 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 //stemGuideline.draw(coloredBinaryImage);
 
                 Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(coloredBinaryImage);
-                Line stem = stemGuideline.getStemLine(coloredBinaryImage, stemMiddlePoint);
+                stem = stemGuideline.getStemLine(coloredBinaryImage, stemMiddlePoint);
                 stem.draw(coloredBinaryImage);
             }
 
 
+            // ***************** TRY NUMBER 4 ************************
 
-            double angle = 48; // Rotation angle in degrees
+            /*
 
-            // Calculate the center of the image (rotation center)
-            //Point center = new Point(coloredBinaryImage.cols() / 2.0, coloredBinaryImage.rows() / 2.0);
+            Rect roi = new Rect(rect.x, rect.y, rect.width, rect.height); // Rectangle specifying the ROI
+            Mat cipherImage = new Mat(coloredBinaryImage, roi); // Extracting the ROI from the image
 
-            // Get the rotation matrix for the specified angle and center
-            Mat rotationMatrix = Imgproc.getRotationMatrix2D(rectMiddlePoint, angle, 1);
+            double angle = stem.getSmallestInclinationAngleFromVertical(); // Rotation angle in degrees
+            System.out.println("THIS IS THE ANGLE: " + angle);
 
-            // Determine the size of the rotated image
-            Size rotatedSize = new Size(coloredBinaryImage.cols(), coloredBinaryImage.rows());
+            // Calculate the center of the cipher image
+            Point center = new Point(cipherImage.width() / 2.0, cipherImage.height() / 2.0);
 
-            // Perform the rotation
-            Mat rotatedImage = new Mat();
-            Imgproc.warpAffine(coloredBinaryImage, rotatedImage, rotationMatrix, rotatedSize, Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS);
+            // Calculate new dimensions for the rotatedSize based on the angle
+            double angleRad = Math.toRadians(angle);
+            double cosAngle = Math.abs(Math.cos(angleRad));
+            double sinAngle = Math.abs(Math.sin(angleRad));
+            int newWidth = (int) Math.ceil(cipherImage.width() * cosAngle + cipherImage.height() * sinAngle);
+            int newHeight = (int) Math.ceil(cipherImage.width() * sinAngle + cipherImage.height() * cosAngle);
+            Size rotatedSize = new Size(newWidth, newHeight);
 
-            Rect rotatedRect = findBoundingRectangleWithRadiusExpansion(rotatedImage, rectMiddlePoint, 70, coloredBinaryImage);
-            //processRectangle(rotatedImage, rotatedRect);
+            // Adjust the rotation matrix for the new center (since the image size changes, the center might shift)
+            Point newCenter = new Point(newWidth / 2.0, newHeight / 2.0);
+            Mat rotationMatrix = Imgproc.getRotationMatrix2D(newCenter, angle, 1.0);
 
-            // To rotate the image back rotate by -angle
-            //Mat rotationMatrixInverse = Imgproc.getRotationMatrix2D(rectMiddlePoint, -angle, 1);
-            //Mat originalOrientationImage = new Mat();
-            //Imgproc.warpAffine(rotatedImage, originalOrientationImage, rotationMatrixInverse, rotatedSize, Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS);
+            // Perform the rotation with the new dimensions
+            Mat rotatedCipher = new Mat();
+            Imgproc.warpAffine(cipherImage, rotatedCipher, rotationMatrix, rotatedSize, Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, new Scalar(255, 0, 0));
 
+            // Convert the rotated Mat to a Bitmap
+            Bitmap bitmapImage = Bitmap.createBitmap(rotatedCipher.cols(), rotatedCipher.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(rotatedCipher, bitmapImage);
 
-
-
-
-
-
-
-            if (rect.width > rect.height) {
-
-
-
-                /*
-                // Rotate the image 90 degrees clockwise
-                //System.out.println("rectangle was rotated");
-                Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_COUNTERCLOCKWISE);
-                Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
-                processRectangle(rotatedImage, rotatedRect);
-                Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_CLOCKWISE);
-
-                 */
+            // Set the Bitmap to the ImageView
+            ImageView imageView = findViewById(R.id.image_display_view_provisorio);
+            imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            imageView.setImageBitmap(bitmapImage);
 
 
 
+            // ***************** TRY NUMBER 3 ************************
+
+            /*
 
 
+            double xLeftLimit = 0, xRightLimit = 0, yTopLimit = 0, yBottomLimit = 0;
+            double angle = -stem.getSmallestInclinationAngleFromVertical(); // Rotation angle in degrees
+            System.out.println("the angle is " + angle);
+
+            List<Point> rotatedRectCorners = rotateRectangle(rect, angle);
+                        // Print the coordinates of the rotated corners
+                        for (Point corner : rotatedRectCorners) {
+                            System.out.println("after (" + corner + ")");
+                        }
+
+            /*
+            if (angle <= 0) {
+                xLeftLimit = rotatedRectCorners.get(0).x;
+                yTopLimit = rotatedRectCorners.get(1).y;
+                xRightLimit = rotatedRectCorners.get(2).x;
+                yBottomLimit = rotatedRectCorners.get(3).y;
             } else {
-                //System.out.println("rectangle was NOT rotated");
-                processRectangle(coloredBinaryImage, rect);
+                yTopLimit = rotatedRectCorners.get(0).y;
+                xRightLimit = rotatedRectCorners.get(1).x;
+                yBottomLimit = rotatedRectCorners.get(2).y;
+                xLeftLimit = rotatedRectCorners.get(3).x;
+            }
+
+             */
+            /*
+
+            if (angle <= 0) {
+                xLeftLimit = rect.y + rect.height;
+                yTopLimit = rect.tl();
+                xRightLimit = rect.x + rect.width;
+                yBottomLimit = rect.x + rect.width + rect.height;
+            } else {
+                yTopLimit = rotatedRectCorners.get(0).y;
+                xRightLimit = rotatedRectCorners.get(1).x;
+                yBottomLimit = rotatedRectCorners.get(2).y;
+                xLeftLimit = rotatedRectCorners.get(3).x;
+            }
+
+            Mat rotatedImage = rotateImage(coloredBinaryImage, angle, rectMiddlePoint);
+            Mat croppedImage = cropImage(rotatedImage, yTopLimit, yBottomLimit, xLeftLimit, xRightLimit);
+
+            int guidelineRectWidth = croppedImage.cols() / 50;
+            int guidelineRectHeight = croppedImage.cols() / 2;
+            int topLimitY = 0, bottomLimitY = 0;
+            Line topLine = null;
+            Line bottomLine = null;
+
+            // Define a
+            Rect guidelineRectTop = new Rect((int)rectMiddlePoint.x - guidelineRectWidth/2, 0, guidelineRectWidth, guidelineRectHeight);
+            // iterate through the rectangle to find the first black pixel from the other side
+            for (int y = guidelineRectTop.y; y < guidelineRectHeight; y++) {
+                for (int x = guidelineRectTop.x; x < guidelineRectTop.x + guidelineRectWidth; x++) {
+                    double[] pixel = croppedImage.get(y, x);
+                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                        topLimitY = y;
+                        topLine = new Line(new Point(0,topLimitY), new Point(croppedImage.cols()-1,topLimitY), new Scalar(0, 255, 0), 1);
+                        break;
+                    }
+                }
+                if (topLimitY != -1)
+                    break; // Exit the outer loop as well after defining the top line
+            }
+
+            Rect guidelineRectBottom = new Rect((int)rectMiddlePoint.x - guidelineRectWidth/2, (int)rectMiddlePoint.y, guidelineRectWidth, guidelineRectHeight - guidelineRectHeight/2);
+            for (int y = guidelineRectBottom.y + guidelineRectHeight; y > guidelineRectBottom.y; y--) {
+                for (int x = guidelineRectBottom.x; x < guidelineRectBottom.x + guidelineRectWidth; x++) {
+                    double[] pixel = croppedImage.get(y, x);
+                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                        bottomLimitY = y;
+                        bottomLine = new Line(new Point(0,bottomLimitY), new Point(croppedImage.cols()-1,bottomLimitY), new Scalar(0, 255, 0), 1);
+                        break;
+                    }
+                }
+                if (bottomLimitY != -1)
+                    break; // Exit the outer loop as well after "drawing" the second line
+            }
+
+            int cypherRectangleHeight = bottomLimitY - topLimitY;
+            int cypherRectangleWidth = 2*(cypherRectangleHeight/3);
+
+            Rect cypherRectangle = new Rect((int)rectMiddlePoint.x - cypherRectangleWidth/2, topLimitY, cypherRectangleWidth, cypherRectangleHeight);
+
+            */
+
+    }
+
+    public Mat rotateImage(Mat src, double angle, Point center) {
+        // Get the rotation matrix for the specified angle
+        Mat rotationMatrix = Imgproc.getRotationMatrix2D(center, angle, 1.0);
+
+        // Determine the size of the new image to ensure it fits the entire rotated image
+        double absCos = Math.abs(rotationMatrix.get(0, 0)[0]);
+        double absSin = Math.abs(rotationMatrix.get(0, 1)[0]);
+        int newWidth = (int) (src.height() * absSin + src.width() * absCos);
+        int newHeight = (int) (src.height() * absCos + src.width() * absSin);
+
+        // Adjust the rotation matrix to take into account translation
+        rotationMatrix.put(0, 2, rotationMatrix.get(0, 2)[0] + (newWidth / 2) - center.x);
+        rotationMatrix.put(1, 2, rotationMatrix.get(1, 2)[0] + (newHeight / 2) - center.y);
+
+        // Perform the rotation
+        Mat dst = new Mat();
+        Imgproc.warpAffine(src, dst, rotationMatrix, new Size(newWidth, newHeight));
+
+        return dst;
+    }
+
+    public List<Point> rotateRectangle(Rect rectangle, double angleDegrees) {
+        // Calculate the center of the rectangle
+        double centerX = rectangle.x + rectangle.width / 2.0;
+        double centerY = rectangle.y + rectangle.height / 2.0;
+
+        // Convert angle from degrees to radians
+        double angleRadians = Math.toRadians(angleDegrees);
+
+        // Pre-calculate sine and cosine of the rotation angle
+        double cosAngle = Math.cos(angleRadians);
+        double sinAngle = Math.sin(angleRadians);
+
+        // Define the original corners of the rectangle
+        List<Point> originalCorners = new ArrayList<>();
+        originalCorners.add(new Point(rectangle.x, rectangle.y)); // Top-left
+        originalCorners.add(new Point(rectangle.x + rectangle.width, rectangle.y)); // Top-right
+        originalCorners.add(new Point(rectangle.x + rectangle.width, rectangle.y + rectangle.height)); // Bottom-right
+        originalCorners.add(new Point(rectangle.x, rectangle.y + rectangle.height)); // Bottom-left
+
+        // Calculate the new corners after rotation
+        List<Point> rotatedCorners = new ArrayList<>();
+        for (Point corner : originalCorners) {
+            // Translate point to origin (center of rectangle)
+            double translatedX = corner.x - centerX;
+            double translatedY = corner.y - centerY;
+
+            // Rotate point
+            double rotatedX = translatedX * cosAngle - translatedY * sinAngle;
+            double rotatedY = translatedX * sinAngle + translatedY * cosAngle;
+
+            // Translate point back
+            rotatedX += centerX;
+            rotatedY += centerY;
+
+            // Add rotated corner to the list
+            rotatedCorners.add(new Point(rotatedX, rotatedY));
+        }
+
+        return rotatedCorners;
+    }
+
+
+    public Mat cropImage(Mat originalImage, double top, double bottom, double left, double right) {
+        // Ensure the crop coordinates are within the image bounds and are integers
+        int x = (int) Math.max(left, 0);
+        int y = (int) Math.max(top, 0);
+        int width = (int) Math.min(right - left, originalImage.cols() - x);
+        int height = (int) Math.min(bottom - top, originalImage.rows() - y);
+
+        // Define the rectangle for cropping
+        Rect cropRect = new Rect(x, y, width, height);
+
+        // Crop the image
+        Mat croppedImage = new Mat(originalImage, cropRect);
+
+        return croppedImage;
+    }
+
+    private Rect findSingleCipherBoundingRectInRotatedImage(Mat originalImage, double angle, Point rotationCenter) {
+        // Rotate the image
+        Mat rotatedImage = new Mat();
+        Size imageSize = originalImage.size();
+        Mat rotationMatrix = Imgproc.getRotationMatrix2D(rotationCenter, angle, 1.0);
+        Imgproc.warpAffine(originalImage, rotatedImage, rotationMatrix, imageSize, Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS);
+
+        // Now find contours in the rotated image
+        List<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(rotatedImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        // Assuming the target is the largest contour
+        Rect boundingRect = null;
+        double maxArea = 0;
+        for (MatOfPoint contour : contours) {
+            double contourArea = Imgproc.contourArea(contour);
+            if (contourArea > maxArea) {
+                maxArea = contourArea;
+                boundingRect = Imgproc.boundingRect(contour);
             }
         }
+
+        // boundingRect is now aligned with the rotated image
+        return boundingRect;
     }
+
+
 
     private Rect findBoundingRectangleWithRadiusExpansion(Mat image, Point startPoint, int stepSize, Mat visualizationImage) {
         // Initialize variables to define the search area, starting from the startPoint
@@ -470,7 +680,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int bottom = (int) startPoint.y;
 
         boolean foundBlackPixel = true;
-        Scalar boxColor = new Scalar(0, 255, 0); // Green color for visualization boxes
+        Scalar boxColor = new Scalar(0, 255, 0); // color for visualization boxes
 
         // Continue expanding the search area as long as black pixels are found
         while (foundBlackPixel) {
@@ -492,6 +702,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     if (x == newLeft || x == newRight || y == newTop || y == newBottom) {
                         double[] pixelValue = image.get(y, x);
                         if (pixelValue != null && pixelValue[0] == 0) { // Assuming a binary image where black pixels have a value of 0
+                            System.out.println("Pixel Found");
                             // Update the search area bounds if a black pixel is found
                             left = newLeft;
                             right = newRight;

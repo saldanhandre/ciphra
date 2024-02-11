@@ -43,6 +43,32 @@ public class Line {
         return Math.sqrt(dx * dx + dy * dy); // Distance formula
     }
 
+    public double getSmallestInclinationAngleFromVertical() {
+        // Calculate the differences in the x and y coordinates
+        double dx = pt2.x - pt1.x;
+        double dy = pt2.y - pt1.y;
+
+        // Calculate the angle of the line with respect to the horizontal axis in radians
+        double angleRadians = Math.atan2(dy, dx);
+
+        // Convert the angle to degrees
+        double angleDegrees = Math.toDegrees(angleRadians);
+
+        // Calculate the angle's complement with respect to the vertical axis
+        double angleFromVertical = 90 - Math.abs(angleDegrees);
+
+        // Check the slope direction
+        // If the slope is negative (dx and dy have opposite signs), adjust the angle
+        if (dx * dy > 0) { // Negative slope: dx and dy have opposite signs
+            angleFromVertical = 360 - Math.abs(angleFromVertical);
+        }
+
+        // Ensure the angle is within the [0, 360] range
+        angleFromVertical = angleFromVertical % 360;
+
+        return angleFromVertical;
+    }
+
     public Point getIntersectionPoint(Line other) {
         double a1 = this.pt2.y - this.pt1.y;
         double b1 = this.pt1.x - this.pt2.x;
