@@ -2,6 +2,9 @@ package com.example.uidesign_cistercian;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -253,6 +256,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
         //System.out.println("drawQuadrants called");
         // Draw the bounding rectangles that passed the filter
 
+        /*
+
         for (Rect rect : filteredRects) {
             Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
             //System.out.println("clones rotated");
@@ -262,13 +267,52 @@ public class ImageDisplayActivity extends AppCompatActivity {
             if (rect.width > rect.height) {
                 // Rotate the image 90 degrees clockwise
                 //System.out.println("rectangle was rotated");
-                Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_COUNTERCLOCKWISE);
+                Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_CLOCKWISE);
                 Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
                 processRectangle(rotatedImage, rotatedRect);
-                Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_CLOCKWISE);
+                Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_COUNTERCLOCKWISE);
             } else {
                 //System.out.println("rectangle was NOT rotated");
                 processRectangle(coloredBinaryImage, rect);
+            }
+        }
+
+         */
+
+        for (Rect rect : filteredRects) {
+            Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
+
+            Point rectCenter = new Point(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
+            double angle = rect.width > rect.height ? 90 : 0; // Determine if we need to rotate
+            double scale = 1.0; // Keep the original scale
+
+            // Get the rotation matrix for rotating the image around its center
+            Mat rotationMatrix = Imgproc.getRotationMatrix2D(rectCenter, angle, scale);
+            // Rotate the image
+            Imgproc.warpAffine(coloredBinaryImage, rotatedImage, rotationMatrix, coloredBinaryImage.size());
+
+            // After rotation, the rectangle's coordinates need to be updated or recalculated
+            // This step is complex as it involves transforming the rectangle's corners by the rotation matrix
+            // and then calculating the bounding rectangle of the transformed points.
+
+            if (angle != 0) { // Since angle is always 90 degrees clockwise in this scenario
+                // Calculate new coordinates of the rectangle after a 90-degree clockwise rotation
+                int newX = rect.y;
+                int newY = coloredBinaryImage.cols() - rect.x - rect.width;
+                int newWidth = rect.height;
+                int newHeight = rect.width;
+
+                // Create a new Rect object with these dimensions
+                Rect rotatedRect = new Rect(newX, newY, newWidth, newHeight);
+
+                // Process the rectangle as needed
+                processRectangle(rotatedImage, rotatedRect);
+
+                // If you rotate the image back after processing, you don't need to adjust the coordinates
+                // of the original rectangle since you're working with a clone of the image for processing
+                // and the original image remains unchanged.
+            } else {
+                processRectangle(rotatedImage, rect);
             }
         }
 
@@ -740,7 +784,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Find Stem
         Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
         Point divisionPoint2 = new Point(rect.x + rect.width / 2, rect.y + rect.height);
-        //Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
+        Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
 
         int quadrantHeight = 4 * (rect.height / 10);
         int quadrantWidth = rect.width / 2;
@@ -761,8 +805,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         //Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
         int thousandsDigit = resizingThousands(coloredBinaryImage, quadrantThousands);
 
-        arabicResult = thousandsDigit*1000 + hundredsDigit*100 + tensDigit*10 + unitsDigit;
-        System.out.println("FINAL ARABIC RESULT IS " + arabicResult);
+        arabicResult = thousandsDigit + hundredsDigit + tensDigit + unitsDigit;
+        System.out.println("ARABIC RESULT IS " + arabicResult);
+        System.out.println(thousandsDigit + " + " + hundredsDigit + " + " + tensDigit + " + " + unitsDigit + " = " + arabicResult);
 
         arabicResults.add(arabicResult);
         updateResultsDisplay(); // Refresh the display with the new list of results
@@ -956,7 +1001,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsUnits.add(subQuadrantUnits8);
             subQuadrantsUnits.add(subQuadrantUnits9);
 
-            //drawSubQuadrants(image, subQuadrantsUnits);
+            drawSubQuadrants(image, subQuadrantsUnits);
             unitsDigitResult = detectValidSubQuadrants(image, subQuadrantsUnits);
             //System.out.println("THE NUMBER IN UNITS IS " + unitsDigitResult);
         }
@@ -1128,11 +1173,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsTens.add(subQuadrantTens8);
             subQuadrantsTens.add(subQuadrantTens9);
 
-            //drawSubQuadrants(image, subQuadrantsTens);
+            drawSubQuadrants(image, subQuadrantsTens);
             tensDigitResult = detectValidSubQuadrants(image, subQuadrantsTens);
             //System.out.println("THE NUMBER IN TENS IS " + tensDigitResult);
         }
-        return tensDigitResult;
+        return tensDigitResult * 10;
     }
 
 // *******************************************************************************************************************
@@ -1299,11 +1344,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsHundreds.add(subQuadrantHundreds8);
             subQuadrantsHundreds.add(subQuadrantHundreds9);
 
-            //drawSubQuadrants(image, subQuadrantsHundreds);
+            drawSubQuadrants(image, subQuadrantsHundreds);
             hundredsDigitResult = detectValidSubQuadrants(image, subQuadrantsHundreds);
             //System.out.println("THE NUMBER IN HUNDREDS IS " + hundredsDigitResult);
         }
-        return hundredsDigitResult;
+        return hundredsDigitResult * 100;
     }
 
 // *******************************************************************************************************************
@@ -1469,11 +1514,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsThousands.add(subQuadrantThousands8);
             subQuadrantsThousands.add(subQuadrantThousands9);
 
-            //drawSubQuadrants(image, subQuadrantsThousands);
+            drawSubQuadrants(image, subQuadrantsThousands);
             thousandsDigitResult = detectValidSubQuadrants(image, subQuadrantsThousands);
             //System.out.println("THE NUMBER IN THOUSANDS IS " + thousandsDigitResult);
         }
-        return thousandsDigitResult;
+        return thousandsDigitResult * 1000;
     }
 
 // *******************************************************************************************************************
@@ -1594,6 +1639,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private int mapFlaggedSubQuadrantsToNumber(Set<Integer> flaggedSubQuadrants) {
         // Define patterns corresponding to numbers
+//        Set<Integer> patternForNumber0 = new HashSet<>(Collections.emptyList());
         Set<Integer> patternForNumber1 = new HashSet<>(Arrays.asList(1, 2, 3));
         Set<Integer> patternForNumber2 = new HashSet<>(Arrays.asList(7, 8, 9));
         Set<Integer> patternForNumber3 = new HashSet<>(Arrays.asList(1, 5, 9));
@@ -1605,6 +1651,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Set<Integer> patternForNumber9 = new HashSet<>(Arrays.asList(1, 2, 3, 6, 7, 8, 9));
 
         // Check against each pattern
+//        if (flaggedSubQuadrants.equals(patternForNumber0)) {
+//            return 0; // Matches pattern for Number 0
+//        }
         if (flaggedSubQuadrants.equals(patternForNumber1)) {
             return 1; // Matches pattern for Number 1
         } else if (flaggedSubQuadrants.equals(patternForNumber2)) {
@@ -1641,5 +1690,37 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
         resultsView.setText(resultsText.toString());
+    }
+
+
+    private Bitmap drawTextOnBitmap(Bitmap bitmap, List<Rect> rectangles, List<Integer> results) {
+        Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(mutableBitmap);
+
+        // Prepare the paint for drawing text
+        Paint paint = new Paint();
+        paint.setColor(Color.RED); // Text color
+        paint.setTextSize(50); // Text size
+        paint.setTextAlign(Paint.Align.CENTER); // Center text
+
+        // Ensure rectangles and results lists match in size
+        if (rectangles.size() != results.size()) {
+            Log.e("Error", "Rectangles and results lists size mismatch.");
+            return mutableBitmap;
+        }
+
+        for (int i = 0; i < rectangles.size(); i++) {
+            Rect rect = rectangles.get(i);
+            int result = results.get(i);
+
+            // Calculate the center of the rectangle
+            int centerX = rect.x + rect.width / 2;
+            int centerY = rect.y + rect.height / 2 + (int)(paint.getTextSize() / 2); // Adjust for baseline
+
+            // Draw the text at the center of the rectangle
+            canvas.drawText(String.valueOf(result), centerX, centerY, paint);
+        }
+
+        return mutableBitmap;
     }
 }
