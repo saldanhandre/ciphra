@@ -6,10 +6,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
+import android.opengl.Matrix;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,6 +53,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
     private Mat matImage;
     private int imageHeight;
     private List<Integer> arabicResults = new ArrayList<>();
+    private List<Rect> finalFilteredRects = new ArrayList<>();
+    private List<Rect> foundRecsAfterCountours = new ArrayList<>();
 
     // Load openCV library
     static {
@@ -139,7 +144,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Mat coloredBinaryImage = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC3);
         Imgproc.cvtColor(binaryImage, coloredBinaryImage, Imgproc.COLOR_GRAY2BGR);
         // Find Contours and approximate them
-        findAndApproximateContours(edgeDetectedImage, coloredBinaryImage);
+        foundRecsAfterCountours = findAndApproximateContours(edgeDetectedImage, coloredBinaryImage);
+        // Draw the Quadrants
+        drawQuadrants(coloredBinaryImage, foundRecsAfterCountours);
         // Convert processed Mat back to Bitmap
         Utils.matToBitmap(coloredBinaryImage, bitmap);
 
@@ -150,7 +157,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         });
     }
 
-    private void findAndApproximateContours(Mat edgeDetectedImage, Mat coloredBinaryImage) {
+    private List<Rect> findAndApproximateContours(Mat edgeDetectedImage, Mat coloredBinaryImage) {
         System.out.println("findAndApproximateContours");
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
@@ -176,8 +183,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         // Filter out rectangles that are inside other rectangles
-        List<Rect> filteredRects = filterRectangles(boundingRects, imageHeight, coloredBinaryImage);
-        drawQuadrants(coloredBinaryImage, filteredRects);
+        List<Rect> foundRecs = filterRectangles(boundingRects, imageHeight, coloredBinaryImage);
+
+        return foundRecs;
     }
 
     private List<Rect> filterRectangles(List<Rect> rects, int imageHeight, Mat image) {
@@ -185,7 +193,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         List<Rect> sizeFilteredRects = new ArrayList<>(); // List of rectangles that pass filter 1
         List<Rect> uniqueFilteredRects = new ArrayList<>(); // List of rectangles that pass filters 1 and 2
         Set<String> uniqueRectSignatures = new HashSet<>(); // Signatures for filter 2
-        List<Rect> finalFilteredRects = new ArrayList<>(); // Set of rectangles that pass filters 1, 2, and 3
+        //List<Rect> finalFilteredRects = new ArrayList<>(); // Set of rectangles that pass filters 1, 2, and 3 (already initialized in the beginning)
 
         // Filter 1 - Filter out rectangles that are too small
         double minHeightThreshold = 0.15 * imageHeight; // Minimum height of a rectangle
@@ -198,6 +206,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         /*
         // Extra filter -  filter out rectangles that dont have a stem
+        NOTE FROM PAST SELF: PARA SEGMENTS QUE ESTAO SEPARADOS DA MAIN STEM, VER SE UMA GRANDE MAIORIA DA PERCENTAGEM DOS PIXELS
+        ]E PRETA, SE FOR VERDADE E SE O COMPRIMENTO FOR MENOS DE METADE DO COMPRIMENTO TO MAIOR RECT (SE PELO MENOS 50% DOS RECTS TIVEREM
+        O MESMO GRANDE COMPRIMENTO OU SIOMILAR), ]E PORQUE ]E UM SEGMENTO SEPARADO, ENTAO TEM DE SER ENCONTRAR A STEM DELE.
         for (Rect rect : sizeFilteredRects) {
             Mat rotatedImage = image.clone(); // Clone the image for rotation
 
@@ -205,11 +216,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 // Rotate the image 90 degrees clockwise
                 Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_COUNTERCLOCKWISE);
                 Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
-                processRectangle(rotatedImage, rotatedRect);
+                processCipher(rotatedImage, rotatedRect);
                 Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_CLOCKWISE);
             } else {
                 //System.out.println("rectangle was NOT rotated");
-                processRectangle(coloredBinaryImage, rect);
+                processCipher(coloredBinaryImage, rect);
             }
 
         }
@@ -252,35 +263,60 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
 
-    private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
+    private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) { //NAME FINDQUADRANTS IN THE FUTURE
         //System.out.println("drawQuadrants called");
         // Draw the bounding rectangles that passed the filter
 
-        /*
+
 
         for (Rect rect : filteredRects) {
             Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
-            //System.out.println("clones rotated");
+            int numberResult = 0;
+
             // Draw the bounding rectangle
             //Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
 
             if (rect.width > rect.height) {
                 // Rotate the image 90 degrees clockwise
-                //System.out.println("rectangle was rotated");
+                /*
                 Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_CLOCKWISE);
                 Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
-                processRectangle(rotatedImage, rotatedRect);
+                numberResult = processCipher(rotatedImage, rotatedRect);
                 Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_COUNTERCLOCKWISE);
+
+                 */
+
+
+                // Perform the rotation with the new dimensions
+                Mat provisorio = cloneAndCropImageWithPadding(coloredBinaryImage, rect, 90);
+                Imgproc.cvtColor(provisorio, provisorio, Imgproc.COLOR_BGR2RGB);
+
+                // Convert the rotated Mat to a Bitmap
+                Bitmap provisorioBitmap = Bitmap.createBitmap(provisorio.cols(), provisorio.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(provisorio, provisorioBitmap);
+
+                // Set the Bitmap to the ImageView
+                ImageView imageView = findViewById(R.id.image_display_view_provisorio);
+                //imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                imageView.setImageBitmap(provisorioBitmap);
+
             } else {
                 //System.out.println("rectangle was NOT rotated");
-                processRectangle(coloredBinaryImage, rect);
+                numberResult = processCipher(coloredBinaryImage, rect);
             }
+            arabicResults.add(numberResult);
+            displayResultsOnImageOverlay(coloredBinaryImage, finalFilteredRects, arabicResults);
         }
 
-         */
+
+
+
+
+        /*
 
         for (Rect rect : filteredRects) {
             Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
+            int numberResult = 0;
 
             Point rectCenter = new Point(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
             double angle = rect.width > rect.height ? 90 : 0; // Determine if we need to rotate
@@ -292,8 +328,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Imgproc.warpAffine(coloredBinaryImage, rotatedImage, rotationMatrix, coloredBinaryImage.size());
 
             // After rotation, the rectangle's coordinates need to be updated or recalculated
-            // This step is complex as it involves transforming the rectangle's corners by the rotation matrix
-            // and then calculating the bounding rectangle of the transformed points.
 
             if (angle != 0) { // Since angle is always 90 degrees clockwise in this scenario
                 // Calculate new coordinates of the rectangle after a 90-degree clockwise rotation
@@ -306,15 +340,18 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 Rect rotatedRect = new Rect(newX, newY, newWidth, newHeight);
 
                 // Process the rectangle as needed
-                processRectangle(rotatedImage, rotatedRect);
-
-                // If you rotate the image back after processing, you don't need to adjust the coordinates
-                // of the original rectangle since you're working with a clone of the image for processing
-                // and the original image remains unchanged.
+                numberResult = processCipher(rotatedImage, rotatedRect);
             } else {
-                processRectangle(rotatedImage, rect);
+                numberResult = processCipher(rotatedImage, rect);
             }
+            arabicResults.add(numberResult);
+            displayResultsOnImageOverlay(coloredBinaryImage, finalFilteredRects, arabicResults);
         }
+
+         */
+
+
+
 
         // ***************** TRY TO MAKE IT DETECT DIAGONAL CIPHERS ************************
 
@@ -608,6 +645,46 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     }
 
+    public static Mat cloneAndCropImageWithPadding(Mat src, Rect rect, double angle) {
+        // Clone the source image to preserve the original
+        Mat clonedSrc = src.clone();
+
+        // Crop the cloned image by the specified rectangle
+        Mat croppedImage = clonedSrc.submat(rect).clone(); // Clone to detach from original image
+
+        // Define the padding dynamically based on the dimensions of the cropped image
+        int padding = Math.max(croppedImage.width(), croppedImage.height()) / 2;
+
+        // Calculate new size with padding
+        int paddedWidth = croppedImage.width() + 2 * padding;
+        int paddedHeight = croppedImage.height() + 2 * padding;
+
+        // Create a new image with the padded size
+        Mat paddedImage = new Mat(paddedHeight, paddedWidth, croppedImage.type(), new Scalar(255, 0, 0));
+
+        // Determine the ROI within the padded image where the cropped image will be placed
+        int roiX = padding;
+        int roiY = padding;
+
+        // Place the cropped image in the center of the padded image
+        croppedImage.copyTo(paddedImage.submat(roiY, roiY + croppedImage.height(), roiX, roiX + croppedImage.width()));
+
+        // Calculate the center of the original rectangle within the padded image
+        Point center = new Point(roiX + croppedImage.width() / 2.0, roiY + croppedImage.height() / 2.0);
+
+        // Get the rotation matrix for the specified angle around the rectangle's center in the padded image
+        Mat rotationMatrix = Imgproc.getRotationMatrix2D(center, -angle, 1.0);
+
+        // Determine the size of the rotated image (could be the same as padded image size to keep everything)
+        Size rotatedSize = new Size(paddedImage.width(), paddedImage.height());
+
+        // Perform the rotation
+        Mat rotatedImage = new Mat();
+        Imgproc.warpAffine(paddedImage, rotatedImage, rotationMatrix, rotatedSize);
+
+        return rotatedImage;
+    }
+
     public Mat rotateImage(Mat src, double angle, Point center) {
         // Get the rotation matrix for the specified angle
         Mat rotationMatrix = Imgproc.getRotationMatrix2D(center, angle, 1.0);
@@ -779,7 +856,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         return new Point(xNew, yNew);
     }
 
-    private int processRectangle(Mat coloredBinaryImage, Rect rect) {
+    private int processCipher(Mat coloredBinaryImage, Rect rect) {
         int arabicResult = 0;
         // Find Stem
         Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
@@ -791,26 +868,27 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         Rect quadrantUnits = new Rect(rect.x + quadrantWidth, rect.y, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
-        int unitsDigit = resizingUnits(coloredBinaryImage, quadrantUnits);
+        int unitsValue = findUnitsValue(coloredBinaryImage, quadrantUnits);
 
         Rect quadrantTens = new Rect(rect.x, rect.y, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
-        int tensDigit = resizingTens(coloredBinaryImage, quadrantTens);
+        int tensValue = findTensValue(coloredBinaryImage, quadrantTens);
 
         Rect quadrantHundreds = new Rect(rect.x + quadrantWidth, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
-        int hundredsDigit = resizingHundreds(coloredBinaryImage, quadrantHundreds);
+        int hundredsValue = findHundredsValue(coloredBinaryImage, quadrantHundreds);
 
         Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
-        int thousandsDigit = resizingThousands(coloredBinaryImage, quadrantThousands);
+        int thousandsValue = findThousandsValue(coloredBinaryImage, quadrantThousands);
 
-        arabicResult = thousandsDigit + hundredsDigit + tensDigit + unitsDigit;
+        arabicResult = thousandsValue + hundredsValue + tensValue + unitsValue;
         System.out.println("ARABIC RESULT IS " + arabicResult);
-        System.out.println(thousandsDigit + " + " + hundredsDigit + " + " + tensDigit + " + " + unitsDigit + " = " + arabicResult);
+        System.out.println(thousandsValue + " + " + hundredsValue + " + " + tensValue + " + " + unitsValue + " = " + arabicResult);
 
-        arabicResults.add(arabicResult);
-        updateResultsDisplay(); // Refresh the display with the new list of results
+        //arabicResults.add(arabicResult);
+        //updateResultsDisplay(); // Refresh the display with the new list of
+
         return arabicResult;
     }
 
@@ -837,7 +915,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 // *******************************************************************************************************************
 
-    private int resizingUnits(Mat image, Rect rect) {
+    private int findUnitsValue(Mat image, Rect rect) {
         int unitsDigitResult = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
@@ -1010,7 +1088,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 // *******************************************************************************************************************
 
-    private int resizingTens(Mat image, Rect rect) {
+    private int findTensValue(Mat image, Rect rect) {
         int tensDigitResult = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
@@ -1182,7 +1260,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 // *******************************************************************************************************************
 
-    private int resizingHundreds(Mat image, Rect rect) {
+    private int findHundredsValue(Mat image, Rect rect) {
         int hundredsDigitResult = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
@@ -1353,7 +1431,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 // *******************************************************************************************************************
 
-    private int resizingThousands(Mat image, Rect rect) {
+    private int findThousandsValue(Mat image, Rect rect) {
         int thousandsDigitResult = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
@@ -1692,35 +1770,57 @@ public class ImageDisplayActivity extends AppCompatActivity {
         resultsView.setText(resultsText.toString());
     }
 
+    private void displayResultsOnImageOverlay(Mat imageMat, List<Rect> cipherRects, List<Integer> results) {
+        FrameLayout layout = findViewById(R.id.imageOverlayLayout);
 
-    private Bitmap drawTextOnBitmap(Bitmap bitmap, List<Rect> rectangles, List<Integer> results) {
-        Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-        Canvas canvas = new Canvas(mutableBitmap);
+        // Assuming ImageView is the first child and clear previous TextViews
+        layout.removeViews(1, layout.getChildCount() - 1);
 
-        // Prepare the paint for drawing text
-        Paint paint = new Paint();
-        paint.setColor(Color.RED); // Text color
-        paint.setTextSize(50); // Text size
-        paint.setTextAlign(Paint.Align.CENTER); // Center text
-
-        // Ensure rectangles and results lists match in size
-        if (rectangles.size() != results.size()) {
-            Log.e("Error", "Rectangles and results lists size mismatch.");
-            return mutableBitmap;
-        }
-
-        for (int i = 0; i < rectangles.size(); i++) {
-            Rect rect = rectangles.get(i);
+        for (int i = 0; i < cipherRects.size(); i++) {
+            final Rect rect = cipherRects.get(i);
             int result = results.get(i);
 
-            // Calculate the center of the rectangle
-            int centerX = rect.x + rect.width / 2;
-            int centerY = rect.y + rect.height / 2 + (int)(paint.getTextSize() / 2); // Adjust for baseline
+            final TextView resultView = new TextView(this);
+            resultView.setText(String.valueOf(result));
+            resultView.setTextColor(Color.RED); // Text color
+            resultView.setTextSize(20); // Text size
+            resultView.setGravity(Gravity.CENTER);
 
-            // Draw the text at the center of the rectangle
-            canvas.drawText(String.valueOf(result), centerX, centerY, paint);
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT);
+
+            // Calculate center position of the TextView
+            // Assume getImageScale() correctly adjusts for any scaling applied by the ImageView
+            float scale = getImageScale(imageMat, layout);
+            int centerX = (int) ((rect.x + rect.width / 2.0f) * scale);
+            int centerY = (int) ((rect.y + rect.height / 2.0f) * scale);
+
+            // Initially, place TextView in the approximate center
+            params.leftMargin = centerX;
+            params.topMargin = centerY;
+
+            layout.addView(resultView, params);
+
+            // Dynamically adjust TextView position after it's been added to the layout
+            resultView.post(() -> {
+                // Adjust params based on actual TextView size
+                params.leftMargin = centerX - resultView.getWidth() / 2;
+                params.topMargin = centerY - resultView.getHeight() / 2;
+                resultView.setLayoutParams(params);
+            });
         }
+    }
 
-        return mutableBitmap;
+    /**
+     * Calculate scaling factor between Mat dimensions and ImageView dimensions
+     * if ImageView is scaled. Adjust this method to match your actual scaling logic.
+     */
+    private float getImageScale(Mat imageMat, FrameLayout layout) {
+        ImageView imageView = layout.findViewById(R.id.image_display_view);
+        float widthScale = (float) imageView.getWidth() / imageMat.cols();
+        float heightScale = (float) imageView.getHeight() / imageMat.rows();
+        // Use either widthScale or heightScale depending on your scaling strategy
+        return widthScale; // or heightScale
     }
 }
