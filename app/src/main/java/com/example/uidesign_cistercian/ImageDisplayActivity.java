@@ -176,7 +176,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
             // Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
-            //Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 0, 255), 2);
+            Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 0, 255), 2);
             // Calculate bounding rectangle for each contour
             Rect boundingRect = Imgproc.boundingRect(contour);
             boundingRects.add(boundingRect);
@@ -263,11 +263,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
 
-    private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) { //NAME FINDQUADRANTS IN THE FUTURE
+    private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
         //System.out.println("drawQuadrants called");
         // Draw the bounding rectangles that passed the filter
 
-
+        /*
 
         for (Rect rect : filteredRects) {
             Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
@@ -278,13 +278,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             if (rect.width > rect.height) {
                 // Rotate the image 90 degrees clockwise
-                /*
+
                 Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_CLOCKWISE);
                 Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
                 numberResult = processCipher(rotatedImage, rotatedRect);
                 Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_COUNTERCLOCKWISE);
 
-                 */
 
 
                 // Perform the rotation with the new dimensions
@@ -308,190 +307,55 @@ public class ImageDisplayActivity extends AppCompatActivity {
             displayResultsOnImageOverlay(coloredBinaryImage, finalFilteredRects, arabicResults);
         }
 
-
-
-
-
-        /*
-
-        for (Rect rect : filteredRects) {
-            Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
-            int numberResult = 0;
-
-            Point rectCenter = new Point(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
-            double angle = rect.width > rect.height ? 90 : 0; // Determine if we need to rotate
-            double scale = 1.0; // Keep the original scale
-
-            // Get the rotation matrix for rotating the image around its center
-            Mat rotationMatrix = Imgproc.getRotationMatrix2D(rectCenter, angle, scale);
-            // Rotate the image
-            Imgproc.warpAffine(coloredBinaryImage, rotatedImage, rotationMatrix, coloredBinaryImage.size());
-
-            // After rotation, the rectangle's coordinates need to be updated or recalculated
-
-            if (angle != 0) { // Since angle is always 90 degrees clockwise in this scenario
-                // Calculate new coordinates of the rectangle after a 90-degree clockwise rotation
-                int newX = rect.y;
-                int newY = coloredBinaryImage.cols() - rect.x - rect.width;
-                int newWidth = rect.height;
-                int newHeight = rect.width;
-
-                // Create a new Rect object with these dimensions
-                Rect rotatedRect = new Rect(newX, newY, newWidth, newHeight);
-
-                // Process the rectangle as needed
-                numberResult = processCipher(rotatedImage, rotatedRect);
-            } else {
-                numberResult = processCipher(rotatedImage, rect);
-            }
-            arabicResults.add(numberResult);
-            displayResultsOnImageOverlay(coloredBinaryImage, finalFilteredRects, arabicResults);
-        }
-
          */
-
-
-
-
-        // ***************** TRY TO MAKE IT DETECT DIAGONAL CIPHERS ************************
-
 
 
         for (Rect rect : filteredRects) {
             Line stem = findStem(coloredBinaryImage, rect);
-            stem.draw(coloredBinaryImage);
+            //stem.draw(coloredBinaryImage);
 
-
-
-            // ***************** TRY NUMBER 4 ************************
-
-
-
-            Rect roi = new Rect(rect.x, rect.y, rect.width, rect.height); // Rectangle specifying the ROI
-            Mat cipherImage = new Mat(coloredBinaryImage, roi); // Extracting the ROI from the image
+            int numberResult = 0;
 
             double angle = stem.getSmallestAngleFromVertical(); // Rotation angle in degrees
-            System.out.println("THIS IS THE ANGLE: " + angle);
 
-            // Calculate the center of the cipher image
-            Point center = new Point(cipherImage.width() / 2.0, cipherImage.height() / 2.0);
-
-            // Calculate new dimensions for the rotatedSize based on the angle
-            double angleRad = Math.toRadians(angle);
-            double cosAngle = Math.abs(Math.cos(angleRad));
-            double sinAngle = Math.abs(Math.sin(angleRad));
-            int newWidth = (int) Math.ceil(cipherImage.width() * cosAngle + cipherImage.height() * sinAngle);
-            int newHeight = (int) Math.ceil(cipherImage.width() * sinAngle + cipherImage.height() * cosAngle);
-            Size rotatedSize = new Size(newWidth, newHeight);
-
-            // Adjust the rotation matrix for the new center (since the image size changes, the center might shift)
-            Point newCenter = new Point(newWidth / 2.0, newHeight / 2.0);
-            Mat rotationMatrix = Imgproc.getRotationMatrix2D(newCenter, angle, 1.0);
+            List<Rect> foundRecs = new ArrayList<>();
 
             // Perform the rotation with the new dimensions
-            Mat rotatedCipher = new Mat();
-            Imgproc.warpAffine(cipherImage, rotatedCipher, rotationMatrix, rotatedSize, Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, new Scalar(255, 0, 0));
+            Mat provisorio = cloneAndCropImageWithPadding(coloredBinaryImage, rect, -angle);
+            //Imgproc.cvtColor(provisorio, provisorio, Imgproc.COLOR_BGR2RGB);
+
+
+            // Convert to Grayscale
+            Imgproc.cvtColor(provisorio, provisorio, Imgproc.COLOR_RGB2GRAY);
+                    // Apply Gaussian Blur for noise reduction
+                    //Imgproc.GaussianBlur(provisorio, provisorio, new Size(5, 5), 0);
+            // Apply Binary Threshold
+            Mat binaryImage = new Mat(); // keep copy of binary image for future processing
+            Imgproc.threshold(provisorio, provisorio, 155, 255, Imgproc.THRESH_BINARY);
+            // Apply Canny Edge Detection
+            Mat edgeDetectedImage = new Mat();
+            Imgproc.Canny(provisorio, provisorio, 100, 200);
+            // Convert matImage to 3 channels
+            Mat imageToPresent = new Mat();
+            Imgproc.cvtColor(binaryImage, imageToPresent, Imgproc.COLOR_GRAY2BGR);
+            // Find Contours and approximate them
+            foundRecs = findAndApproximateContours(edgeDetectedImage, imageToPresent);
+            // Draw the Rectangles
+            numberResult = processCipher(coloredBinaryImage, foundRecs.get(0));
 
             // Convert the rotated Mat to a Bitmap
-            Bitmap bitmapImage = Bitmap.createBitmap(rotatedCipher.cols(), rotatedCipher.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(rotatedCipher, bitmapImage);
+            Bitmap provisorioBitmap = Bitmap.createBitmap(provisorio.cols(), provisorio.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(provisorio, provisorioBitmap);
 
             // Set the Bitmap to the ImageView
             ImageView imageView = findViewById(R.id.image_display_view_provisorio);
-            imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            imageView.setImageBitmap(bitmapImage);
+            //imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            imageView.setImageBitmap(provisorioBitmap);
 
-
-
-            // ***************** TRY NUMBER 3 ************************
-
-            /*
-
-
-            double xLeftLimit = 0, xRightLimit = 0, yTopLimit = 0, yBottomLimit = 0;
-            double angle = -stem.getSmallestAngleFromVertical(); // Rotation angle in degrees
-            System.out.println("the angle is " + angle);
-
-            List<Point> rotatedRectCorners = rotateRectangle(rect, angle);
-                        // Print the coordinates of the rotated corners
-                        for (Point corner : rotatedRectCorners) {
-                            System.out.println("after (" + corner + ")");
-                        }
-
-            /*
-            if (angle <= 0) {
-                xLeftLimit = rotatedRectCorners.get(0).x;
-                yTopLimit = rotatedRectCorners.get(1).y;
-                xRightLimit = rotatedRectCorners.get(2).x;
-                yBottomLimit = rotatedRectCorners.get(3).y;
-            } else {
-                yTopLimit = rotatedRectCorners.get(0).y;
-                xRightLimit = rotatedRectCorners.get(1).x;
-                yBottomLimit = rotatedRectCorners.get(2).y;
-                xLeftLimit = rotatedRectCorners.get(3).x;
-            }
-
-             */
-            /*
-
-            if (angle <= 0) {
-                xLeftLimit = rect.y + rect.height;
-                yTopLimit = rect.tl();
-                xRightLimit = rect.x + rect.width;
-                yBottomLimit = rect.x + rect.width + rect.height;
-            } else {
-                yTopLimit = rotatedRectCorners.get(0).y;
-                xRightLimit = rotatedRectCorners.get(1).x;
-                yBottomLimit = rotatedRectCorners.get(2).y;
-                xLeftLimit = rotatedRectCorners.get(3).x;
-            }
-
-            Mat rotatedImage = rotateImage(coloredBinaryImage, angle, rectMiddlePoint);
-            Mat croppedImage = cropImage(rotatedImage, yTopLimit, yBottomLimit, xLeftLimit, xRightLimit);
-
-            int guidelineRectWidth = croppedImage.cols() / 50;
-            int guidelineRectHeight = croppedImage.cols() / 2;
-            int topLimitY = 0, bottomLimitY = 0;
-            Line topLine = null;
-            Line bottomLine = null;
-
-            // Define a
-            Rect guidelineRectTop = new Rect((int)rectMiddlePoint.x - guidelineRectWidth/2, 0, guidelineRectWidth, guidelineRectHeight);
-            // iterate through the rectangle to find the first black pixel from the other side
-            for (int y = guidelineRectTop.y; y < guidelineRectHeight; y++) {
-                for (int x = guidelineRectTop.x; x < guidelineRectTop.x + guidelineRectWidth; x++) {
-                    double[] pixel = croppedImage.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        topLimitY = y;
-                        topLine = new Line(new Point(0,topLimitY), new Point(croppedImage.cols()-1,topLimitY), new Scalar(0, 255, 0), 1);
-                        break;
-                    }
-                }
-                if (topLimitY != -1)
-                    break; // Exit the outer loop as well after defining the top line
-            }
-
-            Rect guidelineRectBottom = new Rect((int)rectMiddlePoint.x - guidelineRectWidth/2, (int)rectMiddlePoint.y, guidelineRectWidth, guidelineRectHeight - guidelineRectHeight/2);
-            for (int y = guidelineRectBottom.y + guidelineRectHeight; y > guidelineRectBottom.y; y--) {
-                for (int x = guidelineRectBottom.x; x < guidelineRectBottom.x + guidelineRectWidth; x++) {
-                    double[] pixel = croppedImage.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        bottomLimitY = y;
-                        bottomLine = new Line(new Point(0,bottomLimitY), new Point(croppedImage.cols()-1,bottomLimitY), new Scalar(0, 255, 0), 1);
-                        break;
-                    }
-                }
-                if (bottomLimitY != -1)
-                    break; // Exit the outer loop as well after "drawing" the second line
-            }
-
-            int cypherRectangleHeight = bottomLimitY - topLimitY;
-            int cypherRectangleWidth = 2*(cypherRectangleHeight/3);
-
-            Rect cypherRectangle = new Rect((int)rectMiddlePoint.x - cypherRectangleWidth/2, topLimitY, cypherRectangleWidth, cypherRectangleHeight);
-
-            */
+            arabicResults.add(numberResult);
+            updateResultsDisplay();
         }
+
     }
 
     private Line findStem(Mat image, Rect rect) {
@@ -502,7 +366,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Point rectMiddlePoint = new Point(rect.x + rect.width / 2.00, rect.y + rect.height / 2.00);
 
         // Draw the bounding rectangle
-        Imgproc.rectangle(image, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+        //Imgproc.rectangle(image, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
 
         boolean stemFound = false;
         boolean firstCheckDone = false;
@@ -755,123 +619,36 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
 
-    public Mat cropImage(Mat originalImage, double top, double bottom, double left, double right) {
-        // Ensure the crop coordinates are within the image bounds and are integers
-        int x = (int) Math.max(left, 0);
-        int y = (int) Math.max(top, 0);
-        int width = (int) Math.min(right - left, originalImage.cols() - x);
-        int height = (int) Math.min(bottom - top, originalImage.rows() - y);
+    // *******************************************************************************************************************
 
-        // Define the rectangle for cropping
-        Rect cropRect = new Rect(x, y, width, height);
+    // SubQuadrant class
+    private static class SubQuadrant {
+        Rect rect;
+        double blackPixelPercentage;
 
-        // Crop the image
-        Mat croppedImage = new Mat(originalImage, cropRect);
-
-        return croppedImage;
-    }
-
-    private Rect findSingleCipherBoundingRectInRotatedImage(Mat originalImage, double angle, Point rotationCenter) {
-        // Rotate the image
-        Mat rotatedImage = new Mat();
-        Size imageSize = originalImage.size();
-        Mat rotationMatrix = Imgproc.getRotationMatrix2D(rotationCenter, angle, 1.0);
-        Imgproc.warpAffine(originalImage, rotatedImage, rotationMatrix, imageSize, Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS);
-
-        // Now find contours in the rotated image
-        List<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
-        Imgproc.findContours(rotatedImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        // Assuming the target is the largest contour
-        Rect boundingRect = null;
-        double maxArea = 0;
-        for (MatOfPoint contour : contours) {
-            double contourArea = Imgproc.contourArea(contour);
-            if (contourArea > maxArea) {
-                maxArea = contourArea;
-                boundingRect = Imgproc.boundingRect(contour);
-            }
+        SubQuadrant(Rect rect, double blackPixelPercentage) {
+            this.rect = rect;
+            this.blackPixelPercentage = blackPixelPercentage;
         }
 
-        // boundingRect is now aligned with the rotated image
-        return boundingRect;
-    }
-
-
-
-    private Rect findBoundingRectangleWithRadiusExpansion(Mat image, Point startPoint, int stepSize, Mat visualizationImage) {
-        // Initialize variables to define the search area, starting from the startPoint
-        int left = (int) startPoint.x;
-        int right = (int) startPoint.x;
-        int top = (int) startPoint.y;
-        int bottom = (int) startPoint.y;
-
-        boolean foundBlackPixel = true;
-        Scalar boxColor = new Scalar(0, 255, 0); // color for visualization boxes
-
-        // Continue expanding the search area as long as black pixels are found
-        while (foundBlackPixel) {
-            foundBlackPixel = false; // Reset flag for each expansion step
-
-            // Temporarily store the expanded bounds
-            int newLeft = Math.max(left - stepSize, 0);
-            int newRight = Math.min(right + stepSize, image.cols() - 1);
-            int newTop = Math.max(top - stepSize, 0);
-            int newBottom = Math.min(bottom + stepSize, image.rows() - 1);
-
-            // Draw the current bounding box for visualization
-            Imgproc.rectangle(visualizationImage, new Point(newLeft, newTop), new Point(newRight, newBottom), boxColor, 2);
-
-            // Scan the expanded area for black pixels
-            for (int x = newLeft; x <= newRight; x++) {
-                for (int y = newTop; y <= newBottom; y++) {
-                    // Only check the perimeter of the expanded area to reduce calculations
-                    if (x == newLeft || x == newRight || y == newTop || y == newBottom) {
-                        double[] pixelValue = image.get(y, x);
-                        if (pixelValue != null && pixelValue[0] == 0) { // Assuming a binary image where black pixels have a value of 0
-                            System.out.println("Pixel Found");
-                            // Update the search area bounds if a black pixel is found
-                            left = newLeft;
-                            right = newRight;
-                            top = newTop;
-                            bottom = newBottom;
-                            foundBlackPixel = true;
-                            break; // Exit the loop early if a black pixel is found
-                        }
-                    }
-                }
-                if (foundBlackPixel) break; // Exit the outer loop early if a black pixel is found
-            }
+        public Rect getRect() {
+            return rect;
         }
 
-        // Calculate the width and height of the bounding rectangle
-        int width = right - left + 1;
-        int height = bottom - top + 1;
-
-        // Create and return the bounding rectangle
-        return new Rect(left, top, width, height);
+        public double getBlackPixelPercentage() {
+            return blackPixelPercentage;
+        }
     }
 
-    private Point rotatePoint(Point center, double angleDegrees, int width, int height) {
-        double radians = Math.toRadians(angleDegrees);
-        double sin = Math.sin(radians);
-        double cos = Math.cos(radians);
-        // This will rotate the point around the center of the rectangle
-        double xNew = center.x + (width / 2.0) * cos - (height / 2.0) * sin;
-        double yNew = center.y + (width / 2.0) * sin + (height / 2.0) * cos;
-        return new Point(xNew, yNew);
-    }
+// *******************************************************************************************************************
+
 
     private int processCipher(Mat coloredBinaryImage, Rect rect) {
+        int quadrantWidth = rect.width / 2;
+        int quadrantHeight = 2 * (rect.height / 3);
         int arabicResult = 0;
         // Find Stem
         Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
-        Point divisionPoint2 = new Point(rect.x + rect.width / 2, rect.y + rect.height);
-        Imgproc.line(coloredBinaryImage, divisionPoint1, divisionPoint2, new Scalar(0, 255, 255), 2);
-
-        int quadrantHeight = 4 * (rect.height / 10);
-        int quadrantWidth = rect.width / 2;
 
         Rect quadrantUnits = new Rect(rect.x + quadrantWidth, rect.y, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
@@ -898,29 +675,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         return arabicResult;
     }
-
-    // *******************************************************************************************************************
-
-    // SubQuadrant class
-    private static class SubQuadrant {
-        Rect rect;
-        double blackPixelPercentage;
-
-        SubQuadrant(Rect rect, double blackPixelPercentage) {
-            this.rect = rect;
-            this.blackPixelPercentage = blackPixelPercentage;
-        }
-
-        public Rect getRect() {
-            return rect;
-        }
-
-        public double getBlackPixelPercentage() {
-            return blackPixelPercentage;
-        }
-    }
-
-// *******************************************************************************************************************
 
     private int findUnitsValue(Mat image, Rect rect) {
         int unitsDigitResult = 0;
@@ -1703,7 +1457,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // iterate through each pixel
         for (int y = subQuadrant.y; y < (subQuadrant.y + subQuadrant.height); y++) {
             for (int x = subQuadrant.x; x < (subQuadrant.x + subQuadrant.width); x++) {
-                double[] pixel = coloredBinaryImage.get(y, x);
+                double[] pixel = coloredBinaryImage.get(y, x); //
                 // check if pixel is black
                 if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
                     blackPixelCount++;
