@@ -43,7 +43,7 @@ public class Line {
         return Math.sqrt(dx * dx + dy * dy); // Distance formula
     }
 
-    public double getSmallestInclinationAngleFromVertical() {
+    public double getSmallestAngleFromVertical() {
         // Calculate the differences in the x and y coordinates
         double dx = pt2.x - pt1.x;
         double dy = pt2.y - pt1.y;

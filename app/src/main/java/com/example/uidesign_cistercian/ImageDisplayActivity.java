@@ -288,7 +288,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
                 // Perform the rotation with the new dimensions
-                Mat provisorio = cloneAndCropImageWithPadding(coloredBinaryImage, rect, 90);
+                Mat provisorio = cloneAndCropImageWithPadding(coloredBinaryImage, rect, 48);
                 Imgproc.cvtColor(provisorio, provisorio, Imgproc.COLOR_BGR2RGB);
 
                 // Convert the rotated Mat to a Bitmap
@@ -355,173 +355,22 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // ***************** TRY TO MAKE IT DETECT DIAGONAL CIPHERS ************************
 
-        /*
+
 
         for (Rect rect : filteredRects) {
-            Map<Line, Double> percentages1stCheck = new HashMap<>();
-            Map<Line, Double> percentages2ndCheck = new HashMap<>();
-            Map<Line, Double> percentagesTop4 = new HashMap<>();
+            Line stem = findStem(coloredBinaryImage, rect);
+            stem.draw(coloredBinaryImage);
 
-            Point rectMiddlePoint = new Point(rect.x + rect.width/2.00, rect.y + rect.height/2.00);
-
-            // Draw the bounding rectangle
-            //Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
-
-            boolean stemFound = false;
-            boolean firstCheckDone = false;
-            boolean secondCheckDone = false;
-            boolean similarPercentages = false;
-
-            Line stem = null;
-
-            if(!stemFound) {
-                for (int a = 0; a <= 40; a++) {
-                    Point divisionPoint1 = new Point(rect.x, rect.y + a * (rect.height / 40.0));
-                    Point divisionPoint2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 40.0)));
-                    stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
-
-                    double percentage = stem.getBlackPixelPercentage(coloredBinaryImage);
-                    percentages1stCheck.put(stem, percentage);
-
-                    if (percentage >= 90) {
-                        stem.draw(coloredBinaryImage);
-                        stemFound = true;
-                        break;
-                    }
-                }
-                firstCheckDone = true;
-            }
-            if(!stemFound && firstCheckDone) {
-                for (int a = 0; a <= 40; a++) {
-                    Point divisionPoint1 = new Point(rect.x + rect.width - (a * (rect.width / 40.0)), rect.y);
-                    Point divisionPoint2 = new Point(rect.x + a * (rect.width / 40.0), rect.y + rect.height);
-                    stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0 , 0, 255), 1);
-
-                    double percentage = stem.getBlackPixelPercentage(coloredBinaryImage);
-                    percentages2ndCheck.put(stem, percentage);
-
-                    if (percentage >= 90) {
-                        stem.draw(coloredBinaryImage);
-                        stemFound = true;
-                        break;
-                    }
-
-                    //stemCandidate.draw(coloredBinaryImage);
-                }
-                secondCheckDone = true;
-            }
-            if(!stemFound && firstCheckDone && secondCheckDone) {
-                // For 1st check
-                // create list with the map entries of the percentages
-                List<Map.Entry<Line, Double>> sortedEntries1 = new ArrayList<>(percentages1stCheck.entrySet());
-                // Sort the list in descending order
-                sortedEntries1.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-
-                // Initialize the largest percentages of the 1st Check
-                Map.Entry<Line, Double> biggestPercent1stCheck = null;
-                Map.Entry<Line, Double> secondBiggestPercent1stCheck = null;
-
-                if (!sortedEntries1.isEmpty()) {
-                    biggestPercent1stCheck = sortedEntries1.get(0); // largest percentage in the 1st check
-                    if (sortedEntries1.size() > 1) {
-                        secondBiggestPercent1stCheck = sortedEntries1.get(1); // second largest percentage in the 1st check
-                    }
-                }
-
-                // Add the largest 2 percentages to the Top 4 Map
-                percentagesTop4.put(biggestPercent1stCheck.getKey(), biggestPercent1stCheck.getValue());
-                percentagesTop4.put(secondBiggestPercent1stCheck.getKey(), secondBiggestPercent1stCheck.getValue());
-
-                // draw the 2 largest percentages of the check 1
-                //biggestPercent1stCheck.getKey().draw(coloredBinaryImage);
-                //secondBiggestPercent1stCheck.getKey().draw(coloredBinaryImage);
-
-                // For 2nd check
-                // create list with the map entries of the percentages
-                List<Map.Entry<Line, Double>> sortedEntries2 = new ArrayList<>(percentages2ndCheck.entrySet());
-                // Sort the list in descending order
-                sortedEntries2.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-
-                // Initialize the largest percentages of the 2nd Check
-                Map.Entry<Line, Double> biggestPercent2ndCheck = null;
-                Map.Entry<Line, Double> secondBiggestPercent2ndCheck = null;
-
-                if (!sortedEntries2.isEmpty()) {
-                    biggestPercent2ndCheck = sortedEntries2.get(0); // largest percentage in the 2nd check
-                    if (sortedEntries2.size() > 1) {
-                        secondBiggestPercent2ndCheck = sortedEntries2.get(1); // second largest percentage in the 2nd check
-                    }
-                }
-
-                // Add the largest 2 percentages to the Top 4 Map
-                percentagesTop4.put(biggestPercent2ndCheck.getKey(), biggestPercent2ndCheck.getValue());
-                percentagesTop4.put(secondBiggestPercent2ndCheck.getKey(), secondBiggestPercent2ndCheck.getValue());
-
-                // draw the 2 largest percentages of the check 2
-                //biggestPercent2ndCheck.getKey().draw(coloredBinaryImage);
-                //secondBiggestPercent2ndCheck.getKey().draw(coloredBinaryImage);
-
-                // create list with the map entries of the top 4 percentages
-                List<Map.Entry<Line, Double>> top4List = new ArrayList<>(percentagesTop4.entrySet());
-                // Sort the list in descending order
-                top4List.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-
-                // Initialize the largest percentages
-                Map.Entry<Line, Double> largestPercentage = null;
-                Map.Entry<Line, Double> secondLargestPercentage = null;
-
-                if (Math.abs(biggestPercent2ndCheck.getValue() - biggestPercent1stCheck.getValue()) <= 9) {
-                    similarPercentages = true;
-                }
-
-                if (!percentagesTop4.isEmpty() && !similarPercentages) {
-                    largestPercentage = top4List.get(0); // largest percentage
-                    if (percentagesTop4.size() > 1) {
-                        secondLargestPercentage = top4List.get(1); // second largest percentage
-                    }
-                } else if (!percentagesTop4.isEmpty() && similarPercentages) {
-                    largestPercentage = biggestPercent1stCheck;
-                    secondLargestPercentage = biggestPercent2ndCheck;
-                }
-
-                // draw the 2 largest percentages of the rectangle
-                 //largestPercentage.getKey().draw(coloredBinaryImage);
-                 //secondLargestPercentage.getKey().draw(coloredBinaryImage);
-
-                Point intersectionPoint = new Point();
-                intersectionPoint = largestPercentage.getKey().getIntersectionPoint(secondLargestPercentage.getKey());
-
-                // Create the 2 candidates for Stem, by making lines between opposite corners of the 2 largestPercentage lines
-                Line stemCandidate1 = new Line(largestPercentage.getKey().getPt1(), secondLargestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
-                Line stemCandidate2 = new Line(secondLargestPercentage.getKey().getPt1(), largestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
-                if (stemCandidate1.getLength() < largestPercentage.getKey().getLength()) {
-                    stemCandidate1 = new Line(largestPercentage.getKey().getPt1(), secondLargestPercentage.getKey().getPt1(), new Scalar(255, 50, 50), 2);
-                    stemCandidate2 = new Line(secondLargestPercentage.getKey().getPt2(), largestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
-                }
-
-                // draw the 2 stem candidates
-                // stemCandidate1.draw(coloredBinaryImage);
-                // stemCandidate2.draw(coloredBinaryImage);
-
-                // Create a line that unites the intersection point with the candidates - stem guideline
-                Line stemGuideline = new Line(stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint), stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint), new Scalar(0, 0, 255), 1);
-                // draw it
-                //stemGuideline.draw(coloredBinaryImage);
-
-                Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(coloredBinaryImage);
-                stem = stemGuideline.getStemLine(coloredBinaryImage, stemMiddlePoint);
-                stem.draw(coloredBinaryImage);
-            }
 
 
             // ***************** TRY NUMBER 4 ************************
 
-            /*
+
 
             Rect roi = new Rect(rect.x, rect.y, rect.width, rect.height); // Rectangle specifying the ROI
             Mat cipherImage = new Mat(coloredBinaryImage, roi); // Extracting the ROI from the image
 
-            double angle = stem.getSmallestInclinationAngleFromVertical(); // Rotation angle in degrees
+            double angle = stem.getSmallestAngleFromVertical(); // Rotation angle in degrees
             System.out.println("THIS IS THE ANGLE: " + angle);
 
             // Calculate the center of the cipher image
@@ -560,7 +409,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
             double xLeftLimit = 0, xRightLimit = 0, yTopLimit = 0, yBottomLimit = 0;
-            double angle = -stem.getSmallestInclinationAngleFromVertical(); // Rotation angle in degrees
+            double angle = -stem.getSmallestAngleFromVertical(); // Rotation angle in degrees
             System.out.println("the angle is " + angle);
 
             List<Point> rotatedRectCorners = rotateRectangle(rect, angle);
@@ -642,7 +491,165 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect cypherRectangle = new Rect((int)rectMiddlePoint.x - cypherRectangleWidth/2, topLimitY, cypherRectangleWidth, cypherRectangleHeight);
 
             */
+        }
+    }
 
+    private Line findStem(Mat image, Rect rect) {
+        Map<Line, Double> percentages1stCheck = new HashMap<>();
+        Map<Line, Double> percentages2ndCheck = new HashMap<>();
+        Map<Line, Double> percentagesTop4 = new HashMap<>();
+
+        Point rectMiddlePoint = new Point(rect.x + rect.width / 2.00, rect.y + rect.height / 2.00);
+
+        // Draw the bounding rectangle
+        Imgproc.rectangle(image, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+
+        boolean stemFound = false;
+        boolean firstCheckDone = false;
+        boolean secondCheckDone = false;
+        boolean similarPercentages = false;
+
+        Line stem = null;
+
+        if (!stemFound) {
+            for (int a = 0; a <= 40; a++) {
+                Point divisionPoint1 = new Point(rect.x, rect.y + a * (rect.height / 40.0));
+                Point divisionPoint2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 40.0)));
+                stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
+
+                double percentage = stem.getBlackPixelPercentage(image);
+                percentages1stCheck.put(stem, percentage);
+
+                if (percentage >= 90) {
+                    //stem.draw(image);
+                    stemFound = true;
+                    break;
+                }
+            }
+            firstCheckDone = true;
+        }
+        if (!stemFound && firstCheckDone) {
+            for (int a = 0; a <= 40; a++) {
+                Point divisionPoint1 = new Point(rect.x + rect.width - (a * (rect.width / 40.0)), rect.y);
+                Point divisionPoint2 = new Point(rect.x + a * (rect.width / 40.0), rect.y + rect.height);
+                stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
+
+                double percentage = stem.getBlackPixelPercentage(image);
+                percentages2ndCheck.put(stem, percentage);
+
+                if (percentage >= 90) {
+                    //stem.draw(image);
+                    stemFound = true;
+                    break;
+                }
+
+                //stemCandidate.draw(coloredBinaryImage);
+            }
+            secondCheckDone = true;
+        }
+        if (!stemFound && firstCheckDone && secondCheckDone) {
+            // For 1st check
+            // create list with the map entries of the percentages
+            List<Map.Entry<Line, Double>> sortedEntries1 = new ArrayList<>(percentages1stCheck.entrySet());
+            // Sort the list in descending order
+            sortedEntries1.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+            // Initialize the largest percentages of the 1st Check
+            Map.Entry<Line, Double> biggestPercent1stCheck = null;
+            Map.Entry<Line, Double> secondBiggestPercent1stCheck = null;
+
+            if (!sortedEntries1.isEmpty()) {
+                biggestPercent1stCheck = sortedEntries1.get(0); // largest percentage in the 1st check
+                if (sortedEntries1.size() > 1) {
+                    secondBiggestPercent1stCheck = sortedEntries1.get(1); // second largest percentage in the 1st check
+                }
+            }
+
+            // Add the largest 2 percentages to the Top 4 Map
+            percentagesTop4.put(biggestPercent1stCheck.getKey(), biggestPercent1stCheck.getValue());
+            percentagesTop4.put(secondBiggestPercent1stCheck.getKey(), secondBiggestPercent1stCheck.getValue());
+
+            // draw the 2 largest percentages of the check 1
+            //biggestPercent1stCheck.getKey().draw(coloredBinaryImage);
+            //secondBiggestPercent1stCheck.getKey().draw(coloredBinaryImage);
+
+            // For 2nd check
+            // create list with the map entries of the percentages
+            List<Map.Entry<Line, Double>> sortedEntries2 = new ArrayList<>(percentages2ndCheck.entrySet());
+            // Sort the list in descending order
+            sortedEntries2.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+            // Initialize the largest percentages of the 2nd Check
+            Map.Entry<Line, Double> biggestPercent2ndCheck = null;
+            Map.Entry<Line, Double> secondBiggestPercent2ndCheck = null;
+
+            if (!sortedEntries2.isEmpty()) {
+                biggestPercent2ndCheck = sortedEntries2.get(0); // largest percentage in the 2nd check
+                if (sortedEntries2.size() > 1) {
+                    secondBiggestPercent2ndCheck = sortedEntries2.get(1); // second largest percentage in the 2nd check
+                }
+            }
+
+            // Add the largest 2 percentages to the Top 4 Map
+            percentagesTop4.put(biggestPercent2ndCheck.getKey(), biggestPercent2ndCheck.getValue());
+            percentagesTop4.put(secondBiggestPercent2ndCheck.getKey(), secondBiggestPercent2ndCheck.getValue());
+
+            // draw the 2 largest percentages of the check 2
+            //biggestPercent2ndCheck.getKey().draw(coloredBinaryImage);
+            //secondBiggestPercent2ndCheck.getKey().draw(coloredBinaryImage);
+
+            // create list with the map entries of the top 4 percentages
+            List<Map.Entry<Line, Double>> top4List = new ArrayList<>(percentagesTop4.entrySet());
+            // Sort the list in descending order
+            top4List.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+            // Initialize the largest percentages
+            Map.Entry<Line, Double> largestPercentage = null;
+            Map.Entry<Line, Double> secondLargestPercentage = null;
+
+            if (Math.abs(biggestPercent2ndCheck.getValue() - biggestPercent1stCheck.getValue()) <= 9) {
+                similarPercentages = true;
+            }
+
+            if (!percentagesTop4.isEmpty() && !similarPercentages) {
+                largestPercentage = top4List.get(0); // largest percentage
+                if (percentagesTop4.size() > 1) {
+                    secondLargestPercentage = top4List.get(1); // second largest percentage
+                }
+            } else if (!percentagesTop4.isEmpty() && similarPercentages) {
+                largestPercentage = biggestPercent1stCheck;
+                secondLargestPercentage = biggestPercent2ndCheck;
+            }
+
+            // draw the 2 largest percentages of the rectangle
+            //largestPercentage.getKey().draw(coloredBinaryImage);
+            //secondLargestPercentage.getKey().draw(coloredBinaryImage);
+
+            Point intersectionPoint = new Point();
+            intersectionPoint = largestPercentage.getKey().getIntersectionPoint(secondLargestPercentage.getKey());
+
+            // Create the 2 candidates for Stem, by making lines between opposite corners of the 2 largestPercentage lines
+            Line stemCandidate1 = new Line(largestPercentage.getKey().getPt1(), secondLargestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
+            Line stemCandidate2 = new Line(secondLargestPercentage.getKey().getPt1(), largestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
+            if (stemCandidate1.getLength() < largestPercentage.getKey().getLength()) {
+                stemCandidate1 = new Line(largestPercentage.getKey().getPt1(), secondLargestPercentage.getKey().getPt1(), new Scalar(255, 50, 50), 2);
+                stemCandidate2 = new Line(secondLargestPercentage.getKey().getPt2(), largestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
+            }
+
+            // draw the 2 stem candidates
+            // stemCandidate1.draw(coloredBinaryImage);
+            // stemCandidate2.draw(coloredBinaryImage);
+
+            // Create a line that unites the intersection point with the candidates - stem guideline
+            Line stemGuideline = new Line(stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint), stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint), new Scalar(0, 0, 255), 1);
+            // draw it
+            //stemGuideline.draw(coloredBinaryImage);
+
+            Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(image);
+            stem = stemGuideline.getStemLine(image, stemMiddlePoint);
+            //stem.draw(image);
+        }
+        return stem;
     }
 
     public static Mat cloneAndCropImageWithPadding(Mat src, Rect rect, double angle) {
@@ -660,7 +667,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int paddedHeight = croppedImage.height() + 2 * padding;
 
         // Create a new image with the padded size
-        Mat paddedImage = new Mat(paddedHeight, paddedWidth, croppedImage.type(), new Scalar(255, 0, 0));
+        Mat paddedImage = new Mat(paddedHeight, paddedWidth, croppedImage.type(), new Scalar(255, 255, 255));
 
         // Determine the ROI within the padded image where the cropped image will be placed
         int roiX = padding;
