@@ -176,7 +176,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
             // Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
-            Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 0, 255), 2);
+            //Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 0, 255), 2);
             // Calculate bounding rectangle for each contour
             Rect boundingRect = Imgproc.boundingRect(contour);
             boundingRects.add(boundingRect);
@@ -318,44 +318,97 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             double angle = stem.getSmallestAngleFromVertical(); // Rotation angle in degrees
 
-            List<Rect> foundRecs = new ArrayList<>();
-
             // Perform the rotation with the new dimensions
-            Mat provisorio = cloneAndCropImageWithPadding(coloredBinaryImage, rect, -angle);
-            //Imgproc.cvtColor(provisorio, provisorio, Imgproc.COLOR_BGR2RGB);
-
-
+            Mat rotatedImage = cloneAndCropImageWithPadding(coloredBinaryImage, rect, -angle);
             // Convert to Grayscale
-            Imgproc.cvtColor(provisorio, provisorio, Imgproc.COLOR_RGB2GRAY);
-                    // Apply Gaussian Blur for noise reduction
-                    //Imgproc.GaussianBlur(provisorio, provisorio, new Size(5, 5), 0);
-            // Apply Binary Threshold
-            Mat binaryImage = new Mat(); // keep copy of binary image for future processing
-            Imgproc.threshold(provisorio, provisorio, 155, 255, Imgproc.THRESH_BINARY);
-            // Apply Canny Edge Detection
-            Mat edgeDetectedImage = new Mat();
-            Imgproc.Canny(provisorio, provisorio, 100, 200);
-            // Convert matImage to 3 channels
-            Mat imageToPresent = new Mat();
-            Imgproc.cvtColor(binaryImage, imageToPresent, Imgproc.COLOR_GRAY2BGR);
-            // Find Contours and approximate them
-            foundRecs = findAndApproximateContours(edgeDetectedImage, imageToPresent);
-            // Draw the Rectangles
-            numberResult = processCipher(coloredBinaryImage, foundRecs.get(0));
+            //Imgproc.cvtColor(rotatedImage, rotatedImage, Imgproc.COLOR_RGB2GRAY);
 
-            // Convert the rotated Mat to a Bitmap
-            Bitmap provisorioBitmap = Bitmap.createBitmap(provisorio.cols(), provisorio.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(provisorio, provisorioBitmap);
+            Rect boundingRect = expandUntilNoBlack(rotatedImage);
+            numberResult = processCipher(rotatedImage, boundingRect);
 
-            // Set the Bitmap to the ImageView
+            Bitmap bitmapImage = Bitmap.createBitmap(rotatedImage.cols(), rotatedImage.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(rotatedImage, bitmapImage);
+
             ImageView imageView = findViewById(R.id.image_display_view_provisorio);
-            //imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            imageView.setImageBitmap(provisorioBitmap);
+            imageView.setImageBitmap(bitmapImage);
 
             arabicResults.add(numberResult);
             updateResultsDisplay();
         }
+    }
 
+    public Rect expandUntilNoBlack(Mat image) {
+        int centerX = image.width() / 2;
+        int centerY = image.height() / 2;
+        int stepSize = 20; // Increment size
+        boolean foundBlack = false;
+
+        // Initial checking area with a starting size
+        int width = stepSize;
+        int height = stepSize;
+        int tries = 0; // Counter for the number of tries
+
+        do {
+            foundBlack = false; // Reset for each iteration
+            // Define the checking rectangle
+            Rect checkingArea = new Rect(Math.max(0, centerX - width / 2), Math.max(0, centerY - height / 2), width, height);
+
+            // Check for black pixels only on the edges of the checking area
+            // Top edge
+            for (int col = checkingArea.x; col < checkingArea.x + checkingArea.width; col++) {
+                if (isBlack(image, checkingArea.y, col)) {
+                    foundBlack = true;
+                    break;
+                }
+            }
+            // Bottom edge
+            if (!foundBlack) {
+                for (int col = checkingArea.x; col < checkingArea.x + checkingArea.width; col++) {
+                    if (isBlack(image, checkingArea.y + checkingArea.height - 1, col)) {
+                        foundBlack = true;
+                        break;
+                    }
+                }
+            }
+            // Left edge
+            if (!foundBlack) {
+                for (int row = checkingArea.y; row < checkingArea.y + checkingArea.height; row++) {
+                    if (isBlack(image, row, checkingArea.x)) {
+                        foundBlack = true;
+                        break;
+                    }
+                }
+            }
+            // Right edge
+            if (!foundBlack) {
+                for (int row = checkingArea.y; row < checkingArea.y + checkingArea.height; row++) {
+                    if (isBlack(image, row, checkingArea.x + checkingArea.width - 1)) {
+                        foundBlack = true;
+                        break;
+                    }
+                }
+            }
+
+            if (foundBlack) {
+                // Increase the checking area by the stepSize
+                width += stepSize;
+                height += stepSize;
+                tries++; // Increment the tries counter
+            }
+        } while (foundBlack); // Repeat if a black pixel was found on the edges
+
+        // Log the number of tries it took to find the rectangle
+        System.out.println("Rectangle found at try number: " + tries);
+
+        // Draw the final rectangle
+        Rect finalRect = new Rect(Math.max(0, centerX - width / 2), Math.max(0, centerY - height / 2), width, height);
+        Imgproc.rectangle(image, finalRect.tl(), finalRect.br(), new Scalar(255, 0, 0), 2); // Draw in red
+        return finalRect;
+    }
+
+    private boolean isBlack(Mat image, int row, int col) {
+        double[] pixel = image.get(row, col);
+        return pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0; // check if pixel is black
     }
 
     private Line findStem(Mat image, Rect rect) {

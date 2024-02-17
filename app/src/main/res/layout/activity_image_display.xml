@@ -46,15 +46,16 @@
             android:id="@+id/results"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="XXX"
             android:gravity="center"
+            android:text="XXX"
             android:textColor="#000000"
             android:textSize="30sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.914"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintVertical_bias="0.95"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.475" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
