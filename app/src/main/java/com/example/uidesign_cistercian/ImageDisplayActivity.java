@@ -323,8 +323,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // Convert to Grayscale
             //Imgproc.cvtColor(rotatedImage, rotatedImage, Imgproc.COLOR_RGB2GRAY);
 
+            // Get the bounding rect
             Rect boundingRect = expandUntilNoBlack(rotatedImage);
-            numberResult = processCipher(rotatedImage, boundingRect);
+
+            // resize the rect to fit exactly the cipher
+            Rect resizedRect = resizeRectangle(rotatedImage, boundingRect, true, true, true, true);
+            Imgproc.rectangle(rotatedImage, resizedRect.tl(), resizedRect.br(), new Scalar(0, 255, 0), 2);
+
+            // process the cipher and get number
+            numberResult = processCipher(rotatedImage, resizedRect);
 
             Bitmap bitmapImage = Bitmap.createBitmap(rotatedImage.cols(), rotatedImage.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(rotatedImage, bitmapImage);
@@ -401,12 +408,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         System.out.println("Rectangle found at try number: " + tries);
 
         // Draw the final rectangle
-        Rect finalRect = new Rect(Math.max(0, centerX - width / 2), Math.max(0, centerY - height / 2), width, height);
-        Rect resizedRect = resizeRectangle(image, finalRect, true, true, true, true);
-
-        //Imgproc.rectangle(image, finalRect.tl(), finalRect.br(), new Scalar(100, 100, 255), 2);
-        Imgproc.rectangle(image, resizedRect.tl(), resizedRect.br(), new Scalar(0, 255, 0), 2);
-        return resizedRect;
+        Rect boundingRect = new Rect(Math.max(0, centerX - width / 2), Math.max(0, centerY - height / 2), width, height);
+        //Imgproc.rectangle(image, boundingRect.tl(), boundingRect.br(), new Scalar(100, 100, 255), 2);
+        return boundingRect;
     }
 
     private boolean isPixelBlack(Mat image, int row, int col) {
@@ -746,10 +750,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private int processCipher(Mat coloredBinaryImage, Rect rect) {
         int quadrantWidth = rect.width / 2;
-        int quadrantHeight = 2 * (rect.height / 3);
+        int quadrantHeight = 4 * (rect.height / 10);
         int arabicResult = 0;
         // Find Stem
-        Point divisionPoint1 = new Point(rect.x + rect.width / 2, rect.y);
+        Point divisionPoint1 = new Point(rect.x + rect.width / 2.0, rect.y);
 
         Rect quadrantUnits = new Rect(rect.x + quadrantWidth, rect.y, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
@@ -851,7 +855,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Guideline Rectangle 3, to find bottomLimitX
         int guideline3Width = rightLimitX - leftLimitX;
-        int guideline3Height = 4 * (rect.height / 10);
+        int guideline3Height = rect.height / 2;
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline3Rect = new Rect(leftLimitX + (guideline3Width/20), rect.y + rect.height - guideline3Height, guideline3Width, guideline3Height);
             //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
@@ -877,7 +881,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 bottomLimitY = guideline3Rect.y + guideline3Height;
                 Point lineStart = new Point(guideline3Rect.x, bottomLimitY);
                 Point lineEnd = new Point(guideline3Rect.x + guideline3Width, bottomLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+                //Imgproc.line(image, lineStart, lineEnd, new Scalar(100, 0, 225), 1); // Draw the third line
             }
         }
 
@@ -900,7 +904,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         topLimitY = y;
                         Point lineStart = new Point(guideline4Rect.x, topLimitY);
                         Point lineEnd = new Point(guideline4Rect.x + guideline4Width, topLimitY);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
+                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
                         break;
                     }
                 }
@@ -941,7 +945,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsUnits.add(subQuadrantUnits8);
             subQuadrantsUnits.add(subQuadrantUnits9);
 
-            drawSubQuadrants(image, subQuadrantsUnits);
+            //drawSubQuadrants(image, subQuadrantsUnits);
             unitsDigitResult = detectValidSubQuadrants(image, subQuadrantsUnits);
             //System.out.println("THE NUMBER IN UNITS IS " + unitsDigitResult);
         }
@@ -1024,7 +1028,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Guideline Rectangle 3, to find bottomLimitX
         int guideline3Width = rightLimitX - leftLimitX;
-        int guideline3Height = 4 * (rect.height / 10);
+        int guideline3Height = rect.height / 2;
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline3Rect = new Rect(leftLimitX - (guideline3Width/20), rect.y + rect.height - guideline3Height, guideline3Width, guideline3Height);
             //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
@@ -1113,7 +1117,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsTens.add(subQuadrantTens8);
             subQuadrantsTens.add(subQuadrantTens9);
 
-            drawSubQuadrants(image, subQuadrantsTens);
+            //drawSubQuadrants(image, subQuadrantsTens);
             tensDigitResult = detectValidSubQuadrants(image, subQuadrantsTens);
             //System.out.println("THE NUMBER IN TENS IS " + tensDigitResult);
         }
@@ -1196,7 +1200,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Guideline Rectangle 3, to find topLimitX
         int guideline3Width = rightLimitX - leftLimitX;
-        int guideline3Height = 4 * (rect.height / 10);
+        int guideline3Height = rect.height / 2;
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline3Rect = new Rect(leftLimitX + (guideline3Width/20), rect.y, guideline3Width, guideline3Height);
             //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
@@ -1284,7 +1288,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsHundreds.add(subQuadrantHundreds8);
             subQuadrantsHundreds.add(subQuadrantHundreds9);
 
-            drawSubQuadrants(image, subQuadrantsHundreds);
+            //drawSubQuadrants(image, subQuadrantsHundreds);
             hundredsDigitResult = detectValidSubQuadrants(image, subQuadrantsHundreds);
             //System.out.println("THE NUMBER IN HUNDREDS IS " + hundredsDigitResult);
         }
@@ -1366,7 +1370,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Guideline Rectangle 3, to find topLimitX
         int guideline3Width = rightLimitX - leftLimitX;
-        int guideline3Height = 4 * (rect.height / 10);
+        int guideline3Height = rect.height / 2;
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline3Rect = new Rect(leftLimitX - (guideline3Width/20), rect.y, guideline3Width, guideline3Height);
             //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
@@ -1454,7 +1458,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsThousands.add(subQuadrantThousands8);
             subQuadrantsThousands.add(subQuadrantThousands9);
 
-            drawSubQuadrants(image, subQuadrantsThousands);
+            //drawSubQuadrants(image, subQuadrantsThousands);
             thousandsDigitResult = detectValidSubQuadrants(image, subQuadrantsThousands);
             //System.out.println("THE NUMBER IN THOUSANDS IS " + thousandsDigitResult);
         }
