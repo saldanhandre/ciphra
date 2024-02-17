@@ -719,68 +719,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         return rotatedImage;
     }
 
-    public Mat rotateImage(Mat src, double angle, Point center) {
-        // Get the rotation matrix for the specified angle
-        Mat rotationMatrix = Imgproc.getRotationMatrix2D(center, angle, 1.0);
-
-        // Determine the size of the new image to ensure it fits the entire rotated image
-        double absCos = Math.abs(rotationMatrix.get(0, 0)[0]);
-        double absSin = Math.abs(rotationMatrix.get(0, 1)[0]);
-        int newWidth = (int) (src.height() * absSin + src.width() * absCos);
-        int newHeight = (int) (src.height() * absCos + src.width() * absSin);
-
-        // Adjust the rotation matrix to take into account translation
-        rotationMatrix.put(0, 2, rotationMatrix.get(0, 2)[0] + (newWidth / 2) - center.x);
-        rotationMatrix.put(1, 2, rotationMatrix.get(1, 2)[0] + (newHeight / 2) - center.y);
-
-        // Perform the rotation
-        Mat dst = new Mat();
-        Imgproc.warpAffine(src, dst, rotationMatrix, new Size(newWidth, newHeight));
-
-        return dst;
-    }
-
-    public List<Point> rotateRectangle(Rect rectangle, double angleDegrees) {
-        // Calculate the center of the rectangle
-        double centerX = rectangle.x + rectangle.width / 2.0;
-        double centerY = rectangle.y + rectangle.height / 2.0;
-
-        // Convert angle from degrees to radians
-        double angleRadians = Math.toRadians(angleDegrees);
-
-        // Pre-calculate sine and cosine of the rotation angle
-        double cosAngle = Math.cos(angleRadians);
-        double sinAngle = Math.sin(angleRadians);
-
-        // Define the original corners of the rectangle
-        List<Point> originalCorners = new ArrayList<>();
-        originalCorners.add(new Point(rectangle.x, rectangle.y)); // Top-left
-        originalCorners.add(new Point(rectangle.x + rectangle.width, rectangle.y)); // Top-right
-        originalCorners.add(new Point(rectangle.x + rectangle.width, rectangle.y + rectangle.height)); // Bottom-right
-        originalCorners.add(new Point(rectangle.x, rectangle.y + rectangle.height)); // Bottom-left
-
-        // Calculate the new corners after rotation
-        List<Point> rotatedCorners = new ArrayList<>();
-        for (Point corner : originalCorners) {
-            // Translate point to origin (center of rectangle)
-            double translatedX = corner.x - centerX;
-            double translatedY = corner.y - centerY;
-
-            // Rotate point
-            double rotatedX = translatedX * cosAngle - translatedY * sinAngle;
-            double rotatedY = translatedX * sinAngle + translatedY * cosAngle;
-
-            // Translate point back
-            rotatedX += centerX;
-            rotatedY += centerY;
-
-            // Add rotated corner to the list
-            rotatedCorners.add(new Point(rotatedX, rotatedY));
-        }
-
-        return rotatedCorners;
-    }
-
 
     // *******************************************************************************************************************
 
