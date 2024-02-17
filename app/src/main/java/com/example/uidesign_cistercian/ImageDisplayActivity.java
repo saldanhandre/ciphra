@@ -344,8 +344,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
         boolean foundBlack = false;
 
         // Initial checking area with a starting size
-        int width = stepSize;
-        int height = stepSize;
+        int width = 60;
+        int height = 60;
         int tries = 0; // Counter for the number of tries
 
         do {
@@ -356,7 +356,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // Check for black pixels only on the edges of the checking area
             // Top edge
             for (int col = checkingArea.x; col < checkingArea.x + checkingArea.width; col++) {
-                if (isBlack(image, checkingArea.y, col)) {
+                if (isPixelBlack(image, checkingArea.y, col)) {
                     foundBlack = true;
                     break;
                 }
@@ -364,7 +364,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // Bottom edge
             if (!foundBlack) {
                 for (int col = checkingArea.x; col < checkingArea.x + checkingArea.width; col++) {
-                    if (isBlack(image, checkingArea.y + checkingArea.height - 1, col)) {
+                    if (isPixelBlack(image, checkingArea.y + checkingArea.height - 1, col)) {
                         foundBlack = true;
                         break;
                     }
@@ -373,7 +373,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // Left edge
             if (!foundBlack) {
                 for (int row = checkingArea.y; row < checkingArea.y + checkingArea.height; row++) {
-                    if (isBlack(image, row, checkingArea.x)) {
+                    if (isPixelBlack(image, row, checkingArea.x)) {
                         foundBlack = true;
                         break;
                     }
@@ -382,7 +382,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // Right edge
             if (!foundBlack) {
                 for (int row = checkingArea.y; row < checkingArea.y + checkingArea.height; row++) {
-                    if (isBlack(image, row, checkingArea.x + checkingArea.width - 1)) {
+                    if (isPixelBlack(image, row, checkingArea.x + checkingArea.width - 1)) {
                         foundBlack = true;
                         break;
                     }
@@ -402,14 +402,124 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Draw the final rectangle
         Rect finalRect = new Rect(Math.max(0, centerX - width / 2), Math.max(0, centerY - height / 2), width, height);
-        Imgproc.rectangle(image, finalRect.tl(), finalRect.br(), new Scalar(255, 0, 0), 2); // Draw in red
-        return finalRect;
+        Rect resizedRect = resizeRectangle(image, finalRect, true, true, true, true);
+
+        //Imgproc.rectangle(image, finalRect.tl(), finalRect.br(), new Scalar(100, 100, 255), 2);
+        Imgproc.rectangle(image, resizedRect.tl(), resizedRect.br(), new Scalar(0, 255, 0), 2);
+        return resizedRect;
     }
 
-    private boolean isBlack(Mat image, int row, int col) {
+    private boolean isPixelBlack(Mat image, int row, int col) {
         double[] pixel = image.get(row, col);
         return pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0; // check if pixel is black
     }
+
+
+    public Rect resizeRectangle(Mat image, Rect rect, boolean resizeTop, boolean resizeBottom, boolean resizeLeft, boolean resizeRight) {
+        int rectHeight = rect.height;
+        int rectWidth = rect.width;
+        int topLimitY = -1, bottomLimitY = -1, leftLimitX = -1, rightLimitX = -1;
+        boolean topLimitFound = false, bottomLimitFound = false, leftLimitFound = false, rightLimitFound = false;
+
+        //top
+        if (resizeTop) {
+            for (int y = rect.y; y < rectHeight; y++) {
+                for (int x = rect.x; x < rect.x + rectWidth; x++) {
+                    double[] pixel = image.get(y, x);
+                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                        topLimitFound = true;
+                        topLimitY = y;
+                        Point lineStart = new Point(rect.x, topLimitY);
+                        Point lineEnd = new Point(rect.x + rectWidth, topLimitY);
+                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                        break;
+                    }
+                }
+                if (topLimitY != -1)
+                    break; // Exit the outer loop as well after getting the top limit
+            }
+            if (!topLimitFound) {
+                topLimitY = rect.y;
+                Point lineStart = new Point(rect.x, topLimitY);
+                Point lineEnd = new Point(rect.x + rectWidth, topLimitY);
+                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+            }
+        }
+        if (resizeBottom) { //bottom
+            for (int y = rect.y + rectHeight; y > rect.y; y--) {
+                for (int x = rect.x; x < rect.x + rectWidth; x++) {
+                    double[] pixel = image.get(y, x);
+                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                        bottomLimitFound = true;
+                        bottomLimitY = y;
+                        Point lineStart = new Point(rect.x, bottomLimitY);
+                        Point lineEnd = new Point(rect.x + rectWidth, bottomLimitY);
+                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                        break;
+                    }
+                }
+                if (bottomLimitY != -1)
+                    break; // Exit the outer loop as well after getting the bottom limit
+            }
+            if (!bottomLimitFound) {
+                bottomLimitY = rect.y;
+                Point lineStart = new Point(rect.x, bottomLimitY);
+                Point lineEnd = new Point(rect.x + rectWidth, bottomLimitY);
+                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+            }
+        }
+        if (resizeLeft) { //left
+            for (int x = rect.x; x < rectWidth; x++) {
+                for (int y = rect.y; y < rect.y + rectHeight; y++) {
+                    double[] pixel = image.get(y, x);
+                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                        leftLimitFound = true;
+                        leftLimitX = x;
+                        Point lineStart = new Point(leftLimitX, rect.y);
+                        Point lineEnd = new Point(leftLimitX, rect.y + rectHeight);
+                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                        break;
+                    }
+                }
+                if (leftLimitX != -1)
+                    break; // Exit the outer loop as well after drawing 2nd line
+            }
+            if (!leftLimitFound) {
+                leftLimitX = rect.x + rectWidth;
+                Point lineStart = new Point(leftLimitX, rect.y);
+                Point lineEnd = new Point(leftLimitX, rect.y + rectHeight);
+                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+            }
+        }
+        if (resizeRight) { //right
+            for (int x = rect.x + rectWidth; x > rect.x; x--) {
+                for (int y = rect.y; y < rect.y + rectHeight; y++) {
+                    double[] pixel = image.get(y, x);
+                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                        rightLimitFound = true;
+                        rightLimitX = x;
+                        Point lineStart = new Point(rightLimitX, rect.y);
+                        Point lineEnd = new Point(rightLimitX, rect.y + rectHeight);
+                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                        break;
+                    }
+                }
+                if (rightLimitX != -1)
+                    break; // Exit the outer loop as well after drawing 2nd line
+            }
+            if (!rightLimitFound) {
+                rightLimitX = rect.x + rectWidth;
+                Point lineStart = new Point(rightLimitX, rect.y);
+                Point lineEnd = new Point(rightLimitX, rect.y + rectHeight);
+                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+            }
+        }
+
+        return new Rect(leftLimitX, topLimitY, rightLimitX - leftLimitX, bottomLimitY - topLimitY);
+    }
+
+
+
 
     private Line findStem(Mat image, Rect rect) {
         Map<Line, Double> percentages1stCheck = new HashMap<>();
