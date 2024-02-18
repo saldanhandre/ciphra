@@ -264,52 +264,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
-        //System.out.println("drawQuadrants called");
-        // Draw the bounding rectangles that passed the filter
-
-        /*
-
-        for (Rect rect : filteredRects) {
-            Mat rotatedImage = coloredBinaryImage.clone(); // Clone the image for rotation
-            int numberResult = 0;
-
-            // Draw the bounding rectangle
-            //Imgproc.rectangle(coloredBinaryImage, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
-
-            if (rect.width > rect.height) {
-                // Rotate the image 90 degrees clockwise
-
-                Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_CLOCKWISE);
-                Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
-                numberResult = processCipher(rotatedImage, rotatedRect);
-                Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_COUNTERCLOCKWISE);
-
-
-
-                // Perform the rotation with the new dimensions
-                Mat provisorio = cloneAndCropImageWithPadding(coloredBinaryImage, rect, 48);
-                Imgproc.cvtColor(provisorio, provisorio, Imgproc.COLOR_BGR2RGB);
-
-                // Convert the rotated Mat to a Bitmap
-                Bitmap provisorioBitmap = Bitmap.createBitmap(provisorio.cols(), provisorio.rows(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(provisorio, provisorioBitmap);
-
-                // Set the Bitmap to the ImageView
-                ImageView imageView = findViewById(R.id.image_display_view_provisorio);
-                //imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                imageView.setImageBitmap(provisorioBitmap);
-
-            } else {
-                //System.out.println("rectangle was NOT rotated");
-                numberResult = processCipher(coloredBinaryImage, rect);
-            }
-            arabicResults.add(numberResult);
-            displayResultsOnImageOverlay(coloredBinaryImage, finalFilteredRects, arabicResults);
-        }
-
-         */
-
-
         for (Rect rect : filteredRects) {
             Line stem = findStem(coloredBinaryImage, rect);
             //stem.draw(coloredBinaryImage);
@@ -748,28 +702,56 @@ public class ImageDisplayActivity extends AppCompatActivity {
 // *******************************************************************************************************************
 
 
-    private int processCipher(Mat coloredBinaryImage, Rect rect) {
+    private int processCipher(Mat image, Rect rect) {
         int quadrantWidth = rect.width / 2;
         int quadrantHeight = 4 * (rect.height / 10);
         int arabicResult = 0;
-        // Find Stem
-        Point divisionPoint1 = new Point(rect.x + rect.width / 2.0, rect.y);
 
-        Rect quadrantUnits = new Rect(rect.x + quadrantWidth, rect.y, quadrantWidth, quadrantHeight);
+        // Get the middle line of the rectangle, so that the quadrants are more exact
+        Point middlePoint1 = new Point(rect.x + rect.width/2.0, rect.y);
+        Point middlePoint2 = new Point(rect.x + rect.width/2.0, rect.y + rect.height);
+        Line rectMiddleLine = new Line(middlePoint1, middlePoint2, new Scalar(0, 255, 0), 1);
+        rectMiddleLine.draw(image);
+
+        // Create guideline for top and bottom sub stem
+        int guideRectWidth = rect.width / 6;
+
+        // Guideline for top substem
+        Point point1Top = new Point(rect.x + rect.width/2.0 - guideRectWidth/2.0, rect.y + quadrantHeight/2.0);
+        Point point2Top = new Point(rect.x + rect.width/2.0 + guideRectWidth/2.0, rect.y + quadrantHeight/2.0);
+        Line guidelineTop = new Line(point1Top, point2Top, new Scalar(0, 255, 0), 1);
+
+        // this finds the exact middle point inside of the stem, so that the calculations of the quadrants is exact
+        Point pointTop = guidelineTop.findMiddleBlackPixel(image);
+        int subStemXTop = (int) pointTop.x;
+
+
+        // Guideline for bottom substem
+        Point point1Bottom = new Point(rect.x + rect.width/2.0 - guideRectWidth/2.0, rect.y + rect.height - quadrantHeight/2.0);
+        Point point2Bottom = new Point(rect.x + rect.width/2.0 + guideRectWidth/2.0, rect.y + rect.height - quadrantHeight/2.0);
+        Line guidelineBottom = new Line(point1Bottom, point2Bottom, new Scalar(0, 255, 0), 1);
+
+        Point pointBottom = guidelineBottom.findMiddleBlackPixel(image);
+        int subStemXBottom = (int) pointBottom.x;
+
+
+
+
+        Rect quadrantUnits = new Rect(subStemXTop, rect.y, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
-        int unitsValue = findUnitsValue(coloredBinaryImage, quadrantUnits);
+        int unitsValue = findUnitsValue(image, quadrantUnits);
 
-        Rect quadrantTens = new Rect(rect.x, rect.y, quadrantWidth, quadrantHeight);
+        Rect quadrantTens = new Rect(rect.x, rect.y, subStemXTop - rect.x, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
-        int tensValue = findTensValue(coloredBinaryImage, quadrantTens);
+        int tensValue = findTensValue(image, quadrantTens);
 
-        Rect quadrantHundreds = new Rect(rect.x + quadrantWidth, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
+        Rect quadrantHundreds = new Rect(subStemXBottom, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
-        int hundredsValue = findHundredsValue(coloredBinaryImage, quadrantHundreds);
+        int hundredsValue = findHundredsValue(image, quadrantHundreds);
 
-        Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
+        Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, subStemXTop - rect.x, quadrantHeight);
         //Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
-        int thousandsValue = findThousandsValue(coloredBinaryImage, quadrantThousands);
+        int thousandsValue = findThousandsValue(image, quadrantThousands);
 
         arabicResult = thousandsValue + hundredsValue + tensValue + unitsValue;
         System.out.println("ARABIC RESULT IS " + arabicResult);
@@ -780,6 +762,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         return arabicResult;
     }
+
+// *******************************************************************************************************************
 
     private int findUnitsValue(Mat image, Rect rect) {
         int unitsDigitResult = 0;
@@ -945,7 +929,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsUnits.add(subQuadrantUnits8);
             subQuadrantsUnits.add(subQuadrantUnits9);
 
-            //drawSubQuadrants(image, subQuadrantsUnits);
+            drawSubQuadrants(image, subQuadrantsUnits);
             unitsDigitResult = detectValidSubQuadrants(image, subQuadrantsUnits);
             //System.out.println("THE NUMBER IN UNITS IS " + unitsDigitResult);
         }
@@ -1117,7 +1101,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsTens.add(subQuadrantTens8);
             subQuadrantsTens.add(subQuadrantTens9);
 
-            //drawSubQuadrants(image, subQuadrantsTens);
+            drawSubQuadrants(image, subQuadrantsTens);
             tensDigitResult = detectValidSubQuadrants(image, subQuadrantsTens);
             //System.out.println("THE NUMBER IN TENS IS " + tensDigitResult);
         }
@@ -1288,7 +1272,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsHundreds.add(subQuadrantHundreds8);
             subQuadrantsHundreds.add(subQuadrantHundreds9);
 
-            //drawSubQuadrants(image, subQuadrantsHundreds);
+            drawSubQuadrants(image, subQuadrantsHundreds);
             hundredsDigitResult = detectValidSubQuadrants(image, subQuadrantsHundreds);
             //System.out.println("THE NUMBER IN HUNDREDS IS " + hundredsDigitResult);
         }
@@ -1458,7 +1442,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsThousands.add(subQuadrantThousands8);
             subQuadrantsThousands.add(subQuadrantThousands9);
 
-            //drawSubQuadrants(image, subQuadrantsThousands);
+            drawSubQuadrants(image, subQuadrantsThousands);
             thousandsDigitResult = detectValidSubQuadrants(image, subQuadrantsThousands);
             //System.out.println("THE NUMBER IN THOUSANDS IS " + thousandsDigitResult);
         }
