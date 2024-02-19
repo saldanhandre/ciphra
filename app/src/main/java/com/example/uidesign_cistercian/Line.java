@@ -12,6 +12,9 @@ public class Line {
     public int thickness;
 
     public Line(Point pt1, Point pt2, Scalar color, int thickness) {
+        if (pt1 == null || pt2 == null) {
+            throw new IllegalArgumentException("Point objects pt1 and pt2 must not be null.");
+        }
         this.pt1 = pt1;
         this.pt2 = pt2;
         this.color = color;
@@ -112,7 +115,7 @@ public class Line {
     }
 
     // Method to calculate the largest black pixel stream that is uninterrupted along the line, result in percentage
-    public double getBlackPixelPercentage(Mat image) {
+    public double getUninterruptedBlackPixelPercentage(Mat image) {
         int maxBlackPixelStreak = 0;
         int currentStreak = 0;
         int totalPixels = 0;
@@ -132,7 +135,7 @@ public class Line {
         while (true) {
             if(currentX >= 0 && currentX < image.cols() && currentY >= 0 && currentY < image.rows()) {
                 double[] pixel = image.get(currentY, currentX);
-                if (pixel != null && pixel.length > 0 && pixel[0] == 0) { // assuming single-channel image for simplicity
+                if (pixel != null && pixel.length > 0 && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) { // assuming single-channel image for simplicity OU NAO
                     currentStreak++; // Increment current streak of black pixels
                     if (currentStreak > maxBlackPixelStreak) {
                         maxBlackPixelStreak = currentStreak; // Update max streak if current is larger
@@ -160,6 +163,99 @@ public class Line {
 
         // Calculate percentage of the largest black pixel streak relative to the total pixels in the line
         return totalPixels > 0 ? (double) maxBlackPixelStreak / totalPixels * 100 : 0;
+    }
+
+    public double getBlackPixelPercentage(Mat image) {
+        int totalBlackPixels = 0;
+        int totalPixels = 0;
+
+        int dx = Math.abs((int)pt2.x - (int)pt1.x);
+        int dy = Math.abs((int)pt2.y - (int)pt1.y);
+
+        int sx = (int)pt1.x < (int)pt2.x ? 1 : -1;
+        int sy = (int)pt1.y < (int)pt2.y ? 1 : -1;
+
+        int err = dx - dy;
+
+        int currentX = (int)pt1.x;
+        int currentY = (int)pt1.y;
+
+        while (true) {
+            if (currentX >= 0 && currentX < image.cols() && currentY >= 0 && currentY < image.rows()) {
+                double[] pixel = image.get(currentY, currentX);
+                // Check if pixel is black in a 3-channel image
+                if (pixel != null && pixel.length == 3 && pixel[0] <= 5 && pixel[1] <= 5 && pixel[2] <= 5) {
+                    totalBlackPixels++; // Increment total black pixels count
+                }
+            }
+            totalPixels++;
+
+            if (currentX == (int)pt2.x && currentY == (int)pt2.y) {
+                break;
+            }
+
+            int e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                currentX += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                currentY += sy;
+            }
+        }
+
+        // Calculate and return the percentage of the line covered by black pixels
+        return totalPixels > 0 ? (double) totalBlackPixels / totalPixels * 100.0 : 0;
+
+        /*
+
+        int totalBlackPixels = 0;
+        int totalPixels = 0;
+
+        int dx = Math.abs((int)pt2.x - (int)pt1.x);
+        int dy = Math.abs((int)pt2.y - (int)pt1.y);
+
+        int sx = (int)pt1.x < (int)pt2.x ? 1 : -1;
+        int sy = (int)pt1.y < (int)pt2.y ? 1 : -1;
+
+        int err = dx - dy;
+
+        int currentX = (int)pt1.x;
+        int currentY = (int)pt1.y;
+
+        while (true) {
+            // Check bounds
+            if(currentX >= 0 && currentX < image.cols() && currentY >= 0 && currentY < image.rows()) {
+                double[] pixel = image.get(currentY, currentX);
+                // Assuming a grayscale image
+                if (pixel != null && pixel.length > 0 && pixel[0] == 0) {
+                    totalBlackPixels++; // Increment total black pixels count
+                }
+            }
+            totalPixels++;
+
+            // Check end condition
+            if (currentX == (int)pt2.x && currentY == (int)pt2.y) {
+                break;
+            }
+
+            // Bresenham's algorithm step
+            int e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                currentX += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                currentY += sy;
+            }
+        }
+
+        // Calculate and return the percentage of the line covered by black pixels
+        return totalPixels > 0 ? (double) totalBlackPixels / totalPixels * 100.0 : 0;
+
+         */
     }
 
     public Point findMiddleBlackPixel(Mat image) {

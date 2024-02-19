@@ -56,6 +56,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
     private List<Rect> finalFilteredRects = new ArrayList<>();
     private List<Rect> foundRecsAfterCountours = new ArrayList<>();
 
+    // COLOURS
+    private final Scalar blue = new Scalar(0, 0, 255);
+    private final Scalar red = new Scalar(255, 0, 0);
+    private final Scalar green = new Scalar(0, 255, 0);
+    private final Scalar pink = new Scalar(255, 0, 255);
+    private final Scalar black = new Scalar(0, 0, 0);
+    private final Scalar white = new Scalar(255, 255, 255);
+
     // Load openCV library
     static {
         if (!OpenCVLoader.initDebug()) {
@@ -282,7 +290,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             // resize the rect to fit exactly the cipher
             Rect resizedRect = resizeRectangle(rotatedImage, boundingRect, true, true, true, true);
-            Imgproc.rectangle(rotatedImage, resizedRect.tl(), resizedRect.br(), new Scalar(0, 255, 0), 2);
+            //Imgproc.rectangle(rotatedImage, resizedRect.tl(), resizedRect.br(), new Scalar(0, 255, 0), 2);
 
             // process the cipher and get number
             numberResult = processCipher(rotatedImage, resizedRect);
@@ -498,11 +506,17 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         if (!stemFound) {
             for (int a = 0; a <= 40; a++) {
-                Point divisionPoint1 = new Point(rect.x, rect.y + a * (rect.height / 40.0));
-                Point divisionPoint2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 40.0)));
-                stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
+                Point p1 = new Point(rect.x, rect.y + a * (rect.height / 40.0));
+                Point p2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 40.0)));
+                Point divisionPoint1 = adjustPointToBounds(image, p1);
+                Point divisionPoint2 = adjustPointToBounds(image, p2);
+                if (divisionPoint1 != null && divisionPoint2 != null) {
+                    stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
+                } else {
+                    System.out.println("Print");
+                }
 
-                double percentage = stem.getBlackPixelPercentage(image);
+                double percentage = stem.getUninterruptedBlackPixelPercentage(image);
                 percentages1stCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
@@ -515,11 +529,17 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
         if (!stemFound && firstCheckDone) {
             for (int a = 0; a <= 40; a++) {
-                Point divisionPoint1 = new Point(rect.x + rect.width - (a * (rect.width / 40.0)), rect.y);
-                Point divisionPoint2 = new Point(rect.x + a * (rect.width / 40.0), rect.y + rect.height);
-                stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
+                Point p1 = new Point(rect.x + rect.width - (a * (rect.width / 40.0)), rect.y);
+                Point p2 = new Point(rect.x + a * (rect.width / 40.0), rect.y + rect.height);
+                Point divisionPoint1 = adjustPointToBounds(image, p1);
+                Point divisionPoint2 = adjustPointToBounds(image, p2);
+                if (divisionPoint1 != null && divisionPoint2 != null) {
+                    stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
+                } else {
+                    System.out.println("Print");
+                }
 
-                double percentage = stem.getBlackPixelPercentage(image);
+                double percentage = stem.getUninterruptedBlackPixelPercentage(image);
                 percentages2ndCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
@@ -614,12 +634,33 @@ public class ImageDisplayActivity extends AppCompatActivity {
             intersectionPoint = largestPercentage.getKey().getIntersectionPoint(secondLargestPercentage.getKey());
 
             // Create the 2 candidates for Stem, by making lines between opposite corners of the 2 largestPercentage lines
-            Line stemCandidate1 = new Line(largestPercentage.getKey().getPt1(), secondLargestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
-            Line stemCandidate2 = new Line(secondLargestPercentage.getKey().getPt1(), largestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
-            if (stemCandidate1.getLength() < largestPercentage.getKey().getLength()) {
-                stemCandidate1 = new Line(largestPercentage.getKey().getPt1(), secondLargestPercentage.getKey().getPt1(), new Scalar(255, 50, 50), 2);
-                stemCandidate2 = new Line(secondLargestPercentage.getKey().getPt2(), largestPercentage.getKey().getPt2(), new Scalar(255, 50, 50), 2);
+            Point largestP1 = largestPercentage.getKey().getPt1();
+            Point largestPercentageP1 = adjustPointToBounds(image, largestP1);
+
+            Point largestP2 = largestPercentage.getKey().getPt2();
+            Point largestPercentageP2 = adjustPointToBounds(image, largestP2);
+
+            Point secondLargestP1 = secondLargestPercentage.getKey().getPt1();
+            Point secondLargestPercentageP1 = adjustPointToBounds(image, secondLargestP1);
+
+            Point secondLargestP2 = secondLargestPercentage.getKey().getPt2();
+            Point secondLargestPercentageP2 = adjustPointToBounds(image, secondLargestP2);
+
+            Line stemCandidate1 = null, stemCandidate2 = null;
+
+            if (largestPercentageP1 != null && largestPercentageP2 != null && secondLargestPercentageP1 != null && secondLargestPercentageP2 != null) {
+                stemCandidate1 = new Line(largestPercentageP1, secondLargestPercentageP2, new Scalar(255, 50, 50), 2);
+                stemCandidate2 = new Line(secondLargestPercentageP1, largestPercentageP2, new Scalar(255, 50, 50), 2);
+                if (stemCandidate1.getLength() < largestPercentage.getKey().getLength()) {
+                    stemCandidate1 = new Line(largestPercentageP1, secondLargestPercentageP1, new Scalar(255, 50, 50), 2);
+                    stemCandidate2 = new Line(secondLargestPercentageP2, largestPercentageP2, new Scalar(255, 50, 50), 2);
+                }
+            } else {
+                System.out.println("Print");
             }
+
+
+
 
             // draw the 2 stem candidates
             // stemCandidate1.draw(coloredBinaryImage);
@@ -645,24 +686,25 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Mat croppedImage = clonedSrc.submat(rect).clone(); // Clone to detach from original image
 
         // Define the padding dynamically based on the dimensions of the cropped image
-        int padding = Math.max(croppedImage.width(), croppedImage.height()) / 2;
+        // This padding1 is the padding before rotation, so that the image doesn't go out of bounds
+        int padding1 = Math.max(croppedImage.width(), croppedImage.height()) / 3;
 
         // Calculate new size with padding
-        int paddedWidth = croppedImage.width() + 2 * padding;
-        int paddedHeight = croppedImage.height() + 2 * padding;
+        int paddedWidth1 = croppedImage.width() + 2 * padding1;
+        int paddedHeight1 = croppedImage.height() + 2 * padding1;
 
         // Create a new image with the padded size
-        Mat paddedImage = new Mat(paddedHeight, paddedWidth, croppedImage.type(), new Scalar(255, 255, 255));
+        Mat paddedImage = new Mat(paddedHeight1, paddedWidth1, croppedImage.type(), new Scalar(0, 255, 255));
 
         // Determine the ROI within the padded image where the cropped image will be placed
-        int roiX = padding;
-        int roiY = padding;
+        int roiX1 = padding1;
+        int roiY1 = padding1;
 
         // Place the cropped image in the center of the padded image
-        croppedImage.copyTo(paddedImage.submat(roiY, roiY + croppedImage.height(), roiX, roiX + croppedImage.width()));
+        croppedImage.copyTo(paddedImage.submat(roiY1, roiY1 + croppedImage.height(), roiX1, roiX1 + croppedImage.width()));
 
         // Calculate the center of the original rectangle within the padded image
-        Point center = new Point(roiX + croppedImage.width() / 2.0, roiY + croppedImage.height() / 2.0);
+        Point center = new Point(roiX1 + croppedImage.width() / 2.0, roiY1 + croppedImage.height() / 2.0);
 
         // Get the rotation matrix for the specified angle around the rectangle's center in the padded image
         Mat rotationMatrix = Imgproc.getRotationMatrix2D(center, -angle, 1.0);
@@ -674,7 +716,35 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Mat rotatedImage = new Mat();
         Imgproc.warpAffine(paddedImage, rotatedImage, rotationMatrix, rotatedSize);
 
-        return rotatedImage;
+        // pad again - padding2
+        int padding2 = 30;
+        // Calculate new size with padding
+        int paddedWidth2 = rotatedImage.width() + 2 * padding2;
+        int paddedHeight2 = rotatedImage.height() + 2 * padding2;
+        // Create a new image with the padded size
+        Mat finalImage = new Mat(paddedHeight2, paddedWidth2, rotatedImage.type(), new Scalar(255, 0, 255));
+        // Determine the ROI within the padded image where the cropped image will be placed
+        int roiX2 = padding2;
+        int roiY2 = padding2;
+        // Place the cropped image in the center of the padded image
+        rotatedImage.copyTo(finalImage.submat(roiY2, roiY2 + rotatedImage.height(), roiX2, roiX2 + rotatedImage.width()));
+
+        return finalImage;
+    }
+
+    private Point adjustPointToBounds(Mat image, Point point) {
+        double x = point.x;
+        double y = point.y;
+
+        // Adjust x if it's out of bounds
+        if (x < 0) x = 0;
+        else if (x >= image.cols()) x = image.cols() - 1;
+
+        // Adjust y if it's out of bounds
+        if (y < 0) y = 0;
+        else if (y >= image.rows()) y = image.rows() - 1;
+
+        return new Point(x, y);
     }
 
 
@@ -706,20 +776,34 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int quadrantWidth = rect.width / 2;
         int quadrantHeight = 4 * (rect.height / 10);
         int arabicResult = 0;
+        Line rectMiddleLine = null, guidelineTop = null, guidelineBottom = null;
 
         // Get the middle line of the rectangle, so that the quadrants are more exact
-        Point middlePoint1 = new Point(rect.x + rect.width/2.0, rect.y);
-        Point middlePoint2 = new Point(rect.x + rect.width/2.0, rect.y + rect.height);
-        Line rectMiddleLine = new Line(middlePoint1, middlePoint2, new Scalar(0, 255, 0), 1);
+        Point middle1 = new Point(rect.x + rect.width/2.0, rect.y);
+        Point middle2 = new Point(rect.x + rect.width/2.0, rect.y + rect.height);
+        Point middlePoint1 = adjustPointToBounds(image, middle1);
+        Point middlePoint2 = adjustPointToBounds(image, middle2);
+        if (middlePoint1 != null && middlePoint2 != null) {
+            rectMiddleLine = new Line(middlePoint1, middlePoint2, new Scalar(0, 255, 0), 1);
+        } else {
+            System.out.println("Print");
+        }
+
         rectMiddleLine.draw(image);
 
         // Create guideline for top and bottom sub stem
         int guideRectWidth = rect.width / 6;
 
         // Guideline for top substem
-        Point point1Top = new Point(rect.x + rect.width/2.0 - guideRectWidth/2.0, rect.y + quadrantHeight/2.0);
-        Point point2Top = new Point(rect.x + rect.width/2.0 + guideRectWidth/2.0, rect.y + quadrantHeight/2.0);
-        Line guidelineTop = new Line(point1Top, point2Top, new Scalar(0, 255, 0), 1);
+        Point top1 = new Point(rect.x + rect.width/2.0 - guideRectWidth/2.0, rect.y + quadrantHeight/2.0);
+        Point top2 = new Point(rect.x + rect.width/2.0 + guideRectWidth/2.0, rect.y + quadrantHeight/2.0);
+        Point point1Top = adjustPointToBounds(image, top1);
+        Point point2Top = adjustPointToBounds(image, top2);
+        if (point1Top != null && point2Top != null) {
+            guidelineTop = new Line(point1Top, point2Top, new Scalar(0, 255, 0), 1);
+        } else {
+            System.out.println("Print");
+        }
 
         // this finds the exact middle point inside of the stem, so that the calculations of the quadrants is exact
         Point pointTop = guidelineTop.findMiddleBlackPixel(image);
@@ -727,9 +811,16 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
         // Guideline for bottom substem
-        Point point1Bottom = new Point(rect.x + rect.width/2.0 - guideRectWidth/2.0, rect.y + rect.height - quadrantHeight/2.0);
-        Point point2Bottom = new Point(rect.x + rect.width/2.0 + guideRectWidth/2.0, rect.y + rect.height - quadrantHeight/2.0);
-        Line guidelineBottom = new Line(point1Bottom, point2Bottom, new Scalar(0, 255, 0), 1);
+        Point bottom1 = new Point(rect.x + rect.width/2.0 - guideRectWidth/2.0, rect.y + rect.height - quadrantHeight/2.0);
+        Point bottom2 = new Point(rect.x + rect.width/2.0 + guideRectWidth/2.0, rect.y + rect.height - quadrantHeight/2.0);
+        Point point1Bottom = adjustPointToBounds(image, bottom1);
+        Point point2Bottom = adjustPointToBounds(image, bottom2);
+        if (point1Bottom != null && point2Bottom != null) {
+            guidelineBottom = new Line(point1Bottom, point2Bottom, new Scalar(0, 255, 0), 1);
+        } else {
+            System.out.println("Print");
+        }
+
 
         Point pointBottom = guidelineBottom.findMiddleBlackPixel(image);
         int subStemXBottom = (int) pointBottom.x;
@@ -767,12 +858,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private int findUnitsValue(Mat image, Rect rect) {
         int unitsDigitResult = 0;
+        int unitsDigitResultByLines = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
         int leftLimitX = -1, rightLimitX = -1, bottomLimitY = -1, topLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
         List<Rect> subQuadrantsUnits = new ArrayList<>();
+        List<Line> segmentsUnits = new ArrayList<>();
 
 
         // Guideline Rectangle 1, to find leftLimitX
@@ -929,11 +1022,30 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsUnits.add(subQuadrantUnits8);
             subQuadrantsUnits.add(subQuadrantUnits9);
 
-            drawSubQuadrants(image, subQuadrantsUnits);
+            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+
+            Line segment1 = new Line(point1, point2, blue, 1);
+            Line segment2 = new Line(point3, point4, blue, 1);
+            Line segment3 = new Line(point1, point4, blue, 1);
+            Line segment4 = new Line(point3, point2, blue, 1);
+            Line segment5 = new Line(point2, point4, blue, 1);
+
+            segmentsUnits.add(segment1);
+            segmentsUnits.add(segment2);
+            segmentsUnits.add(segment3);
+            segmentsUnits.add(segment4);
+            segmentsUnits.add(segment5);
+
+            unitsDigitResultByLines = detectValidLines(image, segmentsUnits);
+            drawSegments(image, segmentsUnits);
             unitsDigitResult = detectValidSubQuadrants(image, subQuadrantsUnits);
+            //drawSubQuadrants(image, subQuadrantsUnits);
             //System.out.println("THE NUMBER IN UNITS IS " + unitsDigitResult);
         }
-        return unitsDigitResult;
+        return unitsDigitResultByLines;
     }
 
 // *******************************************************************************************************************
@@ -1453,9 +1565,36 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private void drawSubQuadrants(Mat image, List<Rect> subQuadrants) {
         for(Rect subQuadrant : subQuadrants) {
-            Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(255, 0, 0), 2);
+            Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(255, 0, 0), 1/2);
         }
     }
+
+    private void drawSegments(Mat image, List<Line> lines) {
+        for(Line line : lines) {
+            line.draw(image);
+        }
+    }
+
+
+    private Integer detectValidLines(Mat image, List<Line> segments) {
+        Set<Integer> flaggedSegments = new HashSet<>(); // Track flagged segments
+
+        // Initially flagging subQuadrants within 10% of the guide value
+        for (int i = 0; i < segments.size(); i++) {
+            Line segment = segments.get(i);
+            System.out.println("Segment has percentage: " + segment.getBlackPixelPercentage(image));
+            if (segment.getBlackPixelPercentage(image) > 75.0) {
+                flaggedSegments.add(i + 1);
+                System.out.println("Segment " + i + 1 + " added with percentage: " + segment.getBlackPixelPercentage(image));
+            }
+        }
+
+        int detectedNumber = mapFlaggedSegmentsToNumber(flaggedSegments);
+        //System.out.println("Detected Number TESTING UNITS: " + detectedNumber);
+
+        return detectedNumber;
+    }
+
 
     private Integer detectValidSubQuadrants(Mat image, List<Rect> subQuadrants) {
         List<Double> percentages = new ArrayList<>();
@@ -1479,7 +1618,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrant = subQuadrants.get(i);
             double percentage = percentages.get(i);
             // Check if the percentage is within 10% of the guide value
-            if (Math.abs(percentage - guideValue) <= 10) {
+            if (Math.abs(percentage - guideValue) <= 30) {
                 //Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(0, 255, 0), 2); // Using green for highlighting
                 initiallyFlagged.add(i + 1);
             }
@@ -1487,39 +1626,39 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Additional logic to flag based on certain rules
         Set<Integer> toCheck = new HashSet<>();
-        if (initiallyFlagged.contains(3)) {
+        if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(3)) {
             toCheck.addAll(Arrays.asList(1, 2, 5, 6, 7, 9));
         }
-        if (initiallyFlagged.contains(9)) {
+        if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(9)) {
             toCheck.addAll(Arrays.asList(1, 3, 5, 6, 7, 8));
         }
-        if (initiallyFlagged.containsAll(Arrays.asList(3, 9))) {
+        if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(7)) {
+            toCheck.addAll(Arrays.asList(3, 5));
+        }
+        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(3, 9))) {
             toCheck.addAll(Arrays.asList(1, 2, 6, 7, 8));
         }
-        if (initiallyFlagged.containsAll(Arrays.asList(5, 7))) {
+        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(5, 7))) {
             toCheck.add(3);
         }
-        if (initiallyFlagged.containsAll(Arrays.asList(1, 5))) {
+        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(1, 5))) {
             toCheck.add(9);
         }
-        if (initiallyFlagged.containsAll(Arrays.asList(1, 6))) {
+        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(1, 6))) {
             toCheck.add(9);
         }
-        if (initiallyFlagged.containsAll(Arrays.asList(6, 9))) {
+        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(6, 9))) {
             toCheck.add(1);
         }
-        if (initiallyFlagged.contains(1)) {
-            toCheck.addAll(Arrays.asList(2, 3));
-        }
-        if (initiallyFlagged.contains(7)) {
-            toCheck.addAll(Arrays.asList(8, 9));
+        if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(1)) {
+            toCheck.addAll(Arrays.asList(2, 3, 5, 9));
         }
 
         // Check and flag additional subquadrants based on the rule
         for (Integer index : toCheck) {
             int i = index - 1; // Adjusting back to 0-based indexing
             double percentage = percentages.get(i);
-            if (percentage >= guideValue * 0.4) {
+            if (percentage >= guideValue * 0.20) {
                 initiallyFlagged.add(index); // Flagging based on the rule
             }
         }
@@ -1533,7 +1672,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         // Interpretation of flagged subquadrants to number
-        Integer detectedNumber = mapFlaggedSubQuadrantsToNumber(initiallyFlagged);
+        int detectedNumber = mapFlaggedSubQuadrantsToNumber(initiallyFlagged);
         //System.out.println("Detected Number: " + detectedNumber);
 
         return detectedNumber;
@@ -1563,7 +1702,38 @@ public class ImageDisplayActivity extends AppCompatActivity {
         return (double) blackPixelCount / totalPixels * 100;
     }
 
+    private int mapFlaggedSegmentsToNumber(Set<Integer> flaggedSegments) {
+        Set<Integer> patternForNumber1 = new HashSet<>(Collections.singletonList(1));
+        Set<Integer> patternForNumber2 = new HashSet<>(Collections.singletonList(2));
+        Set<Integer> patternForNumber3 = new HashSet<>(Collections.singletonList(3));
+        Set<Integer> patternForNumber4 = new HashSet<>(Collections.singletonList(4));
+        Set<Integer> patternForNumber5 = new HashSet<>(Arrays.asList(1, 4));
+        Set<Integer> patternForNumber6 = new HashSet<>(Collections.singletonList(5));
+        Set<Integer> patternForNumber7 = new HashSet<>(Arrays.asList(1, 6));
+        Set<Integer> patternForNumber8 = new HashSet<>(Arrays.asList(2, 6));
+        Set<Integer> patternForNumber9 = new HashSet<>(Arrays.asList(1, 2, 6));
 
+        if (flaggedSegments.equals(patternForNumber1)) {
+            return 1; // Matches pattern for Number 1
+        } else if (flaggedSegments.equals(patternForNumber2)) {
+            return 2; // Matches pattern for Number 2
+        } else if (flaggedSegments.equals(patternForNumber3)) {
+            return 3; // Matches pattern for Number 3
+        } else if (flaggedSegments.equals(patternForNumber4)) {
+            return 4; // Matches pattern for Number 4
+        } else if (flaggedSegments.equals(patternForNumber5)) {
+            return 5; // Matches pattern for Number 5
+        } else if (flaggedSegments.equals(patternForNumber6)) {
+            return 6; // Matches pattern for Number 6
+        } else if (flaggedSegments.equals(patternForNumber7)) {
+            return 7; // Matches pattern for Number 7
+        } else if (flaggedSegments.equals(patternForNumber8)) {
+            return 8; // Matches pattern for Number 8
+        } else if (flaggedSegments.equals(patternForNumber9)) {
+            return 9; // Matches pattern for Number 9
+        }
+        return 0; // No pattern matches - it's 0
+    }
 
     private int mapFlaggedSubQuadrantsToNumber(Set<Integer> flaggedSubQuadrants) {
         // Define patterns corresponding to numbers
