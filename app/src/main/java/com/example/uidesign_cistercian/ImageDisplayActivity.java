@@ -1607,12 +1607,33 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsThousands.add(subQuadrantThousands8);
             subQuadrantsThousands.add(subQuadrantThousands9);
 
+            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+
+            Line segment1 = new Line(point1, point2, blue, 1);
+            Line segment2 = new Line(point3, point4, blue, 1);
+            Line segment3 = new Line(point1, point4, blue, 1);
+            Line segment4 = new Line(point3, point2, blue, 1);
+            Line segment5 = new Line(point2, point4, blue, 1);
+
+            segmentsThousands.add(segment1);
+            segmentsThousands.add(segment2);
+            segmentsThousands.add(segment3);
+            segmentsThousands.add(segment4);
+            segmentsThousands.add(segment5);
+
+            thousandsDigitResultByLines = detectValidLines(image, segmentsThousands);
+            drawSegments(image, segmentsThousands);
+
             thousandsDigitResult = detectValidSubQuadrants(image, subQuadrantsThousands);
             //drawSubQuadrants(image, subQuadrantsThousands);
 
-            //System.out.println("THE NUMBER IN THOUSANDS IS " + thousandsDigitResult);
+            boolean sameResult = thousandsDigitResultByLines == thousandsDigitResult;
+            System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + thousandsDigitResultByLines + ", Rects: " + thousandsDigitResult);
         }
-        return thousandsDigitResult * 1000;
+        return thousandsDigitResultByLines * 1000;
     }
 
 // *******************************************************************************************************************
