@@ -61,6 +61,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
     private final Scalar red = new Scalar(255, 0, 0);
     private final Scalar green = new Scalar(0, 255, 0);
     private final Scalar pink = new Scalar(255, 0, 255);
+    private final Scalar orange = new Scalar(255, 165, 0);
     private final Scalar black = new Scalar(0, 0, 0);
     private final Scalar white = new Scalar(255, 255, 255);
 
@@ -140,8 +141,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Utils.bitmapToMat(bitmap, matImage);
         // Convert to Grayscale
         Imgproc.cvtColor(matImage, matImage, Imgproc.COLOR_RGB2GRAY);
+
+        // Apply Morphological Erosion and Dilation to remove thin lines
+        //Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+        //Imgproc.erode(matImage, matImage, element);
+        //Imgproc.dilate(matImage, matImage, element);
+
         // Apply Gaussian Blur for noise reduction
-        Imgproc.GaussianBlur(matImage, matImage, new Size(5, 5), 0);
+        Imgproc.GaussianBlur(matImage, matImage, new Size(9, 9), 0);
         // Apply Binary Threshold
         Mat binaryImage = new Mat(); // keep copy of binary image for future processing
         Imgproc.threshold(matImage, binaryImage, 155, 255, Imgproc.THRESH_BINARY);
@@ -371,7 +378,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Draw the final rectangle
         Rect boundingRect = new Rect(Math.max(0, centerX - width / 2), Math.max(0, centerY - height / 2), width, height);
-        //Imgproc.rectangle(image, boundingRect.tl(), boundingRect.br(), new Scalar(100, 100, 255), 2);
+        //Imgproc.rectangle(image, boundingRect.tl(), boundingRect.br(), orange, 1);
         return boundingRect;
     }
 
@@ -481,6 +488,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
 
+        Rect finalRect = new Rect(leftLimitX, topLimitY, rightLimitX - leftLimitX, bottomLimitY - topLimitY);
+        Imgproc.rectangle(image, finalRect.tl(), finalRect.br(), orange, 1);
+
         return new Rect(leftLimitX, topLimitY, rightLimitX - leftLimitX, bottomLimitY - topLimitY);
     }
 
@@ -505,13 +515,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Line stem = null;
 
         if (!stemFound) {
-            for (int a = 0; a <= 40; a++) {
-                Point p1 = new Point(rect.x, rect.y + a * (rect.height / 40.0));
-                Point p2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 40.0)));
+            for (int a = 0; a <= 50; a++) {
+                Point p1 = new Point(rect.x, rect.y + a * (rect.height / 50.0));
+                Point p2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 50.0)));
                 Point divisionPoint1 = adjustPointToBounds(image, p1);
                 Point divisionPoint2 = adjustPointToBounds(image, p2);
                 if (divisionPoint1 != null && divisionPoint2 != null) {
-                    stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
+                    stem = new Line(divisionPoint1, divisionPoint2, red, 1);
                 } else {
                     System.out.println("Print");
                 }
@@ -528,13 +538,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
             firstCheckDone = true;
         }
         if (!stemFound && firstCheckDone) {
-            for (int a = 0; a <= 40; a++) {
-                Point p1 = new Point(rect.x + rect.width - (a * (rect.width / 40.0)), rect.y);
-                Point p2 = new Point(rect.x + a * (rect.width / 40.0), rect.y + rect.height);
+            for (int a = 0; a <= 50; a++) {
+                Point p1 = new Point(rect.x + rect.width - (a * (rect.width / 50.0)), rect.y);
+                Point p2 = new Point(rect.x + a * (rect.width / 50.0), rect.y + rect.height);
                 Point divisionPoint1 = adjustPointToBounds(image, p1);
                 Point divisionPoint2 = adjustPointToBounds(image, p2);
                 if (divisionPoint1 != null && divisionPoint2 != null) {
-                    stem = new Line(divisionPoint1, divisionPoint2, new Scalar(0, 0, 255), 1);
+                    stem = new Line(divisionPoint1, divisionPoint2, red, 1);
                 } else {
                     System.out.println("Print");
                 }
@@ -673,7 +683,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(image);
             stem = stemGuideline.getStemLine(image, stemMiddlePoint);
-            //stem.draw(image);
+            stem.draw(image);
         }
         return stem;
     }
@@ -694,7 +704,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int paddedHeight1 = croppedImage.height() + 2 * padding1;
 
         // Create a new image with the padded size
-        Mat paddedImage = new Mat(paddedHeight1, paddedWidth1, croppedImage.type(), new Scalar(0, 255, 255));
+        Mat paddedImage = new Mat(paddedHeight1, paddedWidth1, croppedImage.type(), new Scalar(255, 255, 255));
 
         // Determine the ROI within the padded image where the cropped image will be placed
         int roiX1 = padding1;
@@ -716,20 +726,23 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Mat rotatedImage = new Mat();
         Imgproc.warpAffine(paddedImage, rotatedImage, rotationMatrix, rotatedSize);
 
+        /*
         // pad again - padding2
         int padding2 = 30;
         // Calculate new size with padding
         int paddedWidth2 = rotatedImage.width() + 2 * padding2;
         int paddedHeight2 = rotatedImage.height() + 2 * padding2;
         // Create a new image with the padded size
-        Mat finalImage = new Mat(paddedHeight2, paddedWidth2, rotatedImage.type(), new Scalar(255, 0, 255));
+        Mat finalImage = new Mat(paddedHeight2, paddedWidth2, rotatedImage.type(), new Scalar(255, 255, 255));
         // Determine the ROI within the padded image where the cropped image will be placed
         int roiX2 = padding2;
         int roiY2 = padding2;
         // Place the cropped image in the center of the padded image
         rotatedImage.copyTo(finalImage.submat(roiY2, roiY2 + rotatedImage.height(), roiX2, roiX2 + rotatedImage.width()));
 
-        return finalImage;
+         */
+
+        return rotatedImage;
     }
 
     private Point adjustPointToBounds(Mat image, Point point) {
@@ -789,9 +802,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             System.out.println("Print");
         }
 
-        rectMiddleLine.draw(image);
+        //rectMiddleLine.draw(image);
 
-        // Create guideline for top and bottom sub stem
+        // Create guideline rect for top and bottom sub stem
         int guideRectWidth = rect.width / 6;
 
         // Guideline for top substem
@@ -807,6 +820,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // this finds the exact middle point inside of the stem, so that the calculations of the quadrants is exact
         Point pointTop = guidelineTop.findMiddleBlackPixel(image);
+        Point secondPoint = new Point(pointTop.x, rect.y);
+        Line line = new Line(pointTop, secondPoint, pink, 1);
+        line.draw(image);
         int subStemXTop = (int) pointTop.x;
 
 
@@ -829,19 +845,19 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
         Rect quadrantUnits = new Rect(subStemXTop, rect.y, quadrantWidth, quadrantHeight);
-        //Imgproc.rectangle(coloredBinaryImage, quadrantUnits.tl(), quadrantUnits.br(), new Scalar(255, 0, 0), 2);
+        Imgproc.rectangle(image, quadrantUnits.tl(), quadrantUnits.br(), green, 1);
         int unitsValue = findUnitsValue(image, quadrantUnits);
 
         Rect quadrantTens = new Rect(rect.x, rect.y, subStemXTop - rect.x, quadrantHeight);
-        //Imgproc.rectangle(coloredBinaryImage, quadrantTens.tl(), quadrantTens.br(), new Scalar(0, 255, 255), 2);
+        Imgproc.rectangle(image, quadrantTens.tl(), quadrantTens.br(), green, 1);
         int tensValue = findTensValue(image, quadrantTens);
 
         Rect quadrantHundreds = new Rect(subStemXBottom, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
-        //Imgproc.rectangle(coloredBinaryImage, quadrantHundreds.tl(), quadrantHundreds.br(), new Scalar(255,255, 0), 2);
+        Imgproc.rectangle(image, quadrantHundreds.tl(), quadrantHundreds.br(), green, 1);
         int hundredsValue = findHundredsValue(image, quadrantHundreds);
 
         Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, subStemXTop - rect.x, quadrantHeight);
-        //Imgproc.rectangle(coloredBinaryImage, quadrantThousands.tl(), quadrantThousands.br(), new Scalar(255, 0, 255), 2);
+        Imgproc.rectangle(image, quadrantThousands.tl(), quadrantThousands.br(), green, 1);
         int thousandsValue = findThousandsValue(image, quadrantThousands);
 
         arabicResult = thousandsValue + hundredsValue + tensValue + unitsValue;
@@ -1022,10 +1038,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsUnits.add(subQuadrantUnits8);
             subQuadrantsUnits.add(subQuadrantUnits9);
 
-            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
+            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.0);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.0);
             Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
 
             Line segment1 = new Line(point1, point2, blue, 1);
             Line segment2 = new Line(point3, point4, blue, 1);
@@ -1043,7 +1059,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             drawSegments(image, segmentsUnits);
 
             unitsDigitResult = detectValidSubQuadrants(image, subQuadrantsUnits);
-            //drawSubQuadrants(image, subQuadrantsUnits);
+            drawSubQuadrants(image, subQuadrantsUnits);
 
             boolean sameResult = unitsDigitResultByLines == unitsDigitResult;
             System.out.println("Digit Units (" + sameResult + ") - Segments: " + unitsDigitResultByLines + ", Rects: " + unitsDigitResult);
@@ -1239,7 +1255,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             drawSegments(image, segmentsTens);
 
             tensDigitResult = detectValidSubQuadrants(image, subQuadrantsTens);
-            //drawSubQuadrants(image, subQuadrantsTens);
+            drawSubQuadrants(image, subQuadrantsTens);
 
             boolean sameResult = tensDigitResultByLines == tensDigitResult;
             System.out.println("Digit Tens (" + sameResult + ") - Segments: " + tensDigitResultByLines + ", Rects: " + tensDigitResult);
@@ -1413,10 +1429,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsHundreds.add(subQuadrantHundreds8);
             subQuadrantsHundreds.add(subQuadrantHundreds9);
 
-            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
-            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
+            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
 
             Line segment1 = new Line(point1, point2, blue, 1);
             Line segment2 = new Line(point3, point4, blue, 1);
@@ -1434,7 +1450,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             drawSegments(image, segmentsHundreds);
 
             hundredsDigitResult = detectValidSubQuadrants(image, subQuadrantsHundreds);
-            //drawSubQuadrants(image, subQuadrantsHundreds);
+            drawSubQuadrants(image, subQuadrantsHundreds);
 
             boolean sameResult = hundredsDigitResultByLines == hundredsDigitResult;
             System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + hundredsDigitResultByLines + ", Rects: " + hundredsDigitResult);
@@ -1628,7 +1644,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             drawSegments(image, segmentsThousands);
 
             thousandsDigitResult = detectValidSubQuadrants(image, subQuadrantsThousands);
-            //drawSubQuadrants(image, subQuadrantsThousands);
+            drawSubQuadrants(image, subQuadrantsThousands);
 
             boolean sameResult = thousandsDigitResultByLines == thousandsDigitResult;
             System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + thousandsDigitResultByLines + ", Rects: " + thousandsDigitResult);
@@ -1640,7 +1656,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private void drawSubQuadrants(Mat image, List<Rect> subQuadrants) {
         for(Rect subQuadrant : subQuadrants) {
-            Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(255, 0, 0), 1/2);
+            Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(255, 0, 0), 2);
         }
     }
 
