@@ -297,7 +297,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             // resize the rect to fit exactly the cipher
             Rect resizedRect = resizeRectangle(rotatedImage, boundingRect, true, true, true, true);
-            //Imgproc.rectangle(rotatedImage, resizedRect.tl(), resizedRect.br(), new Scalar(0, 255, 0), 2);
+            //drawRectangle(rotatedImage, resizedRect, green, 1);
 
             // process the cipher and get number
             numberResult = processCipher(rotatedImage, resizedRect);
@@ -378,7 +378,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Draw the final rectangle
         Rect boundingRect = new Rect(Math.max(0, centerX - width / 2), Math.max(0, centerY - height / 2), width, height);
-        //Imgproc.rectangle(image, boundingRect.tl(), boundingRect.br(), orange, 1);
+        //drawRectangle(image, boundingRect, orange, 1);
         return boundingRect;
     }
 
@@ -489,7 +489,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         Rect finalRect = new Rect(leftLimitX, topLimitY, rightLimitX - leftLimitX, bottomLimitY - topLimitY);
-        Imgproc.rectangle(image, finalRect.tl(), finalRect.br(), orange, 1);
+        drawRectangle(image, finalRect, orange, 1);
 
         return new Rect(leftLimitX, topLimitY, rightLimitX - leftLimitX, bottomLimitY - topLimitY);
     }
@@ -505,7 +505,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Point rectMiddlePoint = new Point(rect.x + rect.width / 2.00, rect.y + rect.height / 2.00);
 
         // Draw the bounding rectangle
-        //Imgproc.rectangle(image, rect.tl(), rect.br(), new Scalar(2, 82, 4), 2);
+        //drawRectangle(image, rect, green, 1);
 
         boolean stemFound = false;
         boolean firstCheckDone = false;
@@ -845,19 +845,19 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
         Rect quadrantUnits = new Rect(subStemXTop, rect.y, quadrantWidth, quadrantHeight);
-        Imgproc.rectangle(image, quadrantUnits.tl(), quadrantUnits.br(), green, 1);
+        drawRectangle(image, quadrantUnits, green, 1);
         int unitsValue = findUnitsValue(image, quadrantUnits);
 
         Rect quadrantTens = new Rect(rect.x, rect.y, subStemXTop - rect.x, quadrantHeight);
-        Imgproc.rectangle(image, quadrantTens.tl(), quadrantTens.br(), green, 1);
+        drawRectangle(image, quadrantTens, green, 1);
         int tensValue = findTensValue(image, quadrantTens);
 
         Rect quadrantHundreds = new Rect(subStemXBottom, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
-        Imgproc.rectangle(image, quadrantHundreds.tl(), quadrantHundreds.br(), green, 1);
+        drawRectangle(image, quadrantHundreds, green, 1);
         int hundredsValue = findHundredsValue(image, quadrantHundreds);
 
         Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, subStemXTop - rect.x, quadrantHeight);
-        Imgproc.rectangle(image, quadrantThousands.tl(), quadrantThousands.br(), green, 1);
+        drawRectangle(image, quadrantThousands, green, 1);
         int thousandsValue = findThousandsValue(image, quadrantThousands);
 
         arabicResult = thousandsValue + hundredsValue + tensValue + unitsValue;
@@ -888,7 +888,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline1Width = rect.width / 2;
         int guideline1Height = rect.height / 15;
         guideline1Rect = new Rect(rect.x + (rect.width / 25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
-        //Imgproc.rectangle(image, guideline1Rect.tl(), guideline1Rect.br(), new Scalar(150, 100, 100), 2);
+        //drawRectangle(image, guideline1Rect, orange, 1);
 
         if (guideline1Rect != null) {
             for (int x = guideline1Rect.x; x < guideline1Rect.x + guideline1Rect.width; x++) {
@@ -919,7 +919,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline2Width = rect.width / 3;
         int guideline2Height = rect.height;
         guideline2Rect = new Rect(rect.x + (2 * (rect.width / 3)), rect.y, guideline2Width, guideline2Height);
-        //Imgproc.rectangle(image, guideline2Rect.tl(), guideline2Rect.br(), new Scalar(150, 100, 100), 2);
+        //drawRectangle(image, guideline2Rect, orange, 1);
 
         if (guideline2Rect != null) {
             for (int x = guideline2Rect.x + guideline2Rect.width; x > guideline2Rect.x; x--) {
@@ -951,7 +951,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline3Height = rect.height / 2;
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline3Rect = new Rect(leftLimitX + (guideline3Width/20), rect.y + rect.height - guideline3Height, guideline3Width, guideline3Height);
-            //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
+            //drawRectangle(image, guideline3Rect, orange, 1);
         }
 
         if (guideline3Rect != null) {
@@ -984,7 +984,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline4Height = 4 * (rect.height / 10);
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline4Rect = new Rect(leftLimitX, rect.y, guideline4Width, guideline4Height);
-            //Imgproc.rectangle(image, guideline4Rect.tl(), guideline4Rect.br(), new Scalar(255, 150, 0), 2);
+            //drawRectangle(image, guideline4Rect, orange, 1);
         }
 
         // iterate through the rectangle to find the first black pixel from the other side
@@ -1085,7 +1085,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline1Width = rect.width / 2;
         int guideline1Height = rect.height / 15;
         guideline1Rect = new Rect(rect.x + (rect.width/2) - (rect.width/25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
-        //Imgproc.rectangle(image, guideline1Rect.tl(), guideline1Rect.br(), new Scalar(150, 100, 100), 2);
+        //drawRectangle(image, guideline1Rect, orange, 1);
 
         if (guideline1Rect != null) {
             for (int x = guideline1Rect.x + guideline1Width; x > guideline1Rect.x; x--) {
@@ -1116,7 +1116,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline2Width = rect.width / 3;
         int guideline2Height = rect.height;
         guideline2Rect = new Rect(rect.x, rect.y, guideline2Width, guideline2Height);
-        //Imgproc.rectangle(image, guideline2Rect.tl(), guideline2Rect.br(), new Scalar(150, 100, 100), 2);
+        //drawRectangle(image, guideline2Rect, orange, 1);
 
         if (guideline2Rect != null) {
             for (int x = guideline2Rect.x; x < guideline2Rect.x + guideline2Width; x++) {
@@ -1148,7 +1148,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline3Height = rect.height / 2;
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline3Rect = new Rect(leftLimitX - (guideline3Width/20), rect.y + rect.height - guideline3Height, guideline3Width, guideline3Height);
-            //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
+            //drawRectangle(image, guideline3Rect, orange, 1);
         }
 
         if (guideline3Rect != null) {
@@ -1181,7 +1181,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline4Height = 4 * (rect.height / 10);
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline4Rect = new Rect(leftLimitX, rect.y, guideline4Width, guideline4Height);
-            //Imgproc.rectangle(image, guideline4Rect.tl(), guideline4Rect.br(), new Scalar(255, 150, 0), 2);
+            //drawRectangle(image, guideline4Rect, orange, 1);
         }
 
         if (guideline4Rect != null) {
@@ -1281,7 +1281,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline1Width = rect.width / 2;
         int guideline1Height = rect.height / 15;
         guideline1Rect = new Rect(rect.x + (rect.width / 25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
-        //Imgproc.rectangle(image, guideline1Rect.tl(), guideline1Rect.br(), new Scalar(150, 100, 100), 2);
+        //drawRectangle(image, guideline1Rect, orange, 1);
 
         if (guideline1Rect != null) {
             for (int x = guideline1Rect.x; x < guideline1Rect.x + guideline1Rect.width; x++) {
@@ -1312,7 +1312,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline2Width = rect.width / 3;
         int guideline2Height = rect.height;
         guideline2Rect = new Rect(rect.x + (2 * (rect.width / 3)), rect.y, guideline2Width, guideline2Height);
-        //Imgproc.rectangle(image, guideline2Rect.tl(), guideline2Rect.br(), new Scalar(150, 100, 100), 2);
+        //drawRectangle(image, guideline2Rect, orange, 1);
 
         if (guideline2Rect != null) {
             for (int x = guideline2Rect.x + guideline2Rect.width; x > guideline2Rect.x; x--) {
@@ -1344,7 +1344,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline3Height = rect.height / 2;
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline3Rect = new Rect(leftLimitX + (guideline3Width/20), rect.y, guideline3Width, guideline3Height);
-            //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
+            //drawRectangle(image, guideline3Rect, orange, 1);
         }
 
         if (guideline3Rect != null) {
@@ -1376,7 +1376,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline4Height = 4 * (rect.height / 10);
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline4Rect = new Rect(leftLimitX, rect.y + rect.height - guideline4Height, guideline4Width, guideline4Height);
-            //Imgproc.rectangle(image, guideline4Rect.tl(), guideline4Rect.br(), new Scalar(255, 150, 0), 2);
+            //drawRectangle(image, guideline4Rect, orange, 1);
         }
 
         if (guideline4Rect != null) {
@@ -1475,7 +1475,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline1Width = rect.width / 2;
         int guideline1Height = rect.height / 15;
         guideline1Rect = new Rect(rect.x + (rect.width/2) - (rect.width/25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
-        //Imgproc.rectangle(image, guideline1Rect.tl(), guideline1Rect.br(), new Scalar(150, 100, 100), 2);
+        //drawRectangle(image, guideline1Rect, orange, 1);
 
         if (guideline1Rect != null) {
             for (int x = guideline1Rect.x + guideline1Width; x > guideline1Rect.x; x--) {
@@ -1506,7 +1506,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline2Width = rect.width / 3;
         int guideline2Height = rect.height;
         guideline2Rect = new Rect(rect.x, rect.y, guideline2Width, guideline2Height);
-        //Imgproc.rectangle(image, guideline2Rect.tl(), guideline2Rect.br(), new Scalar(150, 100, 100), 2);
+        //drawRectangle(image, guideline2Rect, orange, 1);
 
         if (guideline2Rect != null) {
             for (int x = guideline2Rect.x; x < guideline2Rect.x + guideline2Width; x++) {
@@ -1538,7 +1538,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline3Height = rect.height / 2;
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline3Rect = new Rect(leftLimitX - (guideline3Width/20), rect.y, guideline3Width, guideline3Height);
-            //Imgproc.rectangle(image, guideline3Rect.tl(), guideline3Rect.br(), new Scalar(255, 150, 0), 2);
+            //drawRectangle(image, guideline3Rect, orange, 1);
         }
 
         if (guideline3Rect != null) {
@@ -1570,7 +1570,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline4Height = 4 * (rect.height / 10);
         if (rightLimitX != -1 && leftLimitX != -1) {
             guideline4Rect = new Rect(leftLimitX, rect.y + rect.height - guideline4Height, guideline4Width, guideline4Height);
-            //Imgproc.rectangle(image, guideline4Rect.tl(), guideline4Rect.br(), new Scalar(255, 150, 0), 2);
+            //drawRectangle(image, guideline4Rect, orange, 1);
         }
 
         if (guideline4Rect != null) {
@@ -1656,7 +1656,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private void drawSubQuadrants(Mat image, List<Rect> subQuadrants) {
         for(Rect subQuadrant : subQuadrants) {
-            Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(255, 0, 0), 2);
+            drawRectangle(image, subQuadrant, red, 1);
         }
     }
 
@@ -1664,6 +1664,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for(Line line : lines) {
             line.draw(image);
         }
+    }
+
+    private void drawRectangle(Mat image, Rect rect, Scalar color, int thickness) {
+        Imgproc.rectangle(image, rect.tl(), rect.br(), color, thickness);
     }
 
 
@@ -1710,7 +1714,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             double percentage = percentages.get(i);
             // Check if the percentage is within 10% of the guide value
             if (Math.abs(percentage - guideValue) <= 30) {
-                //Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(0, 255, 0), 2); // Using green for highlighting
+                //drawRectangle(image, subQuadrant, green, 1); // Using green for highlighting
                 initiallyFlagged.add(i + 1);
             }
         }
@@ -1759,7 +1763,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             int i = index - 1; // Adjusting back to 0-based indexing
             Rect subQuadrant = subQuadrants.get(i);
             // Flagging the subquadrant
-            //Imgproc.rectangle(image, subQuadrant.tl(), subQuadrant.br(), new Scalar(0, 255, 0), 2);
+            //drawRectangle(image, subQuadrant, green, 1);
         }
 
         // Interpretation of flagged subquadrants to number
