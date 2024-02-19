@@ -1022,10 +1022,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsUnits.add(subQuadrantUnits8);
             subQuadrantsUnits.add(subQuadrantUnits9);
 
-            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
+            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
 
             Line segment1 = new Line(point1, point2, blue, 1);
             Line segment2 = new Line(point3, point4, blue, 1);
@@ -1218,10 +1218,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsTens.add(subQuadrantTens8);
             subQuadrantsTens.add(subQuadrantTens9);
 
-            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
+            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
 
             Line segment1 = new Line(point1, point2, blue, 1);
             Line segment2 = new Line(point3, point4, blue, 1);
@@ -1413,10 +1413,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsHundreds.add(subQuadrantHundreds8);
             subQuadrantsHundreds.add(subQuadrantHundreds9);
 
-            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
+            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
 
             Line segment1 = new Line(point1, point2, blue, 1);
             Line segment2 = new Line(point3, point4, blue, 1);
@@ -1607,10 +1607,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsThousands.add(subQuadrantThousands8);
             subQuadrantsThousands.add(subQuadrantThousands9);
 
-            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
+            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
 
             Line segment1 = new Line(point1, point2, blue, 1);
             Line segment2 = new Line(point3, point4, blue, 1);
@@ -1658,7 +1658,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (int i = 0; i < segments.size(); i++) {
             Line segment = segments.get(i);
             System.out.println("Segment has percentage: " + segment.getBlackPixelPercentage(image));
-            if (segment.getBlackPixelPercentage(image) > 75.0) {
+            if (segment.getBlackPixelPercentage(image) > 72.0) {
                 flaggedSegments.add(i + 1);
                 //System.out.println("Segment " + i + 1 + " added with percentage: " + segment.getBlackPixelPercentage(image));
             }
