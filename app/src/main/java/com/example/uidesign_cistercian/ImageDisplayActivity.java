@@ -1041,9 +1041,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             unitsDigitResultByLines = detectValidLines(image, segmentsUnits);
             drawSegments(image, segmentsUnits);
+
             unitsDigitResult = detectValidSubQuadrants(image, subQuadrantsUnits);
             //drawSubQuadrants(image, subQuadrantsUnits);
-            //System.out.println("THE NUMBER IN UNITS IS " + unitsDigitResult);
+
+            boolean sameResult = unitsDigitResultByLines == unitsDigitResult;
+            System.out.println("Digit Units (" + sameResult + ") - Segments: " + unitsDigitResultByLines + ", Rects: " + unitsDigitResult);
         }
         return unitsDigitResultByLines;
     }
@@ -1052,12 +1055,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private int findTensValue(Mat image, Rect rect) {
         int tensDigitResult = 0;
+        int tensDigitResultByLines = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
         int rightLimitX = -1, leftLimitX = -1, bottomLimitY = -1, topLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
         List<Rect> subQuadrantsTens = new ArrayList<>();
+        List<Line> segmentsTens = new ArrayList<>();
 
 
         // Guideline Rectangle 1, to find rightLimitX
@@ -1213,23 +1218,47 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsTens.add(subQuadrantTens8);
             subQuadrantsTens.add(subQuadrantTens9);
 
-            drawSubQuadrants(image, subQuadrantsTens);
+            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+
+            Line segment1 = new Line(point1, point2, blue, 1);
+            Line segment2 = new Line(point3, point4, blue, 1);
+            Line segment3 = new Line(point1, point4, blue, 1);
+            Line segment4 = new Line(point3, point2, blue, 1);
+            Line segment5 = new Line(point2, point4, blue, 1);
+
+            segmentsTens.add(segment1);
+            segmentsTens.add(segment2);
+            segmentsTens.add(segment3);
+            segmentsTens.add(segment4);
+            segmentsTens.add(segment5);
+
+            tensDigitResultByLines = detectValidLines(image, segmentsTens);
+            drawSegments(image, segmentsTens);
+
             tensDigitResult = detectValidSubQuadrants(image, subQuadrantsTens);
-            //System.out.println("THE NUMBER IN TENS IS " + tensDigitResult);
+            //drawSubQuadrants(image, subQuadrantsTens);
+
+            boolean sameResult = tensDigitResultByLines == tensDigitResult;
+            System.out.println("Digit Tens (" + sameResult + ") - Segments: " + tensDigitResultByLines + ", Rects: " + tensDigitResult);
         }
-        return tensDigitResult * 10;
+        return tensDigitResultByLines * 10;
     }
 
 // *******************************************************************************************************************
 
     private int findHundredsValue(Mat image, Rect rect) {
         int hundredsDigitResult = 0;
+        int hundredsDigitResultByLines = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
         int leftLimitX = -1, rightLimitX = -1, topLimitY = -1, bottomLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
         List<Rect> subQuadrantsHundreds = new ArrayList<>();
+        List<Line> segmentsHundreds = new ArrayList<>();
 
 
         // Guideline Rectangle 1, to find leftLimitX
@@ -1384,8 +1413,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsHundreds.add(subQuadrantHundreds8);
             subQuadrantsHundreds.add(subQuadrantHundreds9);
 
-            drawSubQuadrants(image, subQuadrantsHundreds);
             hundredsDigitResult = detectValidSubQuadrants(image, subQuadrantsHundreds);
+            //drawSubQuadrants(image, subQuadrantsHundreds);
+
             //System.out.println("THE NUMBER IN HUNDREDS IS " + hundredsDigitResult);
         }
         return hundredsDigitResult * 100;
@@ -1395,12 +1425,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private int findThousandsValue(Mat image, Rect rect) {
         int thousandsDigitResult = 0;
+        int thousandsDigitResultByLines = 0;
         boolean firstLineDrawn = false;
         boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
         int leftLimitX = -1, rightLimitX = -1, bottomLimitY = -1, topLimitY = -1;
         Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
         int subQuadrantHeight, subQuadrantWidth;
         List<Rect> subQuadrantsThousands = new ArrayList<>();
+        List<Line> segmentsThousands = new ArrayList<>();
 
         // Guideline Rectangle 1, to find rightLimitX
         int guideline1Width = rect.width / 2;
@@ -1554,8 +1586,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsThousands.add(subQuadrantThousands8);
             subQuadrantsThousands.add(subQuadrantThousands9);
 
-            drawSubQuadrants(image, subQuadrantsThousands);
             thousandsDigitResult = detectValidSubQuadrants(image, subQuadrantsThousands);
+            //drawSubQuadrants(image, subQuadrantsThousands);
+
             //System.out.println("THE NUMBER IN THOUSANDS IS " + thousandsDigitResult);
         }
         return thousandsDigitResult * 1000;
@@ -1585,7 +1618,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             System.out.println("Segment has percentage: " + segment.getBlackPixelPercentage(image));
             if (segment.getBlackPixelPercentage(image) > 75.0) {
                 flaggedSegments.add(i + 1);
-                System.out.println("Segment " + i + 1 + " added with percentage: " + segment.getBlackPixelPercentage(image));
+                //System.out.println("Segment " + i + 1 + " added with percentage: " + segment.getBlackPixelPercentage(image));
             }
         }
 
@@ -1709,9 +1742,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Set<Integer> patternForNumber4 = new HashSet<>(Collections.singletonList(4));
         Set<Integer> patternForNumber5 = new HashSet<>(Arrays.asList(1, 4));
         Set<Integer> patternForNumber6 = new HashSet<>(Collections.singletonList(5));
-        Set<Integer> patternForNumber7 = new HashSet<>(Arrays.asList(1, 6));
-        Set<Integer> patternForNumber8 = new HashSet<>(Arrays.asList(2, 6));
-        Set<Integer> patternForNumber9 = new HashSet<>(Arrays.asList(1, 2, 6));
+        Set<Integer> patternForNumber7 = new HashSet<>(Arrays.asList(1, 5));
+        Set<Integer> patternForNumber8 = new HashSet<>(Arrays.asList(2, 5));
+        Set<Integer> patternForNumber9 = new HashSet<>(Arrays.asList(1, 2, 5));
 
         if (flaggedSegments.equals(patternForNumber1)) {
             return 1; // Matches pattern for Number 1
