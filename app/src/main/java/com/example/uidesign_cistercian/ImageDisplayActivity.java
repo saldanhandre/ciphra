@@ -1413,12 +1413,33 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsHundreds.add(subQuadrantHundreds8);
             subQuadrantsHundreds.add(subQuadrantHundreds9);
 
+            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+
+            Line segment1 = new Line(point1, point2, blue, 1);
+            Line segment2 = new Line(point3, point4, blue, 1);
+            Line segment3 = new Line(point1, point4, blue, 1);
+            Line segment4 = new Line(point3, point2, blue, 1);
+            Line segment5 = new Line(point2, point4, blue, 1);
+
+            segmentsHundreds.add(segment1);
+            segmentsHundreds.add(segment2);
+            segmentsHundreds.add(segment3);
+            segmentsHundreds.add(segment4);
+            segmentsHundreds.add(segment5);
+
+            hundredsDigitResultByLines = detectValidLines(image, segmentsHundreds);
+            drawSegments(image, segmentsHundreds);
+
             hundredsDigitResult = detectValidSubQuadrants(image, subQuadrantsHundreds);
             //drawSubQuadrants(image, subQuadrantsHundreds);
 
-            //System.out.println("THE NUMBER IN HUNDREDS IS " + hundredsDigitResult);
+            boolean sameResult = hundredsDigitResultByLines == hundredsDigitResult;
+            System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + hundredsDigitResultByLines + ", Rects: " + hundredsDigitResult);
         }
-        return hundredsDigitResult * 100;
+        return hundredsDigitResultByLines * 100;
     }
 
 // *******************************************************************************************************************
