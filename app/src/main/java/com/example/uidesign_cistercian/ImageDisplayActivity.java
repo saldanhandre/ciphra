@@ -878,10 +878,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
             drawSubQuadrants(image, subQuadrantsUnits);
             
             // Get the result from the segments
-            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.0);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.0);
+            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
             Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
 
             List<Line> segmentsUnits = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -981,10 +981,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
             drawSubQuadrants(image, subQuadrantsHundreds);
 
             // Get the result from the segments
-            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
+            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
 
             List<Line> segmentsHundreds = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -1391,19 +1391,39 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Set<Integer> patternForNumber6 = new HashSet<>(Collections.singletonList(5));
         Set<Integer> patternForNumber7 = new HashSet<>(Arrays.asList(1, 5));
         Set<Integer> patternForNumber8 = new HashSet<>(Arrays.asList(2, 5));
-        Set<Integer> patternForNumber9 = new HashSet<>(Arrays.asList(1, 2, 5));
+        Set<Integer> patternForNumber9a = new HashSet<>(Arrays.asList(1, 2, 5));
+        Set<Integer> patternForNumber9b = new HashSet<>(Arrays.asList(1, 2));
 
-        if (flaggedSegments.equals(patternForNumber1)) { return 1; // Matches pattern for Number 1
-        } else if (flaggedSegments.equals(patternForNumber2)) { return 2; // Matches pattern for Number 2
-        } else if (flaggedSegments.equals(patternForNumber3)) { return 3; // Matches pattern for Number 3
-        } else if (flaggedSegments.equals(patternForNumber4)) { return 4; // Matches pattern for Number 4
-        } else if (flaggedSegments.equals(patternForNumber5)) { return 5; // Matches pattern for Number 5
-        } else if (flaggedSegments.equals(patternForNumber6)) { return 6; // Matches pattern for Number 6
-        } else if (flaggedSegments.equals(patternForNumber7)) { return 7; // Matches pattern for Number 7
-        } else if (flaggedSegments.equals(patternForNumber8)) { return 8; // Matches pattern for Number 8
-        } else if (flaggedSegments.equals(patternForNumber9)) { return 9; // Matches pattern for Number 9
+        if (flaggedSegments.size() <= 3) {
+            if (flaggedSegments.equals(patternForNumber9a)) {
+                return 9; // Matches pattern for Number 9
+            } else if (flaggedSegments.size() <= 2) {
+                if (flaggedSegments.equals(patternForNumber5)) {
+                    return 5; // Matches pattern for Number 5
+                } else if (flaggedSegments.equals(patternForNumber7)) {
+                    return 7; // Matches pattern for Number 7
+                } else if (flaggedSegments.equals(patternForNumber8)) {
+                    return 8; // Matches pattern for Number 8
+                } else if (flaggedSegments.equals(patternForNumber9b)) {
+                    return 9; // Matches pattern for Number 9
+                } else if (flaggedSegments.size() <= 1) {
+                    if (flaggedSegments.equals(patternForNumber1)) {
+                        return 1; // Matches pattern for Number 1
+                    } else if (flaggedSegments.equals(patternForNumber2)) {
+                        return 2; // Matches pattern for Number 2
+                    } else if (flaggedSegments.equals(patternForNumber3)) {
+                        return 3; // Matches pattern for Number 3
+                    } else if (flaggedSegments.equals(patternForNumber4)) {
+                        return 4; // Matches pattern for Number 4
+                    } else if (flaggedSegments.equals(patternForNumber6)) {
+                        return 6; // Matches pattern for Number 6
+                    } else if (flaggedSegments.size() == 0) {
+                        return 0;
+                    }
+                }
+            }
         }
-        return 0; // No pattern matches - it's 0
+        return -1;
     }
 
     private int mapFlaggedSubQuadrantsToNumber(Set<Integer> flaggedSubQuadrants) {
