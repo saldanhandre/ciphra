@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import java.util.HashSet;
+import java.util.Set;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,11 +24,34 @@ import java.util.List;
 public class HistoryItemAdapter extends ArrayAdapter<Integer> {
     private Context context;
     private List<Integer> historyItems;
+    // Track selected items
+    private Set<Integer> selectedItems = new HashSet<>();
 
     public HistoryItemAdapter(@NonNull Context context, @NonNull List<Integer> objects) {
         super(context, 0, objects);
         this.context = context;
         this.historyItems = objects;
+    }
+
+    // Method to toggle selection state
+    public void toggleItemSelection(int position) {
+        if (selectedItems.contains(position)) {
+            selectedItems.remove(position);
+        } else {
+            selectedItems.add(position);
+        }
+        notifyDataSetChanged();
+    }
+
+    // Method to clear selections
+    public void clearSelections() {
+        selectedItems.clear();
+        notifyDataSetChanged();
+    }
+
+    // Get all selected items
+    public Set<Integer> getSelectedItems() {
+        return selectedItems;
     }
 
     @NonNull
@@ -44,6 +69,13 @@ public class HistoryItemAdapter extends ArrayAdapter<Integer> {
 
         // Set the number on the CistercianThumbnailView
         ivThumbnail.setNumber(item);
+
+        // Highlight selected items
+        if (selectedItems.contains(position)) {
+            convertView.setBackgroundColor(Color.LTGRAY); // Example highlight
+        } else {
+            convertView.setBackgroundColor(Color.TRANSPARENT);
+        }
 
         return convertView;
     }
