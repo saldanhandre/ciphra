@@ -489,7 +489,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         Rect finalRect = new Rect(leftLimitX, topLimitY, rightLimitX - leftLimitX, bottomLimitY - topLimitY);
-        drawRectangle(image, finalRect, orange, 1);
+        //drawRectangle(image, finalRect, orange, 1);
 
         return new Rect(leftLimitX, topLimitY, rightLimitX - leftLimitX, bottomLimitY - topLimitY);
     }
@@ -511,13 +511,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
         boolean firstCheckDone = false;
         boolean secondCheckDone = false;
         boolean similarPercentages = false;
+        int dividerInt = 70;
+        double dividerDouble = 70.0; // these 2 need to have the same value
 
         Line stem = null;
 
         if (!stemFound) {
-            for (int a = 0; a <= 50; a++) {
-                Point p1 = new Point(rect.x, rect.y + a * (rect.height / 50.0));
-                Point p2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / 50.0)));
+            for (int a = 0; a <= dividerInt; a++) {
+                Point p1 = new Point(rect.x, rect.y + a * (rect.height / dividerDouble));
+                Point p2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / dividerDouble)));
                 Point divisionPoint1 = adjustPointToBounds(image, p1);
                 Point divisionPoint2 = adjustPointToBounds(image, p2);
                 if (divisionPoint1 != null && divisionPoint2 != null) {
@@ -538,9 +540,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             firstCheckDone = true;
         }
         if (!stemFound && firstCheckDone) {
-            for (int a = 0; a <= 50; a++) {
-                Point p1 = new Point(rect.x + rect.width - (a * (rect.width / 50.0)), rect.y);
-                Point p2 = new Point(rect.x + a * (rect.width / 50.0), rect.y + rect.height);
+            for (int a = 0; a <= dividerInt; a++) {
+                Point p1 = new Point(rect.x + rect.width - (a * (rect.width / dividerDouble)), rect.y);
+                Point p2 = new Point(rect.x + a * (rect.width / dividerDouble), rect.y + rect.height);
                 Point divisionPoint1 = adjustPointToBounds(image, p1);
                 Point divisionPoint2 = adjustPointToBounds(image, p2);
                 if (divisionPoint1 != null && divisionPoint2 != null) {
@@ -816,19 +818,19 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
         Rect quadrantUnits = new Rect(subStemXTop, rect.y, quadrantWidth, quadrantHeight);
-        drawRectangle(image, quadrantUnits, green, 1);
+        //drawRectangle(image, quadrantUnits, green, 1);
         int unitsValue = findUnitsValue(image, quadrantUnits);
 
         Rect quadrantTens = new Rect(rect.x, rect.y, subStemXTop - rect.x, quadrantHeight);
-        drawRectangle(image, quadrantTens, green, 1);
+        //drawRectangle(image, quadrantTens, green, 1);
         int tensValue = findTensValue(image, quadrantTens);
 
         Rect quadrantHundreds = new Rect(subStemXBottom, rect.y + rect.height - quadrantHeight, quadrantWidth, quadrantHeight);
-        drawRectangle(image, quadrantHundreds, green, 1);
+        //drawRectangle(image, quadrantHundreds, green, 1);
         int hundredsValue = findHundredsValue(image, quadrantHundreds);
 
         Rect quadrantThousands = new Rect(rect.x, rect.y + rect.height - quadrantHeight, subStemXTop - rect.x, quadrantHeight);
-        drawRectangle(image, quadrantThousands, green, 1);
+        //drawRectangle(image, quadrantThousands, green, 1);
         int thousandsValue = findThousandsValue(image, quadrantThousands);
 
         arabicResult = thousandsValue + hundredsValue + tensValue + unitsValue;
@@ -879,9 +881,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             
             // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.5, topLimitY + subQuadrantHeight/3.2);
             Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.5, bottomLimitY - subQuadrantHeight/3.2);
 
             List<Line> segmentsUnits = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -931,9 +933,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point2 = new Point(leftLimitX + subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.5, topLimitY + subQuadrantHeight/3.2);
             Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point4 = new Point(leftLimitX + subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.5, bottomLimitY - subQuadrantHeight/3.2);
 
             List<Line> segmentsTens = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -982,9 +984,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.5, bottomLimitY - subQuadrantHeight/3.2);
             Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.5, topLimitY + subQuadrantHeight/3.2);
 
             List<Line> segmentsHundreds = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -1033,9 +1035,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point2 = new Point(leftLimitX + subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.5, bottomLimitY - subQuadrantHeight/3.2);
             Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point4 = new Point(leftLimitX + subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.5, topLimitY + subQuadrantHeight/3.2);
 
             List<Line> segmentsThousands = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -1056,11 +1058,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int leftLimitX = -1, rightLimitX = -1;
         Rect guideline1Rect = null, guideline2Rect = null;
 
-        if (is_stem_on_left_side) {
+        if (is_stem_on_left_side) { // stem is on the left side (Quadrants of the units and hundreds)
             // Guideline Rectangle 1, to find leftLimitX
             int guideline1Width = rect.width / 2;
             int guideline1Height = rect.height / 15;
-            guideline1Rect = new Rect(rect.x + (rect.width / 25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
+            guideline1Rect = new Rect(rect.x + (rect.width / 15), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
             //drawRectangle(image, guideline1Rect, orange, 1);
 
             if (guideline1Rect != null) {
@@ -1069,7 +1071,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         double[] pixel = image.get(y, x);
                         if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                             pixel1Found = true;
-                            leftLimitX = x + (guideline1Rect.width / 15);
+                            leftLimitX = x + (guideline1Rect.width / 20);
                             Point lineStart = new Point(leftLimitX, rect.y);
                             Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
                             Line leftLimit = new Line(lineStart, lineEnd, pink, 1);
@@ -1092,7 +1094,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // Guideline Rectangle 2, to find rightLimitX
             int guideline2Width = rect.width / 3;
             int guideline2Height = rect.height;
-            guideline2Rect = new Rect(rect.x + (2 * (rect.width / 3)), rect.y, guideline2Width, guideline2Height);
+            guideline2Rect = new Rect(rect.x + (2 * (rect.width / 3)) + rect.width/10, rect.y, guideline2Width, guideline2Height);
             //drawRectangle(image, guideline2Rect, orange, 1);
 
             if (guideline2Rect != null) {
@@ -1101,7 +1103,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         double[] pixel = image.get(y, x);
                         if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
                             pixel2Found = true;
-                            rightLimitX = x;
+                            rightLimitX = x + guideline2Rect.width/10;
                             Point lineStart = new Point(rightLimitX, rect.y);
                             Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
                             Line rightLimit = new Line(lineStart, lineEnd, pink, 1);
@@ -1120,7 +1122,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     //rightLimit.draw(image); // draw the line
                 }
             }
-        } else {
+        } else { // stem is on the right side (Quadrants of the tens and tousands)
             // Guideline Rectangle 1, to find rightLimitX
             int guideline1Width = rect.width / 2;
             int guideline1Height = rect.height / 15;
@@ -1133,7 +1135,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         double[] pixel = image.get(y, x);
                         if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
                             pixel1Found = true;
-                            rightLimitX = x - (guideline1Rect.width / 15);
+                            rightLimitX = x - (guideline1Rect.width / 25);
                             Point lineStart = new Point(rightLimitX, rect.y);
                             Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
                             Line rightLimit = new Line(lineStart, lineEnd, pink, 1);
@@ -1157,7 +1159,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // Guideline Rectangle 2, to find leftLimitX
             int guideline2Width = rect.width / 3;
             int guideline2Height = rect.height;
-            guideline2Rect = new Rect(rect.x, rect.y, guideline2Width, guideline2Height);
+            guideline2Rect = new Rect(rect.x - rect.width/10, rect.y, guideline2Width, guideline2Height);
             //drawRectangle(image, guideline2Rect, orange, 1);
 
             if (guideline2Rect != null) {
@@ -1198,7 +1200,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         int guideline3Width = rightLimitX - leftLimitX;
         int guideline3Height = rect.height / 2;
         if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline3Rect = new Rect(leftLimitX - (guideline3Width/20), rect.y, guideline3Width, guideline3Height);
+            guideline3Rect = new Rect(leftLimitX, rect.y - rect.height/20, guideline3Width, guideline3Height);
             //drawRectangle(image, guideline3Rect, orange, 1);
         }
 
@@ -1229,9 +1231,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Guideline Rectangle 4, to find bottomLimitX
         int guideline4Width = rightLimitX - leftLimitX;
-        int guideline4Height = 4 * (rect.height / 10);
+        int guideline4Height = 9 * (rect.height / 20);
         if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline4Rect = new Rect(leftLimitX, rect.y + rect.height - guideline4Height, guideline4Width, guideline4Height);
+            guideline4Rect = new Rect(leftLimitX, rect.y + rect.height - guideline4Height + rect.height/20, guideline4Width, guideline4Height);
             //drawRectangle(image, guideline4Rect, orange, 1);
         }
 
@@ -1253,7 +1255,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     break; // Exit the outer loop as well after drawing the 4th line
             }
             if (!pixel4Found) {
-                bottomLimitY = guideline4Rect.y + guideline3Height;
+                bottomLimitY = guideline4Rect.y + guideline3Height - guideline3Height/5;
                 Point lineStart = new Point(guideline4Rect.x, bottomLimitY);
                 Point lineEnd = new Point(guideline4Rect.x + guideline4Width, bottomLimitY);
                 Line bottomLimit = new Line(lineStart, lineEnd, pink, 1);
@@ -1296,7 +1298,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Initially flagging subQuadrants within 10% of the guide value
         for (int i = 0; i < segments.size(); i++) {
             Line segment = segments.get(i);
-            System.out.println("Segment has percentage: " + segment.getBlackPixelPercentage(image));
+            // System.out.println("Segment has percentage: " + segment.getBlackPixelPercentage(image));
             if (segment.getBlackPixelPercentage(image) > 72.0) {
                 flaggedSegments.add(i + 1);
                 //System.out.println("Segment " + i + 1 + " added with percentage: " + segment.getBlackPixelPercentage(image));
