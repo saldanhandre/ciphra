@@ -85,4 +85,11 @@ public class ConversionHistoryManager {
             listener.onHistoryUpdated();
         }
     }
+
+    // Method for clearing the history
+    public void clearHistory() {
+        conversionHistory.clear(); // Clear the history list
+        saveHistory(); // Persist the empty list to SharedPreferences
+        notifyHistoryUpdated(); // Notify all listeners about the history update
+    }
 }

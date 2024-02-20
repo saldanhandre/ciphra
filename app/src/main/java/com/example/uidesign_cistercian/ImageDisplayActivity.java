@@ -669,9 +669,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 System.out.println("Print");
             }
 
-
-
-
             // draw the 2 stem candidates
             // stemCandidate1.draw(coloredBinaryImage);
             // stemCandidate2.draw(coloredBinaryImage);
@@ -897,8 +894,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         return unitsResultBySegments;
     }
 
-// *******************************************************************************************************************
-
     private int findTensValue(Mat image, Rect rect) {
         List<Rect> subQuadrantsTens = new ArrayList<>();
 
@@ -951,8 +946,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         return tensResultBySegments * 10;
     }
 
-// *******************************************************************************************************************
-
     private int findHundredsValue(Mat image, Rect rect) {
         List<Rect> subQuadrantsHundreds = new ArrayList<>();
 
@@ -1003,8 +996,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
         return hundredsResultBySegments * 100;
     }
-
-// *******************************************************************************************************************
 
     private int findThousandsValue(Mat image, Rect rect) {
         List<Rect> subQuadrantsThousands = new ArrayList<>();
@@ -1299,7 +1290,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Imgproc.rectangle(image, rect.tl(), rect.br(), color, thickness);
     }
 
-
     private Integer detectValidSegments(Mat image, List<Line> segments) {
         Set<Integer> flaggedSegments = new HashSet<>(); // Track flagged segments
 
@@ -1318,7 +1308,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         return detectedNumber;
     }
-
 
     private Integer detectValidSubQuadrants(Mat image, List<Rect> subQuadrants) {
         List<Double> percentages = new ArrayList<>();
@@ -1393,30 +1382,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         return detectedNumber;
     }
 
-    private double calculateBlackPixelPercentage(Mat coloredBinaryImage, Rect subQuadrant) {
-        int blackPixelCount = 0;
-        int totalPixels = subQuadrant.width * subQuadrant.height;
-
-        // iterate through each pixel
-        for (int y = subQuadrant.y; y < (subQuadrant.y + subQuadrant.height); y++) {
-            for (int x = subQuadrant.x; x < (subQuadrant.x + subQuadrant.width); x++) {
-                double[] pixel = coloredBinaryImage.get(y, x); //
-                // check if pixel is black
-                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                    blackPixelCount++;
-                }
-            }
-        }
-
-        double blackPixelPercentage = (double) blackPixelCount / totalPixels * 100;
-        // label percentage of black pixels on the image near the subQuadrant
-        String label = String.format("%.2f%%", blackPixelPercentage); // Formats the percentage to 2 decimal places
-        Point labelPoint = new Point(subQuadrant.x + 5, subQuadrant.y + 20);
-        //Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 255), 1);
-
-        return (double) blackPixelCount / totalPixels * 100;
-    }
-
     private int mapFlaggedSegmentsToNumber(Set<Integer> flaggedSegments) {
         Set<Integer> patternForNumber1 = new HashSet<>(Collections.singletonList(1));
         Set<Integer> patternForNumber2 = new HashSet<>(Collections.singletonList(2));
@@ -1464,6 +1429,30 @@ public class ImageDisplayActivity extends AppCompatActivity {
         } else if (flaggedSubQuadrants.equals(patternForNumber9)) { return 9; // Matches pattern for Number 9
         }
         return 0; // No pattern matches - it's 0
+    }
+
+    private double calculateBlackPixelPercentage(Mat coloredBinaryImage, Rect subQuadrant) {
+        int blackPixelCount = 0;
+        int totalPixels = subQuadrant.width * subQuadrant.height;
+
+        // iterate through each pixel
+        for (int y = subQuadrant.y; y < (subQuadrant.y + subQuadrant.height); y++) {
+            for (int x = subQuadrant.x; x < (subQuadrant.x + subQuadrant.width); x++) {
+                double[] pixel = coloredBinaryImage.get(y, x); //
+                // check if pixel is black
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    blackPixelCount++;
+                }
+            }
+        }
+
+        double blackPixelPercentage = (double) blackPixelCount / totalPixels * 100;
+        // label percentage of black pixels on the image near the subQuadrant
+        String label = String.format("%.2f%%", blackPixelPercentage); // Formats the percentage to 2 decimal places
+        Point labelPoint = new Point(subQuadrant.x + 5, subQuadrant.y + 20);
+        //Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 255), 1);
+
+        return (double) blackPixelCount / totalPixels * 100;
     }
 
 //CHECK

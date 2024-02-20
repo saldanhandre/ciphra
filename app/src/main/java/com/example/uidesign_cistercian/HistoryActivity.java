@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -77,12 +78,21 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_history, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                // Respond to the action bar's Up/Home button
-                finish();
-                return true;
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        } else if (id == R.id.action_delete_history) {
+            // Handle delete history action
+            deleteHistory();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -91,5 +101,12 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
     protected void onDestroy() {
         super.onDestroy();
         ConversionHistoryManager.getInstance(getApplicationContext()).removeHistoryUpdateListener(this);
+    }
+
+    private void deleteHistory() {
+        // Call clearHistory on your singleton instance of ConversionHistoryManager
+        ConversionHistoryManager.getInstance(getApplicationContext()).clearHistory();
+        // Update the UI by refreshing the history list
+        updateHistory();
     }
 }
