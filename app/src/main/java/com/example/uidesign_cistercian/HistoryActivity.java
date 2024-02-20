@@ -6,8 +6,10 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -16,6 +18,8 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+
 public class HistoryActivity extends AppCompatActivity implements ConversionHistoryManager.HistoryUpdateListener {
 
     private ListView historyListView;
@@ -53,6 +57,47 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
                 intent.putExtra("selectedNumber", selectedNumber);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
+            }
+        });
+
+
+        historyListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        historyListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                // Toggle the selection state
+                adapter.toggleItemSelection(position);
+
+                // Update the title in the action mode
+                mode.setTitle(adapter.getSelectedItems().size() + " selected");
+            }
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                // Inflate the menu for selected items
+                mode.getMenuInflater().inflate(R.menu.menu_selection, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                if (item.getItemId() == R.id.action_delete_selected) {
+                    // Handle delete selected items
+                    deleteSelectedItems(adapter.getSelectedItems());
+                    mode.finish(); // Close the action mode
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                adapter.clearSelections();
             }
         });
     }
@@ -107,6 +152,14 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
         // Call clearHistory on your singleton instance of ConversionHistoryManager
         ConversionHistoryManager.getInstance(getApplicationContext()).clearHistory();
         // Update the UI by refreshing the history list
+        updateHistory();
+    }
+
+    private void deleteSelectedItems(Set<Integer> selectedItems) {
+        // Implement deletion logic, likely involving ConversionHistoryManager
+        for (Integer position : selectedItems) {
+            // Use position to delete from ConversionHistoryManager
+        }
         updateHistory();
     }
 }

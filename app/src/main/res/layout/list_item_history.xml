@@ -18,10 +18,10 @@
             android:id="@+id/tvArabicNumber"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="20sp"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="20dp"/>
+            android:layout_marginStart="20dp"
+            android:layout_weight="1"
+            android:textSize="20sp" />
 
         <com.example.uidesign_cistercian.CistercianThumbnailView
             android:id="@+id/ivThumbnail"
@@ -29,7 +29,7 @@
             android:layout_height="50dp"
             android:layout_marginStart="0dp"
             android:layout_marginEnd="15dp"
-            android:padding="5dp"/>
+            android:padding="5dp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
