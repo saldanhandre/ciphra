@@ -760,31 +760,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         return new Point(x, y);
     }
 
-
-    // *******************************************************************************************************************
-
-    // SubQuadrant class
-    private static class SubQuadrant {
-        Rect rect;
-        double blackPixelPercentage;
-
-        SubQuadrant(Rect rect, double blackPixelPercentage) {
-            this.rect = rect;
-            this.blackPixelPercentage = blackPixelPercentage;
-        }
-
-        public Rect getRect() {
-            return rect;
-        }
-
-        public double getBlackPixelPercentage() {
-            return blackPixelPercentage;
-        }
-    }
-
 // *******************************************************************************************************************
-
-
     private int processCipher(Mat image, Rect rect) {
         int quadrantWidth = rect.width / 2;
         int quadrantHeight = 4 * (rect.height / 10);
@@ -817,12 +793,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
         } else {
             System.out.println("Print");
         }
-
         // this finds the exact middle point inside of the stem, so that the calculations of the quadrants is exact
         Point pointTop = guidelineTop.findMiddleBlackPixel(image);
         Point secondPoint = new Point(pointTop.x, rect.y);
         Line line = new Line(pointTop, secondPoint, pink, 1);
-        line.draw(image);
+        //line.draw(image);
         int subStemXTop = (int) pointTop.x;
 
 
@@ -836,7 +811,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         } else {
             System.out.println("Print");
         }
-
 
         Point pointBottom = guidelineBottom.findMiddleBlackPixel(image);
         int subStemXBottom = (int) pointBottom.x;
@@ -1469,7 +1443,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private int mapFlaggedSubQuadrantsToNumber(Set<Integer> flaggedSubQuadrants) {
         // Define patterns corresponding to numbers
-//        Set<Integer> patternForNumber0 = new HashSet<>(Collections.emptyList());
         Set<Integer> patternForNumber1 = new HashSet<>(Arrays.asList(1, 2, 3));
         Set<Integer> patternForNumber2 = new HashSet<>(Arrays.asList(7, 8, 9));
         Set<Integer> patternForNumber3 = new HashSet<>(Arrays.asList(1, 5, 9));
@@ -1480,10 +1453,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Set<Integer> patternForNumber8 = new HashSet<>(Arrays.asList(3, 6, 7, 8, 9));
         Set<Integer> patternForNumber9 = new HashSet<>(Arrays.asList(1, 2, 3, 6, 7, 8, 9));
 
-        // Check against each pattern
-//        if (flaggedSubQuadrants.equals(patternForNumber0)) {
-//            return 0; // Matches pattern for Number 0
-//        }
         if (flaggedSubQuadrants.equals(patternForNumber1)) { return 1; // Matches pattern for Number 1
         } else if (flaggedSubQuadrants.equals(patternForNumber2)) { return 2; // Matches pattern for Number 2
         } else if (flaggedSubQuadrants.equals(patternForNumber3)) { return 3; // Matches pattern for Number 3
@@ -1496,7 +1465,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
         return 0; // No pattern matches - it's 0
     }
-
 
 //CHECK
     private void updateResultsDisplay() {
