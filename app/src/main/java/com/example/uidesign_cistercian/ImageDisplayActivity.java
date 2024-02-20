@@ -873,150 +873,23 @@ public class ImageDisplayActivity extends AppCompatActivity {
 // *******************************************************************************************************************
 
     private int findUnitsValue(Mat image, Rect rect) {
-        int unitsDigitResult = 0;
-        int unitsDigitResultByLines = 0;
-        boolean firstLineDrawn = false;
-        boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
-        int leftLimitX = -1, rightLimitX = -1, bottomLimitY = -1, topLimitY = -1;
-        Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
-        int subQuadrantHeight, subQuadrantWidth;
         List<Rect> subQuadrantsUnits = new ArrayList<>();
-        List<Line> segmentsUnits = new ArrayList<>();
 
+        int unitsResultBySubQuadrants = 0;
+        int unitsResultBySegments = 0;
 
-        // Guideline Rectangle 1, to find leftLimitX
-        int guideline1Width = rect.width / 2;
-        int guideline1Height = rect.height / 15;
-        guideline1Rect = new Rect(rect.x + (rect.width / 25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
-        //drawRectangle(image, guideline1Rect, orange, 1);
+        int[] limitsLeftRight = getLimitsLeftRight(image, rect, true);
+        int[] limitsTopBottom = getLimitsTopBottom(image, rect, limitsLeftRight[0], limitsLeftRight[1]);
 
-        if (guideline1Rect != null) {
-            for (int x = guideline1Rect.x; x < guideline1Rect.x + guideline1Rect.width; x++) {
-                for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
-                        pixel1Found = true;
-                        leftLimitX = x + (guideline1Rect.width / 15);
-                        Point lineStart = new Point(leftLimitX, rect.y);
-                        Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                        firstLineDrawn = true;
-                        break;
-                    }
-                }
-                if (firstLineDrawn) break; // Exit the outer loop as well after drawing the 1st line
-            }
-            if (!pixel1Found) {
-                leftLimitX = rect.x + (rect.width / 15);
-                Point lineStart = new Point(leftLimitX, rect.y);
-                Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
-
-
-        // Guideline Rectangle 2, to find rightLimitX
-        int guideline2Width = rect.width / 3;
-        int guideline2Height = rect.height;
-        guideline2Rect = new Rect(rect.x + (2 * (rect.width / 3)), rect.y, guideline2Width, guideline2Height);
-        //drawRectangle(image, guideline2Rect, orange, 1);
-
-        if (guideline2Rect != null) {
-            for (int x = guideline2Rect.x + guideline2Rect.width; x > guideline2Rect.x; x--) {
-                for (int y = guideline2Rect.y; y < guideline2Rect.y + guideline2Rect.height; y++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel2Found = true;
-                        rightLimitX = x;
-                        Point lineStart = new Point(rightLimitX, rect.y);
-                        Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                        break;
-                    }
-                }
-                if (rightLimitX != -1)
-                    break; // Exit the outer loop as well after drawing 2nd line
-            }
-            if (!pixel2Found) {
-                rightLimitX = rect.x + rect.width;
-                Point lineStart = new Point(rightLimitX, rect.y);
-                Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
-
-
-        // Guideline Rectangle 3, to find bottomLimitX
-        int guideline3Width = rightLimitX - leftLimitX;
-        int guideline3Height = rect.height / 2;
-        if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline3Rect = new Rect(leftLimitX + (guideline3Width/20), rect.y + rect.height - guideline3Height, guideline3Width, guideline3Height);
-            //drawRectangle(image, guideline3Rect, orange, 1);
-        }
-
-        if (guideline3Rect != null) {
-            for (int y = guideline3Rect.y + guideline3Height; y > guideline3Rect.y; y--) {
-                for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Width; x++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel3Found = true;
-                        bottomLimitY = y;
-                        Point lineStart = new Point(guideline3Rect.x, bottomLimitY);
-                        Point lineEnd = new Point(guideline3Rect.x + guideline3Width, bottomLimitY);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
-                        break;
-                    }
-                }
-                if (bottomLimitY != -1)
-                    break; // Exit the outer loop as well after "drawing" the second line
-            }
-            if (!pixel3Found) {
-                bottomLimitY = guideline3Rect.y + guideline3Height;
-                Point lineStart = new Point(guideline3Rect.x, bottomLimitY);
-                Point lineEnd = new Point(guideline3Rect.x + guideline3Width, bottomLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(100, 0, 225), 1); // Draw the third line
-            }
-        }
-
-
-        // Guideline Rectangle 4, to find topLimitX
-        int guideline4Width = rightLimitX - leftLimitX;
-        int guideline4Height = 4 * (rect.height / 10);
-        if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline4Rect = new Rect(leftLimitX, rect.y, guideline4Width, guideline4Height);
-            //drawRectangle(image, guideline4Rect, orange, 1);
-        }
-
-        // iterate through the rectangle to find the first black pixel from the other side
-        if (guideline4Rect != null) {
-            for (int y = guideline4Rect.y; y < guideline4Height; y++) {
-                for (int x = guideline4Rect.x; x < guideline4Rect.x + guideline4Width; x++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel4Found = true;
-                        topLimitY = y;
-                        Point lineStart = new Point(guideline4Rect.x, topLimitY);
-                        Point lineEnd = new Point(guideline4Rect.x + guideline4Width, topLimitY);
-                        Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
-                        break;
-                    }
-                }
-                if (topLimitY != -1)
-                    break; // Exit the outer loop as well after drawing the 4th line
-            }
-            if (!pixel4Found) {
-                topLimitY = guideline4Rect.y;
-                Point lineStart = new Point(guideline4Rect.x, topLimitY);
-                Point lineEnd = new Point(guideline4Rect.x + guideline4Width, topLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
-            }
-        }
-
+        int leftLimitX = limitsLeftRight[0];
+        int rightLimitX = limitsLeftRight[1];
+        int topLimitY = limitsTopBottom[0];
+        int bottomLimitY = limitsTopBottom[1];
 
         if (leftLimitX != -1 && rightLimitX != -1 && bottomLimitY != -1 && topLimitY != -1) {
-            // Subdivide Resized Quadrant into Sub-quadrants
-            subQuadrantHeight = (bottomLimitY - topLimitY) / 3;
-            subQuadrantWidth = (rightLimitX - leftLimitX) / 3;
+            // Get the result from the subquadrants
+            int subQuadrantHeight = (bottomLimitY - topLimitY) / 3;
+            int subQuadrantWidth = (rightLimitX - leftLimitX) / 3;
 
             Rect subQuadrantUnits1 = new Rect(leftLimitX, topLimitY, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantUnits2 = new Rect(leftLimitX + subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
@@ -1028,191 +901,49 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantUnits8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantUnits9 = new Rect(leftLimitX + 2 * subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
 
-            subQuadrantsUnits.add(subQuadrantUnits1);
-            subQuadrantsUnits.add(subQuadrantUnits2);
-            subQuadrantsUnits.add(subQuadrantUnits3);
-            subQuadrantsUnits.add(subQuadrantUnits4);
-            subQuadrantsUnits.add(subQuadrantUnits5);
-            subQuadrantsUnits.add(subQuadrantUnits6);
-            subQuadrantsUnits.add(subQuadrantUnits7);
-            subQuadrantsUnits.add(subQuadrantUnits8);
-            subQuadrantsUnits.add(subQuadrantUnits9);
+            subQuadrantsUnits.addAll(Arrays.asList(subQuadrantUnits1, subQuadrantUnits2, subQuadrantUnits3, subQuadrantUnits4, subQuadrantUnits5, subQuadrantUnits6, subQuadrantUnits7, subQuadrantUnits8, subQuadrantUnits9));
 
+            unitsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsUnits);
+            drawSubQuadrants(image, subQuadrantsUnits);
+            
+            // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.0);
             Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.0);
             Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
             Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
 
-            Line segment1 = new Line(point1, point2, blue, 1);
-            Line segment2 = new Line(point3, point4, blue, 1);
-            Line segment3 = new Line(point1, point4, blue, 1);
-            Line segment4 = new Line(point3, point2, blue, 1);
-            Line segment5 = new Line(point2, point4, blue, 1);
+            List<Line> segmentsUnits = getSegmentsFromPoints(point1, point2, point3, point4);
 
-            segmentsUnits.add(segment1);
-            segmentsUnits.add(segment2);
-            segmentsUnits.add(segment3);
-            segmentsUnits.add(segment4);
-            segmentsUnits.add(segment5);
-
-            unitsDigitResultByLines = detectValidLines(image, segmentsUnits);
+            unitsResultBySegments = detectValidSegments(image, segmentsUnits);
             drawSegments(image, segmentsUnits);
-
-            unitsDigitResult = detectValidSubQuadrants(image, subQuadrantsUnits);
-            drawSubQuadrants(image, subQuadrantsUnits);
-
-            boolean sameResult = unitsDigitResultByLines == unitsDigitResult;
-            System.out.println("Digit Units (" + sameResult + ") - Segments: " + unitsDigitResultByLines + ", Rects: " + unitsDigitResult);
+            
+            boolean sameResult = unitsResultBySegments == unitsResultBySubQuadrants;
+            System.out.println("Digit Units (" + sameResult + ") - Segments: " + unitsResultBySegments + ", Rects: " + unitsResultBySubQuadrants);
         }
-        return unitsDigitResultByLines;
+        return unitsResultBySegments;
     }
 
 // *******************************************************************************************************************
 
     private int findTensValue(Mat image, Rect rect) {
-        int tensDigitResult = 0;
-        int tensDigitResultByLines = 0;
-        boolean firstLineDrawn = false;
-        boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
-        int rightLimitX = -1, leftLimitX = -1, bottomLimitY = -1, topLimitY = -1;
-        Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
-        int subQuadrantHeight, subQuadrantWidth;
         List<Rect> subQuadrantsTens = new ArrayList<>();
-        List<Line> segmentsTens = new ArrayList<>();
 
+        int tensResultBySubQuadrants = 0;
+        int tensResultBySegments = 0;
 
-        // Guideline Rectangle 1, to find rightLimitX
-        int guideline1Width = rect.width / 2;
-        int guideline1Height = rect.height / 15;
-        guideline1Rect = new Rect(rect.x + (rect.width/2) - (rect.width/25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
-        //drawRectangle(image, guideline1Rect, orange, 1);
+        int[] limitsLeftRight = getLimitsLeftRight(image, rect, false);
+        int[] limitsTopBottom = getLimitsTopBottom(image, rect, limitsLeftRight[0], limitsLeftRight[1]);
 
-        if (guideline1Rect != null) {
-            for (int x = guideline1Rect.x + guideline1Width; x > guideline1Rect.x; x--) {
-                for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Height; y++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
-                        pixel1Found = true;
-                        rightLimitX = x - (guideline1Rect.width / 15);
-                        Point lineStart = new Point(rightLimitX, rect.y);
-                        Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
-                        firstLineDrawn = true;
-                        break;
-                    }
-                }
-                if (firstLineDrawn) break; // Exit the outer loop as well after drawing first line
-            }
-            if (!pixel1Found) {
-                rightLimitX = rect.x + rect.width - (rect.width/15);
-                Point lineStart = new Point(rightLimitX, rect.y);
-                Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
-
-
-        // Guideline Rectangle 2, to find leftLimitX
-        int guideline2Width = rect.width / 3;
-        int guideline2Height = rect.height;
-        guideline2Rect = new Rect(rect.x, rect.y, guideline2Width, guideline2Height);
-        //drawRectangle(image, guideline2Rect, orange, 1);
-
-        if (guideline2Rect != null) {
-            for (int x = guideline2Rect.x; x < guideline2Rect.x + guideline2Width; x++) {
-                for (int y = guideline2Rect.y; y < guideline2Rect.y + guideline2Height; y++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel2Found = true;
-                        leftLimitX = x;
-                        Point lineStart = new Point(leftLimitX, rect.y);
-                        Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
-                        break;
-                    }
-                }
-                if (leftLimitX != -1)
-                    break; // Exit the outer loop as well after drawing second line
-            }
-            if (!pixel2Found) {
-                leftLimitX = guideline2Rect.x;
-                Point lineStart = new Point(leftLimitX, guideline2Rect.y);
-                Point lineEnd = new Point(leftLimitX, guideline2Rect.y + guideline2Height);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
-
-
-        // Guideline Rectangle 3, to find bottomLimitX
-        int guideline3Width = rightLimitX - leftLimitX;
-        int guideline3Height = rect.height / 2;
-        if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline3Rect = new Rect(leftLimitX - (guideline3Width/20), rect.y + rect.height - guideline3Height, guideline3Width, guideline3Height);
-            //drawRectangle(image, guideline3Rect, orange, 1);
-        }
-
-        if (guideline3Rect != null) {
-            for (int y = guideline3Rect.y + guideline3Height; y > guideline3Rect.y; y--) {
-                for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Width; x++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel3Found = true;
-                        bottomLimitY = y;
-                        Point lineStart = new Point(guideline3Rect.x, bottomLimitY);
-                        Point lineEnd = new Point(guideline3Rect.x + guideline3Width, bottomLimitY);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
-                        break;
-                    }
-                }
-                if (bottomLimitY != -1)
-                    break; // Exit the outer loop as well after "drawing" the second line
-            }
-            if (!pixel3Found) {
-                bottomLimitY = guideline3Rect.y + guideline3Height;
-                Point lineStart = new Point(guideline3Rect.x, bottomLimitY);
-                Point lineEnd = new Point(guideline3Rect.x + guideline3Width, bottomLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the third line
-            }
-        }
-
-
-        // Guideline Rectangle 4, to find topLimitX
-        int guideline4Width = rightLimitX - leftLimitX;
-        int guideline4Height = 4 * (rect.height / 10);
-        if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline4Rect = new Rect(leftLimitX, rect.y, guideline4Width, guideline4Height);
-            //drawRectangle(image, guideline4Rect, orange, 1);
-        }
-
-        if (guideline4Rect != null) {
-            for (int y = guideline4Rect.y; y < guideline4Height; y++) {
-                for (int x = guideline4Rect.x; x < guideline4Rect.x + guideline4Width; x++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel4Found = true;
-                        topLimitY = y;
-                        Point lineStart = new Point(guideline4Rect.x, topLimitY);
-                        Point lineEnd = new Point(guideline4Rect.x + guideline4Width, topLimitY);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                        break;
-                    }
-                }
-                if (topLimitY != -1)
-                    break; // Exit the outer loop as well after drawing the 4th line
-            }
-            if (!pixel4Found) {
-                topLimitY = guideline4Rect.y;
-                Point lineStart = new Point(guideline4Rect.x, topLimitY);
-                Point lineEnd = new Point(guideline4Rect.x + guideline4Width, topLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
+        int leftLimitX = limitsLeftRight[0];
+        int rightLimitX = limitsLeftRight[1];
+        int topLimitY = limitsTopBottom[0];
+        int bottomLimitY = limitsTopBottom[1];
 
 
         if (rightLimitX != -1 && leftLimitX != -1 && bottomLimitY != -1 && topLimitY != -1) {
-            // Subdivide Resized Quadrant into Sub-quadrants
-            subQuadrantHeight = (bottomLimitY - topLimitY) / 3;
-            subQuadrantWidth = (rightLimitX - leftLimitX) / 3;
+            // Get the result from the subquadrants
+            int subQuadrantHeight = (bottomLimitY - topLimitY) / 3;
+            int subQuadrantWidth = (rightLimitX - leftLimitX) / 3;
 
             Rect subQuadrantTens1 = new Rect(leftLimitX + 2 * subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantTens2 = new Rect(leftLimitX + subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
@@ -1224,190 +955,48 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantTens8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantTens9 = new Rect(leftLimitX, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
 
-            subQuadrantsTens.add(subQuadrantTens1);
-            subQuadrantsTens.add(subQuadrantTens2);
-            subQuadrantsTens.add(subQuadrantTens3);
-            subQuadrantsTens.add(subQuadrantTens4);
-            subQuadrantsTens.add(subQuadrantTens5);
-            subQuadrantsTens.add(subQuadrantTens6);
-            subQuadrantsTens.add(subQuadrantTens7);
-            subQuadrantsTens.add(subQuadrantTens8);
-            subQuadrantsTens.add(subQuadrantTens9);
-
+            subQuadrantsTens.addAll(Arrays.asList(subQuadrantTens1, subQuadrantTens2, subQuadrantTens3, subQuadrantTens4, subQuadrantTens5, subQuadrantTens6, subQuadrantTens7, subQuadrantTens8, subQuadrantTens9));
+            
+            tensResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsTens);
+            drawSubQuadrants(image, subQuadrantsTens);
+            
+            // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
             Point point2 = new Point(leftLimitX + subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
             Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
             Point point4 = new Point(leftLimitX + subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
 
-            Line segment1 = new Line(point1, point2, blue, 1);
-            Line segment2 = new Line(point3, point4, blue, 1);
-            Line segment3 = new Line(point1, point4, blue, 1);
-            Line segment4 = new Line(point3, point2, blue, 1);
-            Line segment5 = new Line(point2, point4, blue, 1);
+            List<Line> segmentsTens = getSegmentsFromPoints(point1, point2, point3, point4);
 
-            segmentsTens.add(segment1);
-            segmentsTens.add(segment2);
-            segmentsTens.add(segment3);
-            segmentsTens.add(segment4);
-            segmentsTens.add(segment5);
-
-            tensDigitResultByLines = detectValidLines(image, segmentsTens);
+            tensResultBySegments = detectValidSegments(image, segmentsTens);
             drawSegments(image, segmentsTens);
 
-            tensDigitResult = detectValidSubQuadrants(image, subQuadrantsTens);
-            drawSubQuadrants(image, subQuadrantsTens);
-
-            boolean sameResult = tensDigitResultByLines == tensDigitResult;
-            System.out.println("Digit Tens (" + sameResult + ") - Segments: " + tensDigitResultByLines + ", Rects: " + tensDigitResult);
+            boolean sameResult = tensResultBySegments == tensResultBySubQuadrants;
+            System.out.println("Digit Tens (" + sameResult + ") - Segments: " + tensResultBySegments + ", Rects: " + tensResultBySubQuadrants);
         }
-        return tensDigitResultByLines * 10;
+        return tensResultBySegments * 10;
     }
 
 // *******************************************************************************************************************
 
     private int findHundredsValue(Mat image, Rect rect) {
-        int hundredsDigitResult = 0;
-        int hundredsDigitResultByLines = 0;
-        boolean firstLineDrawn = false;
-        boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
-        int leftLimitX = -1, rightLimitX = -1, topLimitY = -1, bottomLimitY = -1;
-        Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
-        int subQuadrantHeight, subQuadrantWidth;
         List<Rect> subQuadrantsHundreds = new ArrayList<>();
-        List<Line> segmentsHundreds = new ArrayList<>();
 
+        int hundredsResultBySubQuadrants = 0;
+        int hundredsResultBySegments = 0;
 
-        // Guideline Rectangle 1, to find leftLimitX
-        int guideline1Width = rect.width / 2;
-        int guideline1Height = rect.height / 15;
-        guideline1Rect = new Rect(rect.x + (rect.width / 25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
-        //drawRectangle(image, guideline1Rect, orange, 1);
+        int[] limitsLeftRight = getLimitsLeftRight(image, rect, true);
+        int[] limitsTopBottom = getLimitsTopBottom(image, rect, limitsLeftRight[0], limitsLeftRight[1]);
 
-        if (guideline1Rect != null) {
-            for (int x = guideline1Rect.x; x < guideline1Rect.x + guideline1Rect.width; x++) {
-                for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
-                        pixel1Found = true;
-                        leftLimitX = x + (guideline1Rect.width / 15);
-                        Point lineStart = new Point(leftLimitX, rect.y);
-                        Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                        firstLineDrawn = true;
-                        break;
-                    }
-                }
-                if (firstLineDrawn) break; // Exit the outer loop as well after drawing the 1st line
-            }
-            if (!pixel1Found) {
-                leftLimitX = rect.x + (rect.width / 15);
-                Point lineStart = new Point(leftLimitX, rect.y);
-                Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
-
-
-        // Guideline Rectangle 2, to find rightLimitX
-        int guideline2Width = rect.width / 3;
-        int guideline2Height = rect.height;
-        guideline2Rect = new Rect(rect.x + (2 * (rect.width / 3)), rect.y, guideline2Width, guideline2Height);
-        //drawRectangle(image, guideline2Rect, orange, 1);
-
-        if (guideline2Rect != null) {
-            for (int x = guideline2Rect.x + guideline2Rect.width; x > guideline2Rect.x; x--) {
-                for (int y = guideline2Rect.y; y < guideline2Rect.y + guideline2Rect.height; y++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel2Found = true;
-                        rightLimitX = x;
-                        Point lineStart = new Point(rightLimitX, rect.y);
-                        Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                        break;
-                    }
-                }
-                if (rightLimitX != -1)
-                    break; // Exit the outer loop as well after drawing 2nd line
-            }
-            if (!pixel2Found) {
-                rightLimitX = rect.x + rect.width;
-                Point lineStart = new Point(rightLimitX, rect.y);
-                Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
-
-
-        // Guideline Rectangle 3, to find topLimitX
-        int guideline3Width = rightLimitX - leftLimitX;
-        int guideline3Height = rect.height / 2;
-        if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline3Rect = new Rect(leftLimitX + (guideline3Width/20), rect.y, guideline3Width, guideline3Height);
-            //drawRectangle(image, guideline3Rect, orange, 1);
-        }
-
-        if (guideline3Rect != null) {
-            for (int y = guideline3Rect.y; y < guideline3Rect.y + guideline3Height; y++) {
-                for (int x = guideline3Rect.x; x < guideline3Rect.x + guideline3Width; x++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel3Found = true;
-                        topLimitY = y;
-                        Point lineStart = new Point(guideline3Rect.x, topLimitY);
-                        Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                        break;
-                    }
-                }
-                if (topLimitY != -1) break; // Exit the outer loop as well after drawing the 3rd line
-            }
-            if (!pixel3Found) {
-                topLimitY = guideline3Rect.y;
-                Point lineStart = new Point(guideline3Rect.x, topLimitY);
-                Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
-
-
-        // Guideline Rectangle 4, to find bottomLimitX
-        int guideline4Width = rightLimitX - leftLimitX;
-        int guideline4Height = 4 * (rect.height / 10);
-        if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline4Rect = new Rect(leftLimitX, rect.y + rect.height - guideline4Height, guideline4Width, guideline4Height);
-            //drawRectangle(image, guideline4Rect, orange, 1);
-        }
-
-        if (guideline4Rect != null) {
-            for (int y = guideline4Rect.y + guideline4Height; y > guideline4Rect.y; y--) {
-                for (int x = guideline4Rect.x; x < guideline4Rect.x + guideline4Width; x++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel4Found = true;
-                        bottomLimitY = y;
-                        Point lineStart = new Point(guideline4Rect.x, bottomLimitY);
-                        Point lineEnd = new Point(guideline4Rect.x + guideline4Width, bottomLimitY);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-                        break;
-                    }
-                }
-                if (bottomLimitY != -1)
-                    break; // Exit the outer loop as well after drawing the 4th line
-            }
-            if (!pixel4Found) {
-                bottomLimitY = guideline4Rect.y + guideline3Height;
-                Point lineStart = new Point(guideline4Rect.x, bottomLimitY);
-                Point lineEnd = new Point(guideline4Rect.x + guideline4Width, bottomLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
-
+        int leftLimitX = limitsLeftRight[0];
+        int rightLimitX = limitsLeftRight[1];
+        int topLimitY = limitsTopBottom[0];
+        int bottomLimitY = limitsTopBottom[1];
 
         if (leftLimitX != -1 && rightLimitX != -1 && topLimitY != -1 && bottomLimitY != -1) {
-            // Subdivide Resized Quadrant into Sub-quadrants
-            subQuadrantHeight = (bottomLimitY - topLimitY) / 3;
-            subQuadrantWidth = (rightLimitX - leftLimitX) / 3;
+            // Get the result from the subquadrants
+            int subQuadrantHeight = (bottomLimitY - topLimitY) / 3;
+            int subQuadrantWidth = (rightLimitX - leftLimitX) / 3;
 
             Rect subQuadrantHundreds1 = new Rect(leftLimitX, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantHundreds2 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + 2 * subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
@@ -1419,119 +1008,226 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Rect subQuadrantHundreds8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
             Rect subQuadrantHundreds9 = new Rect(leftLimitX + 2 * subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
 
-            subQuadrantsHundreds.add(subQuadrantHundreds1);
-            subQuadrantsHundreds.add(subQuadrantHundreds2);
-            subQuadrantsHundreds.add(subQuadrantHundreds3);
-            subQuadrantsHundreds.add(subQuadrantHundreds4);
-            subQuadrantsHundreds.add(subQuadrantHundreds5);
-            subQuadrantsHundreds.add(subQuadrantHundreds6);
-            subQuadrantsHundreds.add(subQuadrantHundreds7);
-            subQuadrantsHundreds.add(subQuadrantHundreds8);
-            subQuadrantsHundreds.add(subQuadrantHundreds9);
+            subQuadrantsHundreds.addAll(Arrays.asList(subQuadrantHundreds1, subQuadrantHundreds2, subQuadrantHundreds3, subQuadrantHundreds4, subQuadrantHundreds5, subQuadrantHundreds6, subQuadrantHundreds7, subQuadrantHundreds8, subQuadrantHundreds9));
 
+            hundredsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsHundreds);
+            drawSubQuadrants(image, subQuadrantsHundreds);
+
+            // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
             Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
             Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
             Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
 
-            Line segment1 = new Line(point1, point2, blue, 1);
-            Line segment2 = new Line(point3, point4, blue, 1);
-            Line segment3 = new Line(point1, point4, blue, 1);
-            Line segment4 = new Line(point3, point2, blue, 1);
-            Line segment5 = new Line(point2, point4, blue, 1);
+            List<Line> segmentsHundreds = getSegmentsFromPoints(point1, point2, point3, point4);
 
-            segmentsHundreds.add(segment1);
-            segmentsHundreds.add(segment2);
-            segmentsHundreds.add(segment3);
-            segmentsHundreds.add(segment4);
-            segmentsHundreds.add(segment5);
-
-            hundredsDigitResultByLines = detectValidLines(image, segmentsHundreds);
+            hundredsResultBySegments = detectValidSegments(image, segmentsHundreds);
             drawSegments(image, segmentsHundreds);
 
-            hundredsDigitResult = detectValidSubQuadrants(image, subQuadrantsHundreds);
-            drawSubQuadrants(image, subQuadrantsHundreds);
-
-            boolean sameResult = hundredsDigitResultByLines == hundredsDigitResult;
-            System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + hundredsDigitResultByLines + ", Rects: " + hundredsDigitResult);
+            boolean sameResult = hundredsResultBySegments == hundredsResultBySubQuadrants;
+            System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + hundredsResultBySegments + ", Rects: " + hundredsResultBySubQuadrants);
         }
-        return hundredsDigitResultByLines * 100;
+        return hundredsResultBySegments * 100;
     }
 
 // *******************************************************************************************************************
 
     private int findThousandsValue(Mat image, Rect rect) {
-        int thousandsDigitResult = 0;
-        int thousandsDigitResultByLines = 0;
-        boolean firstLineDrawn = false;
-        boolean pixel1Found = false, pixel2Found = false, pixel3Found = false, pixel4Found = false;
-        int leftLimitX = -1, rightLimitX = -1, bottomLimitY = -1, topLimitY = -1;
-        Rect guideline1Rect = null, guideline2Rect = null, guideline3Rect = null, guideline4Rect = null;
-        int subQuadrantHeight, subQuadrantWidth;
         List<Rect> subQuadrantsThousands = new ArrayList<>();
-        List<Line> segmentsThousands = new ArrayList<>();
 
-        // Guideline Rectangle 1, to find rightLimitX
-        int guideline1Width = rect.width / 2;
-        int guideline1Height = rect.height / 15;
-        guideline1Rect = new Rect(rect.x + (rect.width/2) - (rect.width/25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
-        //drawRectangle(image, guideline1Rect, orange, 1);
+        int thousandsResultBySubQuadrants = 0;
+        int thousandsResultBySegments = 0;
 
-        if (guideline1Rect != null) {
-            for (int x = guideline1Rect.x + guideline1Width; x > guideline1Rect.x; x--) {
-                for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Height; y++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
-                        pixel1Found = true;
-                        rightLimitX = x - (guideline1Rect.width / 15);
-                        Point lineStart = new Point(rightLimitX, rect.y);
-                        Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the first line
-                        firstLineDrawn = true;
-                        break;
+        int[] limitsLeftRight = getLimitsLeftRight(image, rect, false);
+        int[] limitsTopBottom = getLimitsTopBottom(image, rect, limitsLeftRight[0], limitsLeftRight[1]);
+
+        int leftLimitX = limitsLeftRight[0];
+        int rightLimitX = limitsLeftRight[1];
+        int topLimitY = limitsTopBottom[0];
+        int bottomLimitY = limitsTopBottom[1];
+
+        if (rightLimitX != -1 && leftLimitX != -1 && topLimitY != -1 && bottomLimitY != -1) {
+            // Get the result from the subquadrants
+            int subQuadrantHeight = (bottomLimitY - topLimitY) / 3;
+            int subQuadrantWidth = (rightLimitX - leftLimitX) / 3;
+
+            Rect subQuadrantThousands1 = new Rect(leftLimitX + 2*subQuadrantWidth, topLimitY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
+            Rect subQuadrantThousands2 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
+            Rect subQuadrantThousands3 = new Rect(leftLimitX, topLimitY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
+            Rect subQuadrantThousands4 = new Rect(leftLimitX + 2*subQuadrantWidth, topLimitY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
+            Rect subQuadrantThousands5 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
+            Rect subQuadrantThousands6 = new Rect(leftLimitX, topLimitY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
+            Rect subQuadrantThousands7 = new Rect(leftLimitX + 2*subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
+            Rect subQuadrantThousands8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
+            Rect subQuadrantThousands9 = new Rect(leftLimitX, topLimitY, subQuadrantWidth, subQuadrantHeight);
+
+            subQuadrantsThousands.addAll(Arrays.asList(subQuadrantThousands1, subQuadrantThousands2, subQuadrantThousands3, subQuadrantThousands4, subQuadrantThousands5, subQuadrantThousands6, subQuadrantThousands7, subQuadrantThousands8, subQuadrantThousands9));
+
+            thousandsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsThousands);
+            drawSubQuadrants(image, subQuadrantsThousands);
+            
+            // Get the result from the segments
+            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
+            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
+
+            List<Line> segmentsThousands = getSegmentsFromPoints(point1, point2, point3, point4);
+
+            thousandsResultBySegments = detectValidSegments(image, segmentsThousands);
+            drawSegments(image, segmentsThousands);
+
+            boolean sameResult = thousandsResultBySegments == thousandsResultBySubQuadrants;
+            System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + thousandsResultBySegments + ", Rects: " + thousandsResultBySubQuadrants);
+        }
+        return thousandsResultBySegments * 1000;
+    }
+
+// *******************************************************************************************************************
+
+    private int[] getLimitsLeftRight(Mat image, Rect rect, boolean is_stem_on_left_side) {
+        boolean firstLineDrawn = false;
+        boolean pixel1Found = false, pixel2Found = false;
+        int leftLimitX = -1, rightLimitX = -1;
+        Rect guideline1Rect = null, guideline2Rect = null;
+
+        if (is_stem_on_left_side) {
+            // Guideline Rectangle 1, to find leftLimitX
+            int guideline1Width = rect.width / 2;
+            int guideline1Height = rect.height / 15;
+            guideline1Rect = new Rect(rect.x + (rect.width / 25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
+            //drawRectangle(image, guideline1Rect, orange, 1);
+
+            if (guideline1Rect != null) {
+                for (int x = guideline1Rect.x; x < guideline1Rect.x + guideline1Rect.width; x++) {
+                    for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Rect.height; y++) {
+                        double[] pixel = image.get(y, x);
+                        if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
+                            pixel1Found = true;
+                            leftLimitX = x + (guideline1Rect.width / 15);
+                            Point lineStart = new Point(leftLimitX, rect.y);
+                            Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
+                            Line leftLimit = new Line(lineStart, lineEnd, pink, 1);
+                            //leftLimit.draw(image); // draw the line
+                            firstLineDrawn = true;
+                            break;
+                        }
                     }
+                    if (firstLineDrawn) break; // Exit the outer loop as well after drawing the 1st line
                 }
-                if (firstLineDrawn) break; // Exit the outer loop as well after drawing first line
+                if (!pixel1Found) {
+                    leftLimitX = rect.x + (rect.width / 15);
+                    Point lineStart = new Point(leftLimitX, rect.y);
+                    Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
+                    Line leftLimit = new Line(lineStart, lineEnd, pink, 1);
+                    //leftLimit.draw(image); // draw the line
+                }
             }
-            if (!pixel1Found) {
-                rightLimitX = rect.x + rect.width - (rect.width/15);
-                Point lineStart = new Point(rightLimitX, rect.y);
-                Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+
+            // Guideline Rectangle 2, to find rightLimitX
+            int guideline2Width = rect.width / 3;
+            int guideline2Height = rect.height;
+            guideline2Rect = new Rect(rect.x + (2 * (rect.width / 3)), rect.y, guideline2Width, guideline2Height);
+            //drawRectangle(image, guideline2Rect, orange, 1);
+
+            if (guideline2Rect != null) {
+                for (int x = guideline2Rect.x + guideline2Rect.width; x > guideline2Rect.x; x--) {
+                    for (int y = guideline2Rect.y; y < guideline2Rect.y + guideline2Rect.height; y++) {
+                        double[] pixel = image.get(y, x);
+                        if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                            pixel2Found = true;
+                            rightLimitX = x;
+                            Point lineStart = new Point(rightLimitX, rect.y);
+                            Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
+                            Line rightLimit = new Line(lineStart, lineEnd, pink, 1);
+                            //rightLimit.draw(image); // draw the line
+                            break;
+                        }
+                    }
+                    if (rightLimitX != -1)
+                        break; // Exit the outer loop as well after drawing 2nd line
+                }
+                if (!pixel2Found) {
+                    rightLimitX = rect.x + rect.width;
+                    Point lineStart = new Point(rightLimitX, rect.y);
+                    Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
+                    Line rightLimit = new Line(lineStart, lineEnd, pink, 1);
+                    //rightLimit.draw(image); // draw the line
+                }
+            }
+        } else {
+            // Guideline Rectangle 1, to find rightLimitX
+            int guideline1Width = rect.width / 2;
+            int guideline1Height = rect.height / 15;
+            guideline1Rect = new Rect(rect.x + (rect.width/2) - (rect.width/25), rect.y + (rect.height / 2) - (guideline1Height / 2), guideline1Width, guideline1Height);
+            //drawRectangle(image, guideline1Rect, orange, 1);
+
+            if (guideline1Rect != null) {
+                for (int x = guideline1Rect.x + guideline1Width; x > guideline1Rect.x; x--) {
+                    for (int y = guideline1Rect.y; y < guideline1Rect.y + guideline1Height; y++) {
+                        double[] pixel = image.get(y, x);
+                        if (pixel[0] == 255 && pixel[1] == 255 && pixel[2] == 255 && !firstLineDrawn) {
+                            pixel1Found = true;
+                            rightLimitX = x - (guideline1Rect.width / 15);
+                            Point lineStart = new Point(rightLimitX, rect.y);
+                            Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
+                            Line rightLimit = new Line(lineStart, lineEnd, pink, 1);
+                            //rightLimit.draw(image); // draw the line
+                            firstLineDrawn = true;
+                            break;
+                        }
+                    }
+                    if (firstLineDrawn) break; // Exit the outer loop as well after drawing first line
+                }
+                if (!pixel1Found) {
+                    rightLimitX = rect.x + rect.width - (rect.width/15);
+                    Point lineStart = new Point(rightLimitX, rect.y);
+                    Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
+                    Line rightLimit = new Line(lineStart, lineEnd, pink, 1);
+                    //rightLimit.draw(image); // draw the line
+                }
+            }
+
+
+            // Guideline Rectangle 2, to find leftLimitX
+            int guideline2Width = rect.width / 3;
+            int guideline2Height = rect.height;
+            guideline2Rect = new Rect(rect.x, rect.y, guideline2Width, guideline2Height);
+            //drawRectangle(image, guideline2Rect, orange, 1);
+
+            if (guideline2Rect != null) {
+                for (int x = guideline2Rect.x; x < guideline2Rect.x + guideline2Width; x++) {
+                    for (int y = guideline2Rect.y; y < guideline2Rect.y + guideline2Height; y++) {
+                        double[] pixel = image.get(y, x);
+                        if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                            pixel2Found = true;
+                            leftLimitX = x;
+                            Point lineStart = new Point(leftLimitX, rect.y);
+                            Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
+                            Line leftLimit = new Line(lineStart, lineEnd, pink, 1);
+                            //leftLimit.draw(image); // draw the line
+                            break;
+                        }
+                    }
+                    if (leftLimitX != -1)
+                        break; // Exit the outer loop as well after drawing second line
+                }
+                if (!pixel2Found) {
+                    leftLimitX = guideline2Rect.x;
+                    Point lineStart = new Point(leftLimitX, guideline2Rect.y);
+                    Point lineEnd = new Point(leftLimitX, guideline2Rect.y + guideline2Height);
+                    Line leftLimit = new Line(lineStart, lineEnd, pink, 1);
+                    //leftLimit.draw(image); // draw the line
+                }
             }
         }
+        return new int[]{leftLimitX, rightLimitX};
+    }
 
-
-        // Guideline Rectangle 2, to find leftLimitX
-        int guideline2Width = rect.width / 3;
-        int guideline2Height = rect.height;
-        guideline2Rect = new Rect(rect.x, rect.y, guideline2Width, guideline2Height);
-        //drawRectangle(image, guideline2Rect, orange, 1);
-
-        if (guideline2Rect != null) {
-            for (int x = guideline2Rect.x; x < guideline2Rect.x + guideline2Width; x++) {
-                for (int y = guideline2Rect.y; y < guideline2Rect.y + guideline2Height; y++) {
-                    double[] pixel = image.get(y, x);
-                    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                        pixel2Found = true;
-                        leftLimitX = x;
-                        Point lineStart = new Point(leftLimitX, rect.y);
-                        Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1); // Draw the second line
-                        break;
-                    }
-                }
-                if (leftLimitX != -1)
-                    break; // Exit the outer loop as well after drawing second line
-            }
-            if (!pixel2Found) {
-                leftLimitX = guideline2Rect.x;
-                Point lineStart = new Point(leftLimitX, guideline2Rect.y);
-                Point lineEnd = new Point(leftLimitX, guideline2Rect.y + guideline2Height);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
-            }
-        }
-
+    private int[] getLimitsTopBottom(Mat image, Rect rect, int leftLimitX, int rightLimitX) {
+        boolean pixel3Found = false, pixel4Found = false;
+        int topLimitY = -1, bottomLimitY = -1;
+        Rect guideline3Rect = null, guideline4Rect = null;
 
         // Guideline Rectangle 3, to find topLimitX
         int guideline3Width = rightLimitX - leftLimitX;
@@ -1550,7 +1246,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         topLimitY = y;
                         Point lineStart = new Point(guideline3Rect.x, topLimitY);
                         Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                        Line topLimit = new Line(lineStart, lineEnd, pink, 1);
+                        //topLimit.draw(image); // draw the line
                         break;
                     }
                 }
@@ -1560,10 +1257,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 topLimitY = guideline3Rect.y;
                 Point lineStart = new Point(guideline3Rect.x, topLimitY);
                 Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                Line topLimit = new Line(lineStart, lineEnd, pink, 1);
+                //topLimit.draw(image); // draw the line
             }
         }
-
 
         // Guideline Rectangle 4, to find bottomLimitX
         int guideline4Width = rightLimitX - leftLimitX;
@@ -1582,7 +1279,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         bottomLimitY = y;
                         Point lineStart = new Point(guideline4Rect.x, bottomLimitY);
                         Point lineEnd = new Point(guideline4Rect.x + guideline4Width, bottomLimitY);
-                        //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                        Line bottomLimit = new Line(lineStart, lineEnd, pink, 1);
+                        //bottomLimit.draw(image); // draw the line
                         break;
                     }
                 }
@@ -1593,66 +1291,23 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 bottomLimitY = guideline4Rect.y + guideline3Height;
                 Point lineStart = new Point(guideline4Rect.x, bottomLimitY);
                 Point lineEnd = new Point(guideline4Rect.x + guideline4Width, bottomLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                Line bottomLimit = new Line(lineStart, lineEnd, pink, 1);
+                //bottomLimit.draw(image); // draw the line
             }
         }
 
-
-        if (rightLimitX != -1 && leftLimitX != -1 && topLimitY != -1 && bottomLimitY != -1) {
-            // Subdivide Resized Quadrant into Sub-quadrants
-            subQuadrantHeight = (bottomLimitY - topLimitY) / 3;
-            subQuadrantWidth = (rightLimitX - leftLimitX) / 3;
-
-            Rect subQuadrantThousands1 = new Rect(leftLimitX + 2*subQuadrantWidth, topLimitY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
-            Rect subQuadrantThousands2 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
-            Rect subQuadrantThousands3 = new Rect(leftLimitX, topLimitY + 2*subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
-            Rect subQuadrantThousands4 = new Rect(leftLimitX + 2*subQuadrantWidth, topLimitY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
-            Rect subQuadrantThousands5 = new Rect(leftLimitX + subQuadrantWidth, topLimitY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
-            Rect subQuadrantThousands6 = new Rect(leftLimitX, topLimitY + subQuadrantHeight, subQuadrantWidth, subQuadrantHeight);
-            Rect subQuadrantThousands7 = new Rect(leftLimitX + 2*subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
-            Rect subQuadrantThousands8 = new Rect(leftLimitX + subQuadrantWidth, topLimitY, subQuadrantWidth, subQuadrantHeight);
-            Rect subQuadrantThousands9 = new Rect(leftLimitX, topLimitY, subQuadrantWidth, subQuadrantHeight);
-
-            subQuadrantsThousands.add(subQuadrantThousands1);
-            subQuadrantsThousands.add(subQuadrantThousands2);
-            subQuadrantsThousands.add(subQuadrantThousands3);
-            subQuadrantsThousands.add(subQuadrantThousands4);
-            subQuadrantsThousands.add(subQuadrantThousands5);
-            subQuadrantsThousands.add(subQuadrantThousands6);
-            subQuadrantsThousands.add(subQuadrantThousands7);
-            subQuadrantsThousands.add(subQuadrantThousands8);
-            subQuadrantsThousands.add(subQuadrantThousands9);
-
-            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point2 = new Point(leftLimitX + subQuadrantWidth/3.2, bottomLimitY - subQuadrantHeight/3.2);
-            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point4 = new Point(leftLimitX + subQuadrantWidth/3.2, topLimitY + subQuadrantHeight/3.2);
-
-            Line segment1 = new Line(point1, point2, blue, 1);
-            Line segment2 = new Line(point3, point4, blue, 1);
-            Line segment3 = new Line(point1, point4, blue, 1);
-            Line segment4 = new Line(point3, point2, blue, 1);
-            Line segment5 = new Line(point2, point4, blue, 1);
-
-            segmentsThousands.add(segment1);
-            segmentsThousands.add(segment2);
-            segmentsThousands.add(segment3);
-            segmentsThousands.add(segment4);
-            segmentsThousands.add(segment5);
-
-            thousandsDigitResultByLines = detectValidLines(image, segmentsThousands);
-            drawSegments(image, segmentsThousands);
-
-            thousandsDigitResult = detectValidSubQuadrants(image, subQuadrantsThousands);
-            drawSubQuadrants(image, subQuadrantsThousands);
-
-            boolean sameResult = thousandsDigitResultByLines == thousandsDigitResult;
-            System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + thousandsDigitResultByLines + ", Rects: " + thousandsDigitResult);
-        }
-        return thousandsDigitResultByLines * 1000;
+        return new int[]{topLimitY, bottomLimitY};
     }
 
-// *******************************************************************************************************************
+    public List<Line> getSegmentsFromPoints(Point p1, Point p2, Point p3, Point p4) {
+        Line segment1 = new Line(p1, p2, blue, 1);
+        Line segment2 = new Line(p3, p4, blue, 1);
+        Line segment3 = new Line(p1, p4, blue, 1);
+        Line segment4 = new Line(p3, p2, blue, 1);
+        Line segment5 = new Line(p2, p4, blue, 1);
+
+        return Arrays.asList(segment1, segment2, segment3, segment4, segment5);
+    }
 
     private void drawSubQuadrants(Mat image, List<Rect> subQuadrants) {
         for(Rect subQuadrant : subQuadrants) {
@@ -1671,7 +1326,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
 
-    private Integer detectValidLines(Mat image, List<Line> segments) {
+    private Integer detectValidSegments(Mat image, List<Line> segments) {
         Set<Integer> flaggedSegments = new HashSet<>(); // Track flagged segments
 
         // Initially flagging subQuadrants within 10% of the guide value
@@ -1721,34 +1376,25 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Additional logic to flag based on certain rules
         Set<Integer> toCheck = new HashSet<>();
-        if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(3)) {
-            toCheck.addAll(Arrays.asList(1, 2, 5, 6, 7, 9));
-        }
-        if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(9)) {
-            toCheck.addAll(Arrays.asList(1, 3, 5, 6, 7, 8));
-        }
-        if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(7)) {
-            toCheck.addAll(Arrays.asList(3, 5));
-        }
-        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(3, 9))) {
-            toCheck.addAll(Arrays.asList(1, 2, 6, 7, 8));
-        }
-        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(5, 7))) {
-            toCheck.add(3);
-        }
-        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(1, 5))) {
-            toCheck.add(9);
-        }
-        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(1, 6))) {
-            toCheck.add(9);
-        }
-        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(6, 9))) {
-            toCheck.add(1);
-        }
         if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(1)) {
-            toCheck.addAll(Arrays.asList(2, 3, 5, 9));
-        }
-
+            toCheck.addAll(Arrays.asList(2, 3, 5, 9));}
+        if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(3)) {
+            toCheck.addAll(Arrays.asList(1, 2, 5, 6, 7, 9));}
+        if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(7)) {
+            toCheck.addAll(Arrays.asList(3, 5));}
+        if (initiallyFlagged.size() == 1 && initiallyFlagged.contains(9)) {
+            toCheck.addAll(Arrays.asList(1, 3, 5, 6, 7, 8));}
+        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(1, 5))) {
+            toCheck.add(9);}
+        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(1, 6))) {
+            toCheck.add(9);}
+        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(3, 9))) {
+            toCheck.addAll(Arrays.asList(1, 2, 6, 7, 8));}
+        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(5, 7))) {
+            toCheck.add(3);}
+        if (initiallyFlagged.size() == 2 && initiallyFlagged.containsAll(Arrays.asList(6, 9))) {
+            toCheck.add(1);}
+        
         // Check and flag additional subquadrants based on the rule
         for (Integer index : toCheck) {
             int i = index - 1; // Adjusting back to 0-based indexing
@@ -1808,24 +1454,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Set<Integer> patternForNumber8 = new HashSet<>(Arrays.asList(2, 5));
         Set<Integer> patternForNumber9 = new HashSet<>(Arrays.asList(1, 2, 5));
 
-        if (flaggedSegments.equals(patternForNumber1)) {
-            return 1; // Matches pattern for Number 1
-        } else if (flaggedSegments.equals(patternForNumber2)) {
-            return 2; // Matches pattern for Number 2
-        } else if (flaggedSegments.equals(patternForNumber3)) {
-            return 3; // Matches pattern for Number 3
-        } else if (flaggedSegments.equals(patternForNumber4)) {
-            return 4; // Matches pattern for Number 4
-        } else if (flaggedSegments.equals(patternForNumber5)) {
-            return 5; // Matches pattern for Number 5
-        } else if (flaggedSegments.equals(patternForNumber6)) {
-            return 6; // Matches pattern for Number 6
-        } else if (flaggedSegments.equals(patternForNumber7)) {
-            return 7; // Matches pattern for Number 7
-        } else if (flaggedSegments.equals(patternForNumber8)) {
-            return 8; // Matches pattern for Number 8
-        } else if (flaggedSegments.equals(patternForNumber9)) {
-            return 9; // Matches pattern for Number 9
+        if (flaggedSegments.equals(patternForNumber1)) { return 1; // Matches pattern for Number 1
+        } else if (flaggedSegments.equals(patternForNumber2)) { return 2; // Matches pattern for Number 2
+        } else if (flaggedSegments.equals(patternForNumber3)) { return 3; // Matches pattern for Number 3
+        } else if (flaggedSegments.equals(patternForNumber4)) { return 4; // Matches pattern for Number 4
+        } else if (flaggedSegments.equals(patternForNumber5)) { return 5; // Matches pattern for Number 5
+        } else if (flaggedSegments.equals(patternForNumber6)) { return 6; // Matches pattern for Number 6
+        } else if (flaggedSegments.equals(patternForNumber7)) { return 7; // Matches pattern for Number 7
+        } else if (flaggedSegments.equals(patternForNumber8)) { return 8; // Matches pattern for Number 8
+        } else if (flaggedSegments.equals(patternForNumber9)) { return 9; // Matches pattern for Number 9
         }
         return 0; // No pattern matches - it's 0
     }
@@ -1847,24 +1484,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
 //        if (flaggedSubQuadrants.equals(patternForNumber0)) {
 //            return 0; // Matches pattern for Number 0
 //        }
-        if (flaggedSubQuadrants.equals(patternForNumber1)) {
-            return 1; // Matches pattern for Number 1
-        } else if (flaggedSubQuadrants.equals(patternForNumber2)) {
-            return 2; // Matches pattern for Number 2
-        } else if (flaggedSubQuadrants.equals(patternForNumber3)) {
-            return 3; // Matches pattern for Number 3
-        } else if (flaggedSubQuadrants.equals(patternForNumber4)) {
-            return 4; // Matches pattern for Number 4
-        } else if (flaggedSubQuadrants.equals(patternForNumber5)) {
-            return 5; // Matches pattern for Number 5
-        } else if (flaggedSubQuadrants.equals(patternForNumber6)) {
-            return 6; // Matches pattern for Number 6
-        } else if (flaggedSubQuadrants.equals(patternForNumber7)) {
-            return 7; // Matches pattern for Number 7
-        } else if (flaggedSubQuadrants.equals(patternForNumber8)) {
-            return 8; // Matches pattern for Number 8
-        } else if (flaggedSubQuadrants.equals(patternForNumber9)) {
-            return 9; // Matches pattern for Number 9
+        if (flaggedSubQuadrants.equals(patternForNumber1)) { return 1; // Matches pattern for Number 1
+        } else if (flaggedSubQuadrants.equals(patternForNumber2)) { return 2; // Matches pattern for Number 2
+        } else if (flaggedSubQuadrants.equals(patternForNumber3)) { return 3; // Matches pattern for Number 3
+        } else if (flaggedSubQuadrants.equals(patternForNumber4)) { return 4; // Matches pattern for Number 4
+        } else if (flaggedSubQuadrants.equals(patternForNumber5)) { return 5; // Matches pattern for Number 5
+        } else if (flaggedSubQuadrants.equals(patternForNumber6)) { return 6; // Matches pattern for Number 6
+        } else if (flaggedSubQuadrants.equals(patternForNumber7)) { return 7; // Matches pattern for Number 7
+        } else if (flaggedSubQuadrants.equals(patternForNumber8)) { return 8; // Matches pattern for Number 8
+        } else if (flaggedSubQuadrants.equals(patternForNumber9)) { return 9; // Matches pattern for Number 9
         }
         return 0; // No pattern matches - it's 0
     }
