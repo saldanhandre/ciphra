@@ -6,6 +6,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ConversionHistoryManager {
 
@@ -91,5 +92,11 @@ public class ConversionHistoryManager {
         conversionHistory.clear(); // Clear the history list
         saveHistory(); // Persist the empty list to SharedPreferences
         notifyHistoryUpdated(); // Notify all listeners about the history update
+    }
+
+    public void removeConversions(Set<Integer> itemsToRemove) {
+        conversionHistory.removeAll(itemsToRemove);
+        saveHistory();
+        notifyHistoryUpdated();
     }
 }

@@ -76,6 +76,11 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 // Inflate the menu for selected items
                 mode.getMenuInflater().inflate(R.menu.menu_selection, menu);
+
+                // Hide the toolbar
+                Toolbar toolbar = findViewById(R.id.toolbar);
+                toolbar.setVisibility(View.GONE);
+
                 return true;
             }
 
@@ -97,6 +102,12 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
+                adapter.clearSelections();
+
+                // Show the toolbar again
+                Toolbar toolbar = findViewById(R.id.toolbar);
+                toolbar.setVisibility(View.VISIBLE);
+
                 adapter.clearSelections();
             }
         });
@@ -156,10 +167,8 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
     }
 
     private void deleteSelectedItems(Set<Integer> selectedItems) {
-        // Implement deletion logic, likely involving ConversionHistoryManager
-        for (Integer position : selectedItems) {
-            // Use position to delete from ConversionHistoryManager
-        }
+        ConversionHistoryManager.getInstance(getApplicationContext()).removeConversions(selectedItems);
         updateHistory();
     }
+
 }
