@@ -322,7 +322,7 @@ public class Line {
         double perpSlope = -1 / slope;
 
         // Assuming we want to draw a line of finite length, choose an arbitrary length (delta) for the line ends relative to the crossing point
-        double delta = 200; // Adjust this value based on your image size or requirements
+        double delta = 10; // Adjust this value based on your image size or requirements
 
         // Calculate two points on the perpendicular line, using the slope and a fixed delta from the crossing point
         double x1 = crossingPoint.x - delta;

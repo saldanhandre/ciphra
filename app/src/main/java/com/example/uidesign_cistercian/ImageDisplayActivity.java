@@ -1032,34 +1032,17 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             thousandsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsThousands);
             drawSubQuadrants(image, subQuadrantsThousands);
-
-            double offsetDistance = subQuadrantWidth/5.0;
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point1r = new Point(point1.x + offsetDistance, point1.y - offsetDistance);
-            Point point1l = new Point(point1.x - offsetDistance, point1.y + offsetDistance);
-
             Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point2r = new Point(point2.x + offsetDistance, point2.y + offsetDistance);
-            Point point2l = new Point(point2.x - offsetDistance, point2.y - offsetDistance);
-
             Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point3r = new Point(point3.x - offsetDistance, point3.y - offsetDistance);
-            Point point3l = new Point(point3.x + offsetDistance, point3.y + offsetDistance);
-
             Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point4r = new Point(point4.x - offsetDistance, point4.y + offsetDistance);
-            Point point4l = new Point(point4.x + offsetDistance, point4.y - offsetDistance);
 
-            List<Line> segmentsThousandsA = getSegmentsFromPoints(point1, point2, point3, point4);
-            List<Line> segmentsThousandsB = getSegmentsFromPoints(point1r, point2l, point3l, point4r);
-            List<Line> segmentsThousandsC = getSegmentsFromPoints(point1l, point2r, point3r, point4l);
+            List<Line> segmentsThousands = getSegmentsFromPoints(point1, point2, point3, point4);
 
-            //thousandsResultBySegments = detectValidSegments(image, segmentsThousands);
-            drawSegments(image, segmentsThousandsA);
-            drawSegments(image, segmentsThousandsB);
-            drawSegments(image, segmentsThousandsC);
+            thousandsResultBySegments = detectValidSegments(image, segmentsThousands);
+            drawSegments(image, segmentsThousands);
 
             boolean sameResult = thousandsResultBySegments == thousandsResultBySubQuadrants;
             System.out.println("Digit Thousands (" + sameResult + ") - Segments: " + thousandsResultBySegments + ", Rects: " + thousandsResultBySubQuadrants);
@@ -1315,29 +1298,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Initially flagging subQuadrants within 10% of the guide value
         for (int i = 0; i < segments.size(); i++) {
             Line segment = segments.get(i);
-             System.out.println("Segment " + (i + 1) + " has percentage: " + segment.getBlackPixelPercentage(image));
-            if (segment.getBlackPixelPercentage(image) > 72.0) {
-                flaggedSegments.add(i + 1);
-                //System.out.println("Segment " + (i + 1) + " added with percentage: " + segment.getBlackPixelPercentage(image));
-            }
-        }
-
-        int detectedNumber = mapFlaggedSegmentsToNumber(flaggedSegments);
-        //System.out.println("Detected Number TESTING UNITS: " + detectedNumber);
-
-        return detectedNumber;
-    }
-
-    private Integer detectValidSegmentsThousands(Mat image, List<Line> segmentsA, List<Line> segmentsB, List<Line> segmentsC) {
-        Set<Integer> flaggedSegments = new HashSet<>(); // Track flagged segments
-
-        // Initially flagging subQuadrants within 10% of the guide value
-        for (int i = 0; i < segmentsA.size(); i++) {
-            Line segmentA = segmentsA.get(i);
-            Line segmentB = segmentsA.get(i);
-            Line segmentC = segmentsA.get(i);
-            //System.out.println("Segment " + (i + 1) + " has percentage: " + segmentA.getBlackPixelPercentage(image));
-            if (segmentA.getBlackPixelPercentage(image) > 72.0) {
+            System.out.println("Segment " + (i + 1) + " has percentage: " + segment.getBlackPixelPercentage(image));
+            if (segment.getBlackPixelPercentage(image) > 50.0) {
                 flaggedSegments.add(i + 1);
                 //System.out.println("Segment " + (i + 1) + " added with percentage: " + segment.getBlackPixelPercentage(image));
             }
