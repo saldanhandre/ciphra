@@ -12,8 +12,12 @@ public class Line {
     public int thickness;
 
     public Line(Point pt1, Point pt2, Scalar color, int thickness) {
-        if (pt1 == null || pt2 == null) {
-            throw new IllegalArgumentException("Point objects pt1 and pt2 must not be null.");
+        if (pt1 == null && pt2 == null) {
+            throw new IllegalArgumentException("Point objects pt1 and pt2 are null.");
+        } else if (pt1 == null && pt2 != null) {
+            throw new IllegalArgumentException("Point pt1 is null.");
+        } else if (pt1 != null && pt2 == null) {
+            throw new IllegalArgumentException("Point pt2 is null.");
         }
         this.pt1 = pt1;
         this.pt2 = pt2;
@@ -207,55 +211,6 @@ public class Line {
 
         // Calculate and return the percentage of the line covered by black pixels
         return totalPixels > 0 ? (double) totalBlackPixels / totalPixels * 100.0 : 0;
-
-        /*
-
-        int totalBlackPixels = 0;
-        int totalPixels = 0;
-
-        int dx = Math.abs((int)pt2.x - (int)pt1.x);
-        int dy = Math.abs((int)pt2.y - (int)pt1.y);
-
-        int sx = (int)pt1.x < (int)pt2.x ? 1 : -1;
-        int sy = (int)pt1.y < (int)pt2.y ? 1 : -1;
-
-        int err = dx - dy;
-
-        int currentX = (int)pt1.x;
-        int currentY = (int)pt1.y;
-
-        while (true) {
-            // Check bounds
-            if(currentX >= 0 && currentX < image.cols() && currentY >= 0 && currentY < image.rows()) {
-                double[] pixel = image.get(currentY, currentX);
-                // Assuming a grayscale image
-                if (pixel != null && pixel.length > 0 && pixel[0] == 0) {
-                    totalBlackPixels++; // Increment total black pixels count
-                }
-            }
-            totalPixels++;
-
-            // Check end condition
-            if (currentX == (int)pt2.x && currentY == (int)pt2.y) {
-                break;
-            }
-
-            // Bresenham's algorithm step
-            int e2 = 2 * err;
-            if (e2 > -dy) {
-                err -= dy;
-                currentX += sx;
-            }
-            if (e2 < dx) {
-                err += dx;
-                currentY += sy;
-            }
-        }
-
-        // Calculate and return the percentage of the line covered by black pixels
-        return totalPixels > 0 ? (double) totalBlackPixels / totalPixels * 100.0 : 0;
-
-         */
     }
 
     public Point findMiddleBlackPixel(Mat image) {
@@ -304,17 +259,21 @@ public class Line {
             if (e2 <= dx) { err += dx; currentY -= sy; }
         }
 
-        // Create line to connect start and end black pixels. This line goes from one side of the stem to the other (the short way)
-        Line stemWidth = new Line(startBlackPixel, endBlackPixel, new Scalar(255, 50, 50), 2);
-        // Get the middle point of that line
-        Point middlePoint = stemWidth.getMiddlePoint();
-
-        return middlePoint;
+        // If either startBlackPixel or endBlackPixel is null, return the midpoint of the line
+        if (startBlackPixel == null || endBlackPixel == null) {
+            return getMiddlePoint();
+        } else {
+            // Create line to connect start and end black pixels. This line goes from one side of the stem to the other (the short way)
+            Line stemWidth = new Line(startBlackPixel, endBlackPixel, new Scalar(255, 50, 50), 2);
+            // Get the middle point of that line
+            Point middlePoint = stemWidth.getMiddlePoint();
+            return middlePoint;
+        }
     }
 
     // This method returns a line that's perpendicular to this line, and crosses a specific point
     // It'll be used to find the stem, after we have the stem width line
-    public Line getStemLine(Mat image, Point crossingPoint) {
+    public Line getStemLine(Point crossingPoint) {
         // Calculate the slope of the original line
         double slope = (this.pt2.y - this.pt1.y) / (this.pt2.x - this.pt1.x);
 

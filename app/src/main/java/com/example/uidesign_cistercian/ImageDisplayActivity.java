@@ -280,6 +280,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
         for (Rect rect : filteredRects) {
+            drawRectangle(coloredBinaryImage, rect, green, 1);
             Line stem = findStem(coloredBinaryImage, rect);
             //stem.draw(coloredBinaryImage);
 
@@ -297,7 +298,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             // resize the rect to fit exactly the cipher
             Rect resizedRect = resizeRectangle(rotatedImage, boundingRect, true, true, true, true);
-            //drawRectangle(rotatedImage, resizedRect, green, 1);
+            drawRectangle(rotatedImage, resizedRect, green, 1);
 
             // process the cipher and get number
             numberResult = processCipher(rotatedImage, resizedRect);
@@ -532,7 +533,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 percentages1stCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
-                    //stem.draw(image);
+                    stem.draw(image);
                     stemFound = true;
                     break;
                 }
@@ -555,7 +556,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 percentages2ndCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
-                    //stem.draw(image);
+                    stem.draw(image);
                     stemFound = true;
                     break;
                 }
@@ -639,11 +640,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
 
             // draw the 2 largest percentages of the rectangle
-            //largestPercentage.getKey().draw(coloredBinaryImage);
-            //secondLargestPercentage.getKey().draw(coloredBinaryImage);
+            largestPercentage.getKey().draw(image);
+            secondLargestPercentage.getKey().draw(image);
 
-            Point intersectionPoint = new Point();
-            intersectionPoint = largestPercentage.getKey().getIntersectionPoint(secondLargestPercentage.getKey());
+            Point intersectionPoint = rectMiddlePoint;
+            //intersectionPoint = largestPercentage.getKey().getIntersectionPoint(secondLargestPercentage.getKey());
 
             // Create the 2 candidates for Stem, by making lines between opposite corners of the 2 largestPercentage lines
             Point largestP1 = largestPercentage.getKey().getPt1();
@@ -651,7 +652,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             Point largestP2 = largestPercentage.getKey().getPt2();
             Point largestPercentageP2 = adjustPointToBounds(image, largestP2);
-
             Point secondLargestP1 = secondLargestPercentage.getKey().getPt1();
             Point secondLargestPercentageP1 = adjustPointToBounds(image, secondLargestP1);
 
@@ -672,16 +672,30 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
 
             // draw the 2 stem candidates
-            // stemCandidate1.draw(coloredBinaryImage);
-            // stemCandidate2.draw(coloredBinaryImage);
+            //stemCandidate1.draw(image);
+            //stemCandidate2.draw(image);
 
             // Create a line that unites the intersection point with the candidates - stem guideline
-            Line stemGuideline = new Line(stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint), stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint), new Scalar(0, 0, 255), 1);
+            Line stemGuideline = null;
+            if (stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint) != null && stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint) != null) {
+                stemGuideline= new Line(stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint), stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint), new Scalar(0, 0, 255), 1);
+            } else {
+                System.out.println("Adjusted points");
+                Point p1 = adjustPointToBounds(image, stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint));
+                Point p2 = adjustPointToBounds(image, stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint));
+                stemGuideline= new Line(p1, p2, new Scalar(0, 0, 255), 1);
+
+            }
             // draw it
-            //stemGuideline.draw(coloredBinaryImage);
+            if (stemGuideline != null && stemGuideline.getPt1() != null && stemGuideline.getPt2() != null) {
+                //stemGuideline.draw(image);
+                System.out.println("stemGuideline drawn");
+            } else {
+                System.out.println("stemGuideline not drawn");
+            }
 
             Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(image);
-            stem = stemGuideline.getStemLine(image, stemMiddlePoint);
+            stem = stemGuideline.getStemLine(stemMiddlePoint);
             stem.draw(image);
         }
         return stem;
@@ -1092,7 +1106,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
 
             // Guideline Rectangle 2, to find rightLimitX
-            int guideline2Width = rect.width / 3;
+            int guideline2Width = rect.width / 2;
             int guideline2Height = rect.height;
             guideline2Rect = new Rect(rect.x + (2 * (rect.width / 3)) + rect.width/10, rect.y, guideline2Width, guideline2Height);
             //drawRectangle(image, guideline2Rect, orange, 1);
@@ -1157,7 +1171,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
             // Guideline Rectangle 2, to find leftLimitX
-            int guideline2Width = rect.width / 3;
+            int guideline2Width = rect.width / 2;
             int guideline2Height = rect.height;
             guideline2Rect = new Rect(rect.x - rect.width/10, rect.y, guideline2Width, guideline2Height);
             //drawRectangle(image, guideline2Rect, orange, 1);
@@ -1195,12 +1209,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
         boolean pixel3Found = false, pixel4Found = false;
         int topLimitY = -1, bottomLimitY = -1;
         Rect guideline3Rect = null, guideline4Rect = null;
+        int offsetFromStem = rect.width / 15;
 
         // Guideline Rectangle 3, to find topLimitX
-        int guideline3Width = rightLimitX - leftLimitX;
+        int guideline3Width = rightLimitX - leftLimitX - 2 * offsetFromStem;
         int guideline3Height = rect.height / 2;
         if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline3Rect = new Rect(leftLimitX, rect.y - rect.height/20, guideline3Width, guideline3Height);
+            guideline3Rect = new Rect(leftLimitX + offsetFromStem, rect.y - rect.height/20, guideline3Width, guideline3Height);
             //drawRectangle(image, guideline3Rect, orange, 1);
         }
 
@@ -1230,10 +1245,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         // Guideline Rectangle 4, to find bottomLimitX
-        int guideline4Width = rightLimitX - leftLimitX;
-        int guideline4Height = 9 * (rect.height / 20);
+        int guideline4Width = rightLimitX - leftLimitX - 2 * offsetFromStem;
+        int guideline4Height = 10 * (rect.height / 20);
         if (rightLimitX != -1 && leftLimitX != -1) {
-            guideline4Rect = new Rect(leftLimitX, rect.y + rect.height - guideline4Height + rect.height/20, guideline4Width, guideline4Height);
+            guideline4Rect = new Rect(leftLimitX + offsetFromStem, rect.y + rect.height - guideline4Height + rect.height/20, guideline4Width, guideline4Height);
             //drawRectangle(image, guideline4Rect, orange, 1);
         }
 
