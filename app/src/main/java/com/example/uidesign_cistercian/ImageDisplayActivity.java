@@ -142,26 +142,51 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Convert to Grayscale
         Imgproc.cvtColor(matImage, matImage, Imgproc.COLOR_RGB2GRAY);
 
-        // Apply Morphological Erosion and Dilation to remove thin lines
-        //Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        //Imgproc.erode(matImage, matImage, element);
-        //Imgproc.dilate(matImage, matImage, element);
+        // Dilate the image
+        Mat dilatedImage = new Mat();
+        Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(60, 60));
+        Imgproc.dilate(matImage, dilatedImage, element);
+
+        // Apply Median Blur
+        Mat bgImage = new Mat();
+        Imgproc.medianBlur(dilatedImage, bgImage, 21);
+
+        // Calculate the absolute difference
+        Mat diffImage = new Mat();
+        Core.absdiff(matImage, bgImage, diffImage);
+        Core.bitwise_not(diffImage, diffImage); // Invert the difference
+
+        // Normalize
+        Mat normImage = new Mat();
+        Core.normalize(diffImage, normImage, 0, 255, Core.NORM_MINMAX);
+
+        // Threshold and Normalize
+        Mat thrImage = new Mat();
+        Imgproc.threshold(normImage, thrImage, 230, 255, Imgproc.THRESH_TRUNC);
+        Core.normalize(thrImage, thrImage, 0, 255, Core.NORM_MINMAX);
+
 
         // Apply Gaussian Blur for noise reduction
-        Imgproc.GaussianBlur(matImage, matImage, new Size(9, 9), 0);
+        Imgproc.GaussianBlur(thrImage, thrImage, new Size(9, 9), 0);
+
         // Apply Binary Threshold
         Mat binaryImage = new Mat(); // keep copy of binary image for future processing
-        Imgproc.threshold(matImage, binaryImage, 155, 255, Imgproc.THRESH_BINARY);
+        Imgproc.threshold(thrImage, binaryImage, 155, 255, Imgproc.THRESH_BINARY);
+
         // Apply Canny Edge Detection
         Mat edgeDetectedImage = new Mat();
         Imgproc.Canny(binaryImage, edgeDetectedImage, 100, 200);
+
         // Convert matImage to 3 channels
         Mat coloredBinaryImage = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC3);
         Imgproc.cvtColor(binaryImage, coloredBinaryImage, Imgproc.COLOR_GRAY2BGR);
+
         // Find Contours and approximate them
         foundRecsAfterCountours = findAndApproximateContours(edgeDetectedImage, coloredBinaryImage);
+
         // Draw the Quadrants
         drawQuadrants(coloredBinaryImage, foundRecsAfterCountours);
+
         // Convert processed Mat back to Bitmap
         Utils.matToBitmap(coloredBinaryImage, bitmap);
 
@@ -280,7 +305,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
         for (Rect rect : filteredRects) {
-            drawRectangle(coloredBinaryImage, rect, green, 1);
+            //drawRectangle(coloredBinaryImage, rect, green, 1);
             Line stem = findStem(coloredBinaryImage, rect);
             //stem.draw(coloredBinaryImage);
 
@@ -298,7 +323,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             // resize the rect to fit exactly the cipher
             Rect resizedRect = resizeRectangle(rotatedImage, boundingRect, true, true, true, true);
-            drawRectangle(rotatedImage, resizedRect, green, 1);
+            //drawRectangle(rotatedImage, resizedRect, green, 1);
 
             // process the cipher and get number
             numberResult = processCipher(rotatedImage, resizedRect);
@@ -533,7 +558,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 percentages1stCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
-                    stem.draw(image);
+                    //stem.draw(image);
                     stemFound = true;
                     break;
                 }
@@ -556,7 +581,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 percentages2ndCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
-                    stem.draw(image);
+                    //stem.draw(image);
                     stemFound = true;
                     break;
                 }
@@ -696,7 +721,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(image);
             stem = stemGuideline.getStemLine(stemMiddlePoint);
-            stem.draw(image);
+            //stem.draw(image);
         }
         return stem;
     }
@@ -891,7 +916,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsUnits.addAll(Arrays.asList(subQuadrantUnits1, subQuadrantUnits2, subQuadrantUnits3, subQuadrantUnits4, subQuadrantUnits5, subQuadrantUnits6, subQuadrantUnits7, subQuadrantUnits8, subQuadrantUnits9));
 
             unitsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsUnits);
-            drawSubQuadrants(image, subQuadrantsUnits);
+            //drawSubQuadrants(image, subQuadrantsUnits);
             
             // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
@@ -902,7 +927,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsUnits = getSegmentsFromPoints(point1, point2, point3, point4);
 
             unitsResultBySegments = detectValidSegments(image, segmentsUnits);
-            drawSegments(image, segmentsUnits);
+            //drawSegments(image, segmentsUnits);
             
             boolean sameResult = unitsResultBySegments == unitsResultBySubQuadrants;
             System.out.println("Digit Units (" + sameResult + ") - Segments: " + unitsResultBySegments + ", Rects: " + unitsResultBySubQuadrants);
@@ -943,7 +968,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsTens.addAll(Arrays.asList(subQuadrantTens1, subQuadrantTens2, subQuadrantTens3, subQuadrantTens4, subQuadrantTens5, subQuadrantTens6, subQuadrantTens7, subQuadrantTens8, subQuadrantTens9));
             
             tensResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsTens);
-            drawSubQuadrants(image, subQuadrantsTens);
+            //drawSubQuadrants(image, subQuadrantsTens);
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
@@ -954,7 +979,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsTens = getSegmentsFromPoints(point1, point2, point3, point4);
 
             tensResultBySegments = detectValidSegments(image, segmentsTens);
-            drawSegments(image, segmentsTens);
+            //drawSegments(image, segmentsTens);
 
             boolean sameResult = tensResultBySegments == tensResultBySubQuadrants;
             System.out.println("Digit Tens (" + sameResult + ") - Segments: " + tensResultBySegments + ", Rects: " + tensResultBySubQuadrants);
@@ -994,7 +1019,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsHundreds.addAll(Arrays.asList(subQuadrantHundreds1, subQuadrantHundreds2, subQuadrantHundreds3, subQuadrantHundreds4, subQuadrantHundreds5, subQuadrantHundreds6, subQuadrantHundreds7, subQuadrantHundreds8, subQuadrantHundreds9));
 
             hundredsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsHundreds);
-            drawSubQuadrants(image, subQuadrantsHundreds);
+            //drawSubQuadrants(image, subQuadrantsHundreds);
 
             // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
@@ -1005,7 +1030,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsHundreds = getSegmentsFromPoints(point1, point2, point3, point4);
 
             hundredsResultBySegments = detectValidSegments(image, segmentsHundreds);
-            drawSegments(image, segmentsHundreds);
+            //drawSegments(image, segmentsHundreds);
 
             boolean sameResult = hundredsResultBySegments == hundredsResultBySubQuadrants;
             System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + hundredsResultBySegments + ", Rects: " + hundredsResultBySubQuadrants);
@@ -1045,7 +1070,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsThousands.addAll(Arrays.asList(subQuadrantThousands1, subQuadrantThousands2, subQuadrantThousands3, subQuadrantThousands4, subQuadrantThousands5, subQuadrantThousands6, subQuadrantThousands7, subQuadrantThousands8, subQuadrantThousands9));
 
             thousandsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsThousands);
-            drawSubQuadrants(image, subQuadrantsThousands);
+            //drawSubQuadrants(image, subQuadrantsThousands);
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
@@ -1056,7 +1081,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsThousands = getSegmentsFromPoints(point1, point2, point3, point4);
 
             thousandsResultBySegments = detectValidSegments(image, segmentsThousands);
-            drawSegments(image, segmentsThousands);
+            //drawSegments(image, segmentsThousands);
 
             boolean sameResult = thousandsResultBySegments == thousandsResultBySubQuadrants;
             System.out.println("Digit Thousands (" + sameResult + ") - Segments: " + thousandsResultBySegments + ", Rects: " + thousandsResultBySubQuadrants);
