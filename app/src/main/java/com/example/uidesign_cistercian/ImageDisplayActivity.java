@@ -526,6 +526,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
     private Line findStem(Mat image, Rect rect) {
         Map<Line, Double> percentages1stCheck = new HashMap<>();
         Map<Line, Double> percentages2ndCheck = new HashMap<>();
+
+        Map<Point, Point> p1AndP2 = new HashMap<>();
+        Map<Double, Point> p1AndPercentage = new HashMap<>();
+
+
         Map<Line, Double> percentagesTop4 = new HashMap<>();
 
         Point rectMiddlePoint = new Point(rect.x + rect.width / 2.00, rect.y + rect.height / 2.00);
@@ -544,19 +549,23 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         if (!stemFound) {
             for (int a = 0; a <= dividerInt; a++) {
+                double percentage = 0.0;
                 Point p1 = new Point(rect.x, rect.y + a * (rect.height / dividerDouble));
                 Point p2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / dividerDouble)));
                 Point divisionPoint1 = adjustPointToBounds(image, p1);
                 Point divisionPoint2 = adjustPointToBounds(image, p2);
                 if (divisionPoint1 != null && divisionPoint2 != null) {
-                    stem = new Line(divisionPoint1, divisionPoint2, red, 1);
+                    percentage = getUninterruptedBlackPixelPercentage(image, divisionPoint1, divisionPoint2);
+                    p1AndP2.put(divisionPoint1, divisionPoint2);
+                    p1AndPercentage.put(percentage, divisionPoint1);
+                    //stem = new Line(divisionPoint1, divisionPoint2, red, 1);
                     //stem.draw(image); //draw ALL candidate stems
                 } else {
                     System.out.println("Print");
                 }
 
-                double percentage = stem.getUninterruptedBlackPixelPercentage(image);
-                percentages1stCheck.put(stem, percentage);
+                //double percentage = stem.getUninterruptedBlackPixelPercentage(image);
+                //percentages1stCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
                     //stem.draw(image);
@@ -569,19 +578,21 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
         if (!stemFound && firstCheckDone) {
             for (int a = 0; a <= dividerInt; a++) {
+                double percentage = 0.0;
                 Point p1 = new Point(rect.x + rect.width - (a * (rect.width / dividerDouble)), rect.y);
                 Point p2 = new Point(rect.x + a * (rect.width / dividerDouble), rect.y + rect.height);
                 Point divisionPoint1 = adjustPointToBounds(image, p1);
                 Point divisionPoint2 = adjustPointToBounds(image, p2);
                 if (divisionPoint1 != null && divisionPoint2 != null) {
-                    stem = new Line(divisionPoint1, divisionPoint2, red, 1);
+                    percentage = getUninterruptedBlackPixelPercentage(image, divisionPoint1, divisionPoint2);
+                    //stem = new Line(divisionPoint1, divisionPoint2, red, 1);
                     //stem.draw(image); //draw ALL candidate stems
                 } else {
                     System.out.println("Print");
                 }
 
-                double percentage = stem.getUninterruptedBlackPixelPercentage(image);
-                percentages2ndCheck.put(stem, percentage);
+                //double percentage = stem.getUninterruptedBlackPixelPercentage(image);
+                //percentages2ndCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
                     stem.draw(image);
@@ -709,8 +720,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
 
             // draw the 2 stem candidates
-            stemCandidate1.draw(image);
-            stemCandidate2.draw(image);
+            //stemCandidate1.draw(image);
+            //stemCandidate2.draw(image);
 
             // Create a line that unites the intersection point with the candidates - stem guideline
             Line stemGuideline = null;
@@ -733,10 +744,74 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(image);
             stem = stemGuideline.getStemLine(stemMiddlePoint);
-            stem.draw(image);
+            //stem.draw(image);
             System.out.println("Stem Found at 3rd check");
         }
         return stem;
+    }
+
+    // Method to calculate the percentage of pixels in a line between two points on a Mat image
+    public static double getUninterruptedBlackPixelPercentage(Mat image, Point point1, Point point2) {
+        if (image.empty()) {
+            throw new IllegalArgumentException("Image is empty");
+        }
+
+        // Convert points to integers (assuming the points are at pixel locations)
+        int x0 = (int) point1.x;
+        int y0 = (int) point1.y;
+        int x1 = (int) point2.x;
+        int y1 = (int) point2.y;
+
+        int deltaX = Math.abs(x1 - x0);
+        int deltaY = Math.abs(y1 - y0);
+        int x, y, end;
+        int xIncrement = (x0 < x1) ? 1 : -1;
+        int yIncrement = (y0 < y1) ? 1 : -1;
+        int err = deltaX - deltaY;
+        int e2;
+
+        int totalPixels = 0;
+        int currentStreamLength = 0;
+        int longestStreamLength = 0;
+
+        x = x0;
+        y = y0;
+        end = deltaX > deltaY ? deltaX : deltaY; // Use the larger difference as the end condition
+
+        for(int i = 0; i <= end; i++) {
+            totalPixels++;
+
+            double[] pixel = image.get(y, x);
+            if (pixel != null && pixel[0] == 0) { // Checking if the pixel is black
+                currentStreamLength++;
+                if (currentStreamLength > longestStreamLength) {
+                    longestStreamLength = currentStreamLength; // Update the longest stream if current is longer
+                }
+            } else {
+                currentStreamLength = 0; // Reset current stream length if pixel is not black
+            }
+
+            if (x == x1 && y == y1) {
+                break;
+            }
+
+            e2 = 2 * err;
+            if (e2 > -deltaY) {
+                err -= deltaY;
+                x += xIncrement;
+            }
+            if (e2 < deltaX) {
+                err += deltaX;
+                y += yIncrement;
+            }
+        }
+
+        if (totalPixels == 0) {
+            return 0.0; // To avoid division by zero
+        }
+
+        // Calculate the percentage of the longest uninterrupted stream of black pixels
+        return (double) longestStreamLength / totalPixels * 100.0;
     }
 
     public static Mat cloneAndCropImageWithPadding(Mat src, Rect rect, double angle) {
