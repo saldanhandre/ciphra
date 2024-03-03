@@ -537,8 +537,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
         boolean firstCheckDone = false;
         boolean secondCheckDone = false;
         boolean similarPercentages = false;
-        int dividerInt = 70;
-        double dividerDouble = 70.0; // these 2 need to have the same value
+        int dividerInt = 60;
+        double dividerDouble = 60.0; // these 2 need to have the same value
 
         Line stem = null;
 
@@ -550,6 +550,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 Point divisionPoint2 = adjustPointToBounds(image, p2);
                 if (divisionPoint1 != null && divisionPoint2 != null) {
                     stem = new Line(divisionPoint1, divisionPoint2, red, 1);
+                    //stem.draw(image); //draw ALL candidate stems
                 } else {
                     System.out.println("Print");
                 }
@@ -560,6 +561,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 if (percentage >= 90) {
                     //stem.draw(image);
                     stemFound = true;
+                    System.out.println("Stem Found at 1st check");
                     break;
                 }
             }
@@ -573,6 +575,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 Point divisionPoint2 = adjustPointToBounds(image, p2);
                 if (divisionPoint1 != null && divisionPoint2 != null) {
                     stem = new Line(divisionPoint1, divisionPoint2, red, 1);
+                    //stem.draw(image); //draw ALL candidate stems
                 } else {
                     System.out.println("Print");
                 }
@@ -581,8 +584,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 percentages2ndCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
-                    //stem.draw(image);
+                    stem.draw(image);
                     stemFound = true;
+                    System.out.println("Stem Found at 2nd check");
                     break;
                 }
 
@@ -669,8 +673,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
             //secondLargestPercentage.getKey().draw(image);
 
             // trim the 2 largest percentages of the rectangle
-            Line largestPercentageTrimmed = largestPercentage.getKey().trimToBlackPixels(image);
-            Line secondLargestPercentageTrimmed = secondLargestPercentage.getKey().trimToBlackPixels(image);
+            //Line largestPercentageTrimmed = largestPercentage.getKey().trimToBlackPixels(image);
+            //Line secondLargestPercentageTrimmed = secondLargestPercentage.getKey().trimToBlackPixels(image);
 
             // draw the 2 trimmed largest percentages of the rectangle
             //largestPercentageTrimmed.draw(image);
@@ -696,7 +700,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             if (largestPercentageP1 != null && largestPercentageP2 != null && secondLargestPercentageP1 != null && secondLargestPercentageP2 != null) {
                 stemCandidate1 = new Line(largestPercentageP1, secondLargestPercentageP2, new Scalar(255, 50, 50), 2);
                 stemCandidate2 = new Line(secondLargestPercentageP1, largestPercentageP2, new Scalar(255, 50, 50), 2);
-                if (stemCandidate1.getLength() < largestPercentage.getKey().getLength()) {
+                if (stemCandidate1.getLength() < (largestPercentage.getKey().getLength() * 0.5)) {
                     stemCandidate1 = new Line(largestPercentageP1, secondLargestPercentageP1, new Scalar(255, 50, 50), 2);
                     stemCandidate2 = new Line(secondLargestPercentageP2, largestPercentageP2, new Scalar(255, 50, 50), 2);
                 }
@@ -705,8 +709,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
 
             // draw the 2 stem candidates
-            //stemCandidate1.draw(image);
-            //stemCandidate2.draw(image);
+            stemCandidate1.draw(image);
+            stemCandidate2.draw(image);
 
             // Create a line that unites the intersection point with the candidates - stem guideline
             Line stemGuideline = null;
@@ -729,7 +733,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(image);
             stem = stemGuideline.getStemLine(stemMiddlePoint);
-            //stem.draw(image);
+            stem.draw(image);
+            System.out.println("Stem Found at 3rd check");
         }
         return stem;
     }
