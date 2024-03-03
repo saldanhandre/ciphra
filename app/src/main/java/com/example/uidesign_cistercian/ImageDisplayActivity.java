@@ -167,11 +167,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
 
         // Apply Gaussian Blur for noise reduction
-        Imgproc.GaussianBlur(thrImage, thrImage, new Size(9, 9), 0);
+        Imgproc.GaussianBlur(normImage, normImage, new Size(9, 9), 0);
 
         // Apply Binary Threshold
         Mat binaryImage = new Mat(); // keep copy of binary image for future processing
-        Imgproc.threshold(thrImage, binaryImage, 155, 255, Imgproc.THRESH_BINARY);
+        Imgproc.threshold(normImage, binaryImage, 155, 255, Imgproc.THRESH_BINARY);
 
         // Apply Canny Edge Detection
         Mat edgeDetectedImage = new Mat();

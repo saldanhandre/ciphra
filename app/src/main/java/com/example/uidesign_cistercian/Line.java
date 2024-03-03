@@ -293,4 +293,72 @@ public class Line {
         Line line = new Line(new Point(x1, y1), new Point(x2, y2), new Scalar(0, 0, 255), 2);
         return line;
     }
+
+
+    // this method trims the line so that it starts and ends in a black pixel.
+    // it is used to trim the stem candidates for accuracy.
+    public Line trimToBlackPixels(Mat image) {
+        // Define starting and ending points for search
+        Point startSearchPoint = this.pt1;
+        Point endSearchPoint = this.pt2;
+        Point middlePoint = this.getMiddlePoint();
+
+        // Initialize variables to hold the first black pixels found from each end
+        Point firstBlackPixelFromStart = null;
+        Point firstBlackPixelFromEnd = null;
+
+        // Initialize a boolean to indicate if the middle point has been reached
+        boolean reachedMiddleFromStart = false;
+        boolean reachedMiddleFromEnd = false;
+
+        // Set up for Bresenham's line algorithm
+        int dx = Math.abs((int)(pt2.x - pt1.x));
+        int dy = -Math.abs((int)(pt2.y - pt1.y));
+        int sx = pt1.x < pt2.x ? 1 : -1;
+        int sy = pt1.y < pt2.y ? 1 : -1;
+        int err = dx + dy;
+
+        // Start from pt1, moving towards pt2
+        int x = (int)startSearchPoint.x;
+        int y = (int)startSearchPoint.y;
+        while (!reachedMiddleFromStart) {
+            if (image.get(y, x)[0] == 0) { // Assuming black pixel check for single-channel image
+                firstBlackPixelFromStart = new Point(x, y);
+                break;
+            }
+            if (x == (int)middlePoint.x && y == (int)middlePoint.y) {
+                reachedMiddleFromStart = true;
+            }
+
+            int e2 = 2 * err;
+            if (e2 >= dy) { err += dy; x += sx; }
+            if (e2 <= dx) { err += dx; y += sy; }
+        }
+
+        // Reset for search from pt2 to pt1
+        err = dx + dy;
+        x = (int)endSearchPoint.x;
+        y = (int)endSearchPoint.y;
+        while (!reachedMiddleFromEnd) {
+            if (image.get(y, x)[0] == 0) { // Assuming black pixel check for single-channel image
+                firstBlackPixelFromEnd = new Point(x, y);
+                break;
+            }
+            if (x == (int)middlePoint.x && y == (int)middlePoint.y) {
+                reachedMiddleFromEnd = true;
+            }
+
+            int e2 = 2 * err;
+            if (e2 >= dy) { err += dy; x -= sx; }
+            if (e2 <= dx) { err += dx; y -= sy; }
+        }
+
+        // If black pixels were found before reaching the middle from both ends, create a new line
+        if (firstBlackPixelFromStart != null && firstBlackPixelFromEnd != null) {
+            return new Line(firstBlackPixelFromStart, firstBlackPixelFromEnd, this.color, this.thickness);
+        } else {
+            // If no black pixel is found from either end before the middle, keep the original line
+            return this;
+        }
+    }
 }
