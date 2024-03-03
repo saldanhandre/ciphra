@@ -665,8 +665,16 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
 
             // draw the 2 largest percentages of the rectangle
-            largestPercentage.getKey().draw(image);
-            secondLargestPercentage.getKey().draw(image);
+            //largestPercentage.getKey().draw(image);
+            //secondLargestPercentage.getKey().draw(image);
+
+            // trim the 2 largest percentages of the rectangle
+            Line largestPercentageTrimmed = largestPercentage.getKey().trimToBlackPixels(image);
+            Line secondLargestPercentageTrimmed = secondLargestPercentage.getKey().trimToBlackPixels(image);
+
+            // draw the 2 trimmed largest percentages of the rectangle
+            //largestPercentageTrimmed.draw(image);
+            //secondLargestPercentageTrimmed.draw(image);
 
             Point intersectionPoint = rectMiddlePoint;
             //intersectionPoint = largestPercentage.getKey().getIntersectionPoint(secondLargestPercentage.getKey());
