@@ -423,9 +423,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private boolean isPixelBlack(Mat image, int row, int col) {
         boolean check = false;
-        if (row >= 0 && row < image.width()-1 && col >= 0 && col < image.height()-1) {
+        if (row >= 0 && row < image.height() && col >= 0 && col < image.width()) {
             double[] pixel = image.get(row, col);
-            if (pixel[0] != null)
             check = pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0; // check if pixel is black
         }
         return check;
@@ -1551,7 +1550,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsHundreds = getSegmentsFromPoints(point1, point2, point3, point4);
 
             hundredsResultBySegments = detectValidSegments(image, segmentsHundreds);
-            //drawSegments(image, segmentsHundreds);
+            drawSegments(image, segmentsHundreds);
 
             boolean sameResult = hundredsResultBySegments == hundredsResultBySubQuadrants;
             System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + hundredsResultBySegments + ", Rects: " + hundredsResultBySubQuadrants);
@@ -1594,15 +1593,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
             drawSubQuadrants(image, subQuadrantsThousands);
             
             // Get the result from the segments
-            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
+            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
             Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
             Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
 
             List<Line> segmentsThousands = getSegmentsFromPoints(point1, point2, point3, point4);
 
             thousandsResultBySegments = detectValidSegments(image, segmentsThousands);
-            //drawSegments(image, segmentsThousands);
+            drawSegments(image, segmentsThousands);
 
             boolean sameResult = thousandsResultBySegments == thousandsResultBySubQuadrants;
             System.out.println("Digit Thousands (" + sameResult + ") - Segments: " + thousandsResultBySegments + ", Rects: " + thousandsResultBySubQuadrants);
