@@ -364,16 +364,27 @@ public class Line {
 
     public Line rearrangeLine(Mat image) {
         Point midPoint = getMiddlePoint();
+        Point oneThirdPoint = new Point(pt1.x + (pt2.x - pt1.x) / 3, pt1.y + (pt2.y - pt1.y) / 3);
+        Point twoThirdsPoint = new Point(pt1.x + 2 * (pt2.x - pt1.x) / 3, pt1.y + 2 * (pt2.y - pt1.y) / 3);
         double lineLength = getLength();
-        double searchDistance = lineLength / 3; // Search distance in the perpendicular direction
+        double searchDistance = lineLength / 4; // Search distance in the perpendicular direction
 
-        Point[] resultPoints = new Point[4];
+        Point[] resultPoints = new Point[6];
 
-        // Process each half of the line
-        resultPoints[0] = findAdjustedPoint(image, pt1, midPoint, searchDistance, true);
-        resultPoints[1] = findAdjustedPoint(image, midPoint, pt1, searchDistance, false);
-        resultPoints[2] = findAdjustedPoint(image, midPoint, pt2, searchDistance, true);
-        resultPoints[3] = findAdjustedPoint(image, pt2, midPoint, searchDistance, false);
+        // Process each third of the line
+        resultPoints[0] = findAdjustedPoint(image, pt1, oneThirdPoint, searchDistance, true);
+        resultPoints[1] = findAdjustedPoint(image, oneThirdPoint, pt1, searchDistance, false);
+        resultPoints[2] = findAdjustedPoint(image, oneThirdPoint, twoThirdsPoint, searchDistance, true);
+        resultPoints[3] = findAdjustedPoint(image, twoThirdsPoint, oneThirdPoint, searchDistance, false);
+        resultPoints[4] = findAdjustedPoint(image, twoThirdsPoint, pt2, searchDistance, true);
+        resultPoints[5] = findAdjustedPoint(image, pt2, twoThirdsPoint, searchDistance, false);
+
+//        System.out.println("                         resultPoints[0] = " + resultPoints[0]);
+//        System.out.println("                         resultPoints[1] = " + resultPoints[1]);
+//        System.out.println("                         resultPoints[2] = " + resultPoints[2]);
+//        System.out.println("                         resultPoints[3] = " + resultPoints[3]);
+//        System.out.println("                         resultPoints[4] = " + resultPoints[4]);
+//        System.out.println("                         resultPoints[5] = " + resultPoints[5]);
 
         Line lineOfBestFit = findLineOfBestFit(resultPoints);
 
@@ -397,6 +408,8 @@ public class Line {
 
     private Point findAdjustedPoint(Mat image, Point start, Point end, double searchDistance, boolean forward) {
         Point whitePixelStart = findWhitePixelStreamStart(image, start, end, forward);
+        //System.out.println("whitePixelStart = " + whitePixelStart);
+
         double dx = end.x - start.x;
         double dy = end.y - start.y;
         double length = Math.sqrt(dx * dx + dy * dy);
@@ -405,45 +418,76 @@ public class Line {
         double perpDx = dy / length;
         double perpDy = -dx / length;
 
-        // Initial black pixel not found yet
+        // Try analyzing each perpendicular side separately
+        Point result = analyzePerpendicularSide(image, whitePixelStart, perpDx, perpDy, searchDistance, true);
+        if (result == null) { // If no suitable point is found on the first side, check the other side
+            result = analyzePerpendicularSide(image, whitePixelStart, perpDx, perpDy, searchDistance, false);
+        }
+
+        // If no black pixel is found in both directions, return the initial white pixel start point
+        if (result == null) {
+            System.out.println("No black pixel found perpendicularly, returning initial white pixel");
+            return whitePixelStart;
+        } else {
+            return result;
+        }
+    }
+
+
+    private Point analyzePerpendicularSide(Mat image, Point start, double perpDx, double perpDy, double searchDistance, boolean firstSide) {
+        Point currentPoint = new Point(start.x, start.y);
         Point firstBlackPixelFound = null;
         Point lastWhitePixelAfterBlack = null;
+        int sign = firstSide ? -1 : 1; // Determine direction of analysis
 
-        for (int sign = -1; sign <= 1; sign += 2) { // Check both perpendicular directions
-            Point currentPoint = new Point(whitePixelStart.x, whitePixelStart.y);
-            boolean searchingBlack = true;
+        int consecutiveBlackPixels = 0; // Track consecutive black pixels
+        double distance;
 
-            for (double distance = 0; distance <= searchDistance; distance += Math.sqrt(perpDx * perpDx + perpDy * perpDy)) {
-                double[] pixel = image.get((int) currentPoint.y, (int) currentPoint.x);
+        // Start searching for black pixels
+        for (distance = 0; distance <= searchDistance; distance += Math.sqrt(perpDx * perpDx + perpDy * perpDy)) {
+            double[] pixel = image.get((int) currentPoint.y, (int) currentPoint.x);
 
-                if (pixel != null && pixel[0] > 245 && pixel[1] > 245 && pixel[2] > 245 && firstBlackPixelFound != null) {
-                    // Found white pixel after black pixels
-                    lastWhitePixelAfterBlack = new Point(currentPoint.x, currentPoint.y);
-                    break; // Exit after finding the first white pixel after black
-                } else if (pixel != null && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10 && searchingBlack) {
-                    // Found black pixel and searching for black
-                    if (firstBlackPixelFound == null) {
-                        firstBlackPixelFound = new Point(currentPoint.x, currentPoint.y);
-                    }
-                    searchingBlack = false; // Stop searching for black after finding the first one
+            if (pixel != null && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) { // Black pixel
+                consecutiveBlackPixels++;
+                if (consecutiveBlackPixels == 5) {
+                    // When the 5th consecutive black pixel is found, mark this position.
+                    firstBlackPixelFound = new Point(currentPoint.x, currentPoint.y);
+                    break; // Exit the loop after finding the 5th consecutive black pixel.
                 }
+            } else {
+                consecutiveBlackPixels = 0; // Reset on non-black pixel
+            }
 
-                // Move in the perpendicular direction
+            // Update current point for next iteration
+            currentPoint.x += sign * perpDx;
+            currentPoint.y += sign * perpDy;
+        }
+
+        // Continue searching for a white pixel after finding black sequence
+        if (firstBlackPixelFound != null) {
+            for (; distance <= searchDistance; distance += Math.sqrt(perpDx * perpDx + perpDy * perpDy)) {
+                double[] pixel = image.get((int) currentPoint.y, (int) currentPoint.x);
+                if (pixel != null && pixel[0] > 245 && pixel[1] > 245 && pixel[2] > 245) { // White pixel
+                    lastWhitePixelAfterBlack = new Point(currentPoint.x, currentPoint.y);
+                    break; // Found white pixel, exit loop
+                }
+                // Update current point for next iteration
                 currentPoint.x += sign * perpDx;
                 currentPoint.y += sign * perpDy;
             }
-
-            if (firstBlackPixelFound != null && lastWhitePixelAfterBlack != null) {
-                // Calculate midpoint between first black pixel and last white pixel found
-                return new Point((firstBlackPixelFound.x + lastWhitePixelAfterBlack.x) / 2, (firstBlackPixelFound.y + lastWhitePixelAfterBlack.y) / 2);
-            } else if (firstBlackPixelFound != null) {
-                // Return the black pixel if no white pixel is found after it
-                return firstBlackPixelFound;
-            }
         }
 
-        // Return the initial white pixel start point if no suitable black-white sequence is found
-        return whitePixelStart;
+        // Calculate and return the midpoint or relevant point based on findings
+        if (lastWhitePixelAfterBlack != null) {
+            Line guideline = new Line(firstBlackPixelFound, lastWhitePixelAfterBlack, new Scalar(0, 255, 0), 1);
+            guideline.draw(image);
+            return guideline.findMiddleBlackPixel(image);
+        } else if (firstBlackPixelFound != null) {
+            return firstBlackPixelFound; // Return start of black sequence if no white found
+        }
+
+        // No sequence found, return null
+        return null;
     }
 
     private Point findWhitePixelStreamStart(Mat image, Point start, Point end, boolean forward) {
@@ -467,8 +511,9 @@ public class Line {
                 if (streamLength == 1) { // Mark the start of a potential white pixel stream
                     start = new Point(currentPoint.x, currentPoint.y);
                 }
-                if (streamLength == 5) { // Found a stream of 5 white pixels
-                    return start;
+                if (streamLength == 10) { // Found a stream of 5 white pixels
+                    end = new Point(currentPoint.x, currentPoint.y);
+                    return end;
                 }
             } else {
                 streamLength = 0; // Reset if the current pixel is not white
@@ -523,6 +568,6 @@ public class Line {
         Point endPoint = new Point(maxX, m * maxX + b);
 
         // Create and return the line of best fit
-        return new Line(startPoint, endPoint, this.color, this.thickness);
+        return new Line(startPoint, endPoint, new Scalar(255, 0, 255), 1);
     }
 }

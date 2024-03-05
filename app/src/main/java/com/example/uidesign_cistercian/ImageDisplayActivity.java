@@ -327,7 +327,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             //System.out.println("Going to call resizedRect");
             Rect resizedRect = resizeRectangle(rotatedImage, boundingRect, true, true, true, true);
             //drawRectangle(rotatedImage, resizedRect, blue, 1);
-            System.out.println("resizedRect.tl = " + resizedRect.tl() + ", resizedRect.br = " + resizedRect.br());
+            //System.out.println("resizedRect.tl = " + resizedRect.tl() + ", resizedRect.br = " + resizedRect.br());
 
             // process the cipher and get number
             //System.out.println("Going to call processCipher");
@@ -461,7 +461,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         if (pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) {
                             topLimitFound = true;
                             topLimitY = y;
-                            System.out.println("topLimitY = " + topLimitY);
+                            //System.out.println("topLimitY = " + topLimitY);
                             Point lineStart = new Point(rect.x, topLimitY);
                             Point lineEnd = new Point(rect.x + rectWidth, topLimitY);
                             //Imgproc.line(image, lineStart, lineEnd, green, 2);
@@ -488,7 +488,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
                             bottomLimitFound = true;
                             bottomLimitY = y;
-                            System.out.println("bottomLimitY = " + bottomLimitY);
+                            //System.out.println("bottomLimitY = " + bottomLimitY);
                             Point lineStart = new Point(rect.x, bottomLimitY);
                             Point lineEnd = new Point(rect.x + rectWidth, bottomLimitY);
                             //Imgproc.line(image, lineStart, lineEnd, blue, 1);
@@ -515,7 +515,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
                             leftLimitFound = true;
                             leftLimitX = x;
-                            System.out.println("leftLimitX = " + leftLimitX);
+                            //System.out.println("leftLimitX = " + leftLimitX);
                             Point lineStart = new Point(leftLimitX, rect.y);
                             Point lineEnd = new Point(leftLimitX, rect.y + rectHeight);
                             //Imgproc.line(image, lineStart, lineEnd, blue, 1);
@@ -542,7 +542,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
                             rightLimitFound = true;
                             rightLimitX = x;
-                            System.out.println("rightLimitX = " + rightLimitX);
+                            //System.out.println("rightLimitX = " + rightLimitX);
                             Point lineStart = new Point(rightLimitX, rect.y);
                             Point lineEnd = new Point(rightLimitX, rect.y + rectHeight);
                             //Imgproc.line(image, lineStart, lineEnd, blue, 1);
@@ -1436,7 +1436,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsUnits.addAll(Arrays.asList(subQuadrantUnits1, subQuadrantUnits2, subQuadrantUnits3, subQuadrantUnits4, subQuadrantUnits5, subQuadrantUnits6, subQuadrantUnits7, subQuadrantUnits8, subQuadrantUnits9));
 
             unitsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsUnits);
-            drawSubQuadrants(image, subQuadrantsUnits);
+            //drawSubQuadrants(image, subQuadrantsUnits);
             
             // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
@@ -1447,7 +1447,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsUnits = getSegmentsFromPoints(point1, point2, point3, point4);
 
             unitsResultBySegments = detectValidSegments(image, segmentsUnits);
-            //drawSegments(image, segmentsUnits);
+            drawSegments(image, segmentsUnits);
             
             boolean sameResult = unitsResultBySegments == unitsResultBySubQuadrants;
             System.out.println("Digit Units (" + sameResult + ") - Segments: " + unitsResultBySegments + ", Rects: " + unitsResultBySubQuadrants);
@@ -1488,18 +1488,18 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsTens.addAll(Arrays.asList(subQuadrantTens1, subQuadrantTens2, subQuadrantTens3, subQuadrantTens4, subQuadrantTens5, subQuadrantTens6, subQuadrantTens7, subQuadrantTens8, subQuadrantTens9));
             
             tensResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsTens);
-            drawSubQuadrants(image, subQuadrantsTens);
+            //uadrants(image, subQuadrantsTens);
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
             Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
+            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.7);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.7);
 
             List<Line> segmentsTens = getSegmentsFromPoints(point1, point2, point3, point4);
 
             tensResultBySegments = detectValidSegments(image, segmentsTens);
-            //drawSegments(image, segmentsTens);
+            drawSegments(image, segmentsTens);
 
             boolean sameResult = tensResultBySegments == tensResultBySubQuadrants;
             System.out.println("Digit Tens (" + sameResult + ") - Segments: " + tensResultBySegments + ", Rects: " + tensResultBySubQuadrants);
@@ -1539,13 +1539,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsHundreds.addAll(Arrays.asList(subQuadrantHundreds1, subQuadrantHundreds2, subQuadrantHundreds3, subQuadrantHundreds4, subQuadrantHundreds5, subQuadrantHundreds6, subQuadrantHundreds7, subQuadrantHundreds8, subQuadrantHundreds9));
 
             hundredsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsHundreds);
-            drawSubQuadrants(image, subQuadrantsHundreds);
+            //drawSubQuadrants(image, subQuadrantsHundreds);
 
             // Get the result from the segments
-            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
+            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.7);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.7);
 
             List<Line> segmentsHundreds = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -1590,7 +1590,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsThousands.addAll(Arrays.asList(subQuadrantThousands1, subQuadrantThousands2, subQuadrantThousands3, subQuadrantThousands4, subQuadrantThousands5, subQuadrantThousands6, subQuadrantThousands7, subQuadrantThousands8, subQuadrantThousands9));
 
             thousandsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsThousands);
-            drawSubQuadrants(image, subQuadrantsThousands);
+            //drawSubQuadrants(image, subQuadrantsThousands);
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
@@ -1870,10 +1870,23 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Initially flagging subQuadrants within 10% of the guide value
         for (int i = 0; i < segments.size(); i++) {
             Line segment = segments.get(i);
-            System.out.println("Segment " + (i + 1) + " has percentage: " + segment.getBlackPixelPercentage(image));
+            //System.out.println("Segment " + (i + 1) + " has percentage: " + segment.getBlackPixelPercentage(image));
             if (segment.getBlackPixelPercentage(image) > 50.0) {
                 flaggedSegments.add(i + 1);
-                //System.out.println("Segment " + (i + 1) + " added with percentage: " + segment.getBlackPixelPercentage(image));
+                System.out.println("Seg. " + (i + 1) + " FLAGGED (" + segment.getBlackPixelPercentage(image) +  "%)");
+            }
+//            else if (segment.getBlackPixelPercentage(image) > 30.0 && segment.getBlackPixelPercentage(image) <= 50) {
+//                Line rearrangedSegment = segment.rearrangeLine(image);
+//                rearrangedSegment.draw(image);
+//                if (rearrangedSegment.getBlackPixelPercentage(image) > 50.0) {
+//                    flaggedSegments.add(i + 1);
+//                    System.out.println("Seg. " + (i + 1) + " rearranged & FLAGGED (%: " + rearrangedSegment.getBlackPixelPercentage(image) +  "), old %: " + segment.getBlackPixelPercentage(image));
+//                } else {
+//                    System.out.println("Seg. " + (i + 1) + " rearranged & NOT flagged (%: " + rearrangedSegment.getBlackPixelPercentage(image) +  "), old %: " + segment.getBlackPixelPercentage(image));
+//                }
+//            }
+            else {
+                System.out.println("Seg. " + (i + 1) + " NOT flagged (" + segment.getBlackPixelPercentage(image) +  "%)");
             }
         }
 

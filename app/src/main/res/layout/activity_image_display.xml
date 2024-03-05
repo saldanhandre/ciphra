@@ -30,7 +30,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.1"
-            app:layout_constraintWidth_percent=".5">
+            app:layout_constraintWidth_percent=".3">
 
             <ImageView
                 android:id="@+id/image_display_view"
@@ -52,10 +52,10 @@
             android:textSize="30sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.914"
+            app:layout_constraintHorizontal_bias="0.9"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.475" />
+            app:layout_constraintVertical_bias="0.358" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -71,7 +71,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.95"
-        app:layout_constraintWidth_percent="0.65" />
+        app:layout_constraintWidth_percent="1" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
