@@ -217,7 +217,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
             // Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
-            //Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, new Scalar(0, 0, 255), 2);
+            //Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, blue, 2);
             // Calculate bounding rectangle for each contour
             Rect boundingRect = Imgproc.boundingRect(contour);
             boundingRects.add(boundingRect);
@@ -461,7 +461,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                             System.out.println("topLimitY = " + topLimitY);
                             Point lineStart = new Point(rect.x, topLimitY);
                             Point lineEnd = new Point(rect.x + rectWidth, topLimitY);
-                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
                             break;
                         }
                     }
@@ -473,7 +473,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 topLimitY = rect.y;
                 Point lineStart = new Point(rect.x, topLimitY);
                 Point lineEnd = new Point(rect.x + rectWidth, topLimitY);
-                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
             }
         }
         if (resizeBottom && bottomLimitY > 0) { //bottom
@@ -488,7 +488,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                             System.out.println("bottomLimitY = " + bottomLimitY);
                             Point lineStart = new Point(rect.x, bottomLimitY);
                             Point lineEnd = new Point(rect.x + rectWidth, bottomLimitY);
-                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
                             break;
                         }
                     }
@@ -500,7 +500,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 bottomLimitY = rect.y;
                 Point lineStart = new Point(rect.x, bottomLimitY);
                 Point lineEnd = new Point(rect.x + rectWidth, bottomLimitY);
-                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
             }
         }
         if (resizeLeft && leftLimitX > 0) { //left
@@ -515,7 +515,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                             System.out.println("leftLimitX = " + leftLimitX);
                             Point lineStart = new Point(leftLimitX, rect.y);
                             Point lineEnd = new Point(leftLimitX, rect.y + rectHeight);
-                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
                             break;
                         }
                     }
@@ -527,7 +527,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 leftLimitX = rect.x + rectWidth;
                 Point lineStart = new Point(leftLimitX, rect.y);
                 Point lineEnd = new Point(leftLimitX, rect.y + rectHeight);
-                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
             }
         }
         if (resizeRight && rightLimitX > 0) { //right
@@ -542,7 +542,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                             System.out.println("rightLimitX = " + rightLimitX);
                             Point lineStart = new Point(rightLimitX, rect.y);
                             Point lineEnd = new Point(rightLimitX, rect.y + rectHeight);
-                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
                             break;
                         }
                     }
@@ -554,7 +554,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 rightLimitX = rect.x + rectWidth;
                 Point lineStart = new Point(rightLimitX, rect.y);
                 Point lineEnd = new Point(rightLimitX, rect.y + rectHeight);
-                Imgproc.line(image, lineStart, lineEnd, new Scalar(0, 0, 225), 1);
+                //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
             }
         }
 
@@ -1053,12 +1053,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
 //            // This line is perpendicular to the actual stem
 //            Line stemGuideline = null;
 //            if (stemCandidate1.getPerpendicularIntersectionPoint(rectMiddlePoint) != null && stemCandidate2.getPerpendicularIntersectionPoint(rectMiddlePoint) != null) {
-//                stemGuideline= new Line(stemCandidate1.getPerpendicularIntersectionPoint(rectMiddlePoint), stemCandidate2.getPerpendicularIntersectionPoint(rectMiddlePoint), new Scalar(0, 0, 255), 1);
+//                stemGuideline= new Line(stemCandidate1.getPerpendicularIntersectionPoint(rectMiddlePoint), stemCandidate2.getPerpendicularIntersectionPoint(rectMiddlePoint), blue, 1);
 //            } else {
 //                System.out.println("Adjusted points");
 //                Point p1 = adjustPointToBounds(image, stemCandidate1.getPerpendicularIntersectionPoint(rectMiddlePoint));
 //                Point p2 = adjustPointToBounds(image, stemCandidate1.getPerpendicularIntersectionPoint(rectMiddlePoint));
-//                stemGuideline= new Line(p1, p2, new Scalar(0, 0, 255), 1);
+//                stemGuideline= new Line(p1, p2, blue, 1);
 //
 //            }
 //            // draw the stem guideline
@@ -1149,12 +1149,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
 //            // Create a line that unites the intersection point with the candidates - stem guideline
 //            Line stemGuideline = null;
 //            if (stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint) != null && stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint) != null) {
-//                stemGuideline= new Line(stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint), stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint), new Scalar(0, 0, 255), 1);
+//                stemGuideline= new Line(stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint), stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint), blue, 1);
 //            } else {
 //                System.out.println("Adjusted points");
 //                Point p1 = adjustPointToBounds(image, stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint));
 //                Point p2 = adjustPointToBounds(image, stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint));
-//                stemGuideline= new Line(p1, p2, new Scalar(0, 0, 255), 1);
+//                stemGuideline= new Line(p1, p2, blue, 1);
 //
 //            }
 //            // draw it
@@ -2044,7 +2044,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // label percentage of black pixels on the image near the subQuadrant
         String label = String.format("%.2f%%", blackPixelPercentage); // Formats the percentage to 2 decimal places
         Point labelPoint = new Point(subQuadrant.x + 5, subQuadrant.y + 20);
-        //Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 255), 1);
+        //Imgproc.putText(coloredBinaryImage, label, labelPoint, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, blue, 1);
 
         return (double) blackPixelCount / totalPixels * 100;
     }
