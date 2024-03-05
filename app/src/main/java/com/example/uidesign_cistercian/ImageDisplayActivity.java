@@ -321,11 +321,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             // Get the bounding rect
             Rect boundingRect = expandUntilNoBlack(rotatedImage);
+            //drawRectangle(rotatedImage, boundingRect, orange, 1);
 
             // resize the rect to fit exactly the cipher
             //System.out.println("Going to call resizedRect");
             Rect resizedRect = resizeRectangle(rotatedImage, boundingRect, true, true, true, true);
-            drawRectangle(rotatedImage, resizedRect, green, 1);
+            //drawRectangle(rotatedImage, resizedRect, blue, 1);
+            System.out.println("resizedRect.tl = " + resizedRect.tl() + ", resizedRect.br = " + resizedRect.br());
 
             // process the cipher and get number
             //System.out.println("Going to call processCipher");
@@ -416,14 +418,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Draw the final rectangle
         Rect boundingRect = new Rect(Math.max(0, centerX - width / 2), Math.max(0, centerY - height / 2), width, height);
-        drawRectangle(image, boundingRect, orange, 1);
         return boundingRect;
     }
 
     private boolean isPixelBlack(Mat image, int row, int col) {
         boolean check = false;
-        if (row >= 0 && row < image.width() && col >= 0 && col < image.height()) {
+        if (row >= 0 && row < image.width()-1 && col >= 0 && col < image.height()-1) {
             double[] pixel = image.get(row, col);
+            if (pixel[0] != null)
             check = pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0; // check if pixel is black
         }
         return check;
@@ -436,6 +438,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Initialize limits to the rectangle's current boundaries
         int topLimitY = rect.y, bottomLimitY = rect.y + rectHeight - 1;
         int leftLimitX = rect.x, rightLimitX = rect.x + rectWidth - 1;
+
+        System.out.println("rect.x = " + rect.x + ", rect.y = " + rect.y);
 
         // Additional checks to prevent accessing pixels outside the image
         int maxY = image.rows() - 1;
@@ -451,29 +455,29 @@ public class ImageDisplayActivity extends AppCompatActivity {
         //top
         if (resizeTop && topLimitY > 0) {
             //System.out.println("Going to resize the top");
-            for (int y = rect.y; y < rectHeight; y++) {
+            for (int y = rect.y; y < rect.y + rectHeight; y++) {
                 for (int x = rect.x; x < rect.x + rectWidth; x++) {
                     if (x >= 0 && x < image.width() && y >= 0 && y < image.height()) {
                         double[] pixel = image.get(y, x);
-                        if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                        if (pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) {
                             topLimitFound = true;
                             topLimitY = y;
                             System.out.println("topLimitY = " + topLimitY);
                             Point lineStart = new Point(rect.x, topLimitY);
                             Point lineEnd = new Point(rect.x + rectWidth, topLimitY);
-                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
+                            //Imgproc.line(image, lineStart, lineEnd, green, 2);
                             break;
                         }
                     }
                 }
-                if (topLimitY != -1)
+                if (topLimitFound)
                     break; // Exit the outer loop as well after getting the top limit
             }
             if (!topLimitFound) {
                 topLimitY = rect.y;
                 Point lineStart = new Point(rect.x, topLimitY);
                 Point lineEnd = new Point(rect.x + rectWidth, topLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
+                //Imgproc.line(image, lineStart, lineEnd, red, 2);
             }
         }
         if (resizeBottom && bottomLimitY > 0) { //bottom
@@ -488,19 +492,19 @@ public class ImageDisplayActivity extends AppCompatActivity {
                             System.out.println("bottomLimitY = " + bottomLimitY);
                             Point lineStart = new Point(rect.x, bottomLimitY);
                             Point lineEnd = new Point(rect.x + rectWidth, bottomLimitY);
-                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
+                            //Imgproc.line(image, lineStart, lineEnd, blue, 1);
                             break;
                         }
                     }
                 }
-                if (bottomLimitY != -1)
+                if (bottomLimitFound)
                     break; // Exit the outer loop as well after getting the bottom limit
             }
             if (!bottomLimitFound) {
                 bottomLimitY = rect.y;
                 Point lineStart = new Point(rect.x, bottomLimitY);
                 Point lineEnd = new Point(rect.x + rectWidth, bottomLimitY);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
+                //Imgproc.line(image, lineStart, lineEnd, blue, 1);
             }
         }
         if (resizeLeft && leftLimitX > 0) { //left
@@ -515,19 +519,19 @@ public class ImageDisplayActivity extends AppCompatActivity {
                             System.out.println("leftLimitX = " + leftLimitX);
                             Point lineStart = new Point(leftLimitX, rect.y);
                             Point lineEnd = new Point(leftLimitX, rect.y + rectHeight);
-                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
+                            //Imgproc.line(image, lineStart, lineEnd, blue, 1);
                             break;
                         }
                     }
                 }
-                if (leftLimitX != -1)
+                if (leftLimitFound)
                     break; // Exit the outer loop as well after drawing 2nd line
             }
             if (!leftLimitFound) {
                 leftLimitX = rect.x + rectWidth;
                 Point lineStart = new Point(leftLimitX, rect.y);
                 Point lineEnd = new Point(leftLimitX, rect.y + rectHeight);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
+                //Imgproc.line(image, lineStart, lineEnd, blue, 1);
             }
         }
         if (resizeRight && rightLimitX > 0) { //right
@@ -542,19 +546,19 @@ public class ImageDisplayActivity extends AppCompatActivity {
                             System.out.println("rightLimitX = " + rightLimitX);
                             Point lineStart = new Point(rightLimitX, rect.y);
                             Point lineEnd = new Point(rightLimitX, rect.y + rectHeight);
-                            //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
+                            //Imgproc.line(image, lineStart, lineEnd, blue, 1);
                             break;
                         }
                     }
                 }
-                if (rightLimitX != -1)
+                if (rightLimitFound)
                     break; // Exit the outer loop as well after drawing 2nd line
             }
             if (!rightLimitFound) {
                 rightLimitX = rect.x + rectWidth;
                 Point lineStart = new Point(rightLimitX, rect.y);
                 Point lineEnd = new Point(rightLimitX, rect.y + rectHeight);
-                //Imgproc.line(image, lineStart, lineEnd, new Scalar(blue), 1);
+                //Imgproc.line(image, lineStart, lineEnd, blue, 1);
             }
         }
 
@@ -604,7 +608,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 percentages1stCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
-                    stem.draw(image);
+                    //stem.draw(image);
                     stemFound = true;
                     System.out.println("Stem Found at 1st check");
                     break;
@@ -628,7 +632,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 percentages2ndCheck.put(stem, percentage);
 
                 if (percentage >= 90) {
-                    stem.draw(image);
+                    //stem.draw(image);
                     stemFound = true;
                     System.out.println("Stem Found at 2nd check");
                     break;
@@ -769,7 +773,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(image);
             stem = stemGuideline.getStemLine(stemMiddlePoint);
-            stem.draw(image);
+            //stem.draw(image);
             System.out.println("Stem Found at 3rd check");
         }
         return stem;
@@ -1433,7 +1437,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsUnits.addAll(Arrays.asList(subQuadrantUnits1, subQuadrantUnits2, subQuadrantUnits3, subQuadrantUnits4, subQuadrantUnits5, subQuadrantUnits6, subQuadrantUnits7, subQuadrantUnits8, subQuadrantUnits9));
 
             unitsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsUnits);
-            //drawSubQuadrants(image, subQuadrantsUnits);
+            drawSubQuadrants(image, subQuadrantsUnits);
             
             // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
@@ -1485,7 +1489,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsTens.addAll(Arrays.asList(subQuadrantTens1, subQuadrantTens2, subQuadrantTens3, subQuadrantTens4, subQuadrantTens5, subQuadrantTens6, subQuadrantTens7, subQuadrantTens8, subQuadrantTens9));
             
             tensResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsTens);
-            //drawSubQuadrants(image, subQuadrantsTens);
+            drawSubQuadrants(image, subQuadrantsTens);
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
@@ -1536,7 +1540,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsHundreds.addAll(Arrays.asList(subQuadrantHundreds1, subQuadrantHundreds2, subQuadrantHundreds3, subQuadrantHundreds4, subQuadrantHundreds5, subQuadrantHundreds6, subQuadrantHundreds7, subQuadrantHundreds8, subQuadrantHundreds9));
 
             hundredsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsHundreds);
-            //drawSubQuadrants(image, subQuadrantsHundreds);
+            drawSubQuadrants(image, subQuadrantsHundreds);
 
             // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
@@ -1587,7 +1591,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsThousands.addAll(Arrays.asList(subQuadrantThousands1, subQuadrantThousands2, subQuadrantThousands3, subQuadrantThousands4, subQuadrantThousands5, subQuadrantThousands6, subQuadrantThousands7, subQuadrantThousands8, subQuadrantThousands9));
 
             thousandsResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsThousands);
-            //drawSubQuadrants(image, subQuadrantsThousands);
+            drawSubQuadrants(image, subQuadrantsThousands);
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
