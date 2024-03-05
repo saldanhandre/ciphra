@@ -36,7 +36,7 @@ public class CistercianThumbnailView extends View {
         // Set up paint
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
-        paint.setStrokeWidth(3); 
+        paint.setStrokeWidth(4);
         paint.setStyle(Paint.Style.STROKE);
 
         // Central stem for all numbers
@@ -45,7 +45,7 @@ public class CistercianThumbnailView extends View {
 
         switch(units) {
             case 1:
-                canvas.drawLine(centerX, 0, centerX + segmentLength, 0, paint);
+                canvas.drawLine(centerX, 2, centerX + segmentLength, 2, paint);
                 break;
             case 2:
                 canvas.drawLine(centerX, segmentLength, centerX + segmentLength, segmentLength, paint);
@@ -63,7 +63,7 @@ public class CistercianThumbnailView extends View {
                 canvas.drawPath(path4, paint);
                 break;
             case 5:
-                canvas.drawLine(centerX, 0, centerX + segmentLength, 0, paint);
+                canvas.drawLine(centerX, 2, centerX + segmentLength, 2, paint);
                 Path path5 = new Path();
                 path5.moveTo(centerX, segmentLength);
                 path5.lineTo(centerX + segmentLength, 0);
@@ -73,7 +73,7 @@ public class CistercianThumbnailView extends View {
                 canvas.drawLine(centerX + segmentLength, 0, centerX + segmentLength, segmentLength, paint);
                 break;
             case 7:
-                canvas.drawLine(centerX, 0, centerX + segmentLength, 0, paint);
+                canvas.drawLine(centerX, 2, centerX + segmentLength, 2, paint);
                 canvas.drawLine(centerX + segmentLength, 0, centerX + segmentLength, segmentLength, paint);
                 break;
             case 8:
@@ -81,14 +81,14 @@ public class CistercianThumbnailView extends View {
                 canvas.drawLine(centerX + segmentLength, 0, centerX + segmentLength, segmentLength, paint);
                 break;
             case 9:
-                canvas.drawLine(centerX, 0, centerX + segmentLength, 0, paint);
+                canvas.drawLine(centerX, 2, centerX + segmentLength, 2, paint);
                 canvas.drawLine(centerX, segmentLength, centerX + segmentLength, segmentLength, paint);
                 canvas.drawLine(centerX + segmentLength, 0, centerX + segmentLength, segmentLength, paint);
                 break;
         }
         switch(tens) {
             case 1:
-                canvas.drawLine(centerX, 0, centerX - segmentLength, 0, paint);
+                canvas.drawLine(centerX, 2, centerX - segmentLength, 2, paint);
                 break;
             case 2:
                 canvas.drawLine(centerX, segmentLength, centerX - segmentLength, segmentLength, paint);
@@ -106,7 +106,7 @@ public class CistercianThumbnailView extends View {
                 canvas.drawPath(path4, paint);
                 break;
             case 5:
-                canvas.drawLine(centerX, 0, centerX - segmentLength, 0, paint);
+                canvas.drawLine(centerX, 2, centerX - segmentLength, 2, paint);
                 Path path5 = new Path();
                 path5.moveTo(centerX, segmentLength);
                 path5.lineTo(centerX - segmentLength, 0);
@@ -116,7 +116,7 @@ public class CistercianThumbnailView extends View {
                 canvas.drawLine(centerX - segmentLength, 0, centerX - segmentLength, 0 + segmentLength, paint);
                 break;
             case 7:
-                canvas.drawLine(centerX, 0, centerX - segmentLength, 0, paint);
+                canvas.drawLine(centerX, 2, centerX - segmentLength, 2, paint);
                 canvas.drawLine(centerX - segmentLength, 0, centerX - segmentLength, 0 + segmentLength, paint);
                 break;
             case 8:
@@ -124,14 +124,14 @@ public class CistercianThumbnailView extends View {
                 canvas.drawLine(centerX - segmentLength, 0, centerX - segmentLength, segmentLength, paint);
                 break;
             case 9:
-                canvas.drawLine(centerX, 0, centerX - segmentLength, 0, paint);
+                canvas.drawLine(centerX, 2, centerX - segmentLength, 2, paint);
                 canvas.drawLine(centerX, segmentLength, centerX - segmentLength, segmentLength, paint);
                 canvas.drawLine(centerX - segmentLength, 0, centerX - segmentLength, segmentLength, paint);
                 break;
         }
         switch(hundreds) {
             case 1:
-                canvas.drawLine(centerX, height, centerX + segmentLength, height, paint);
+                canvas.drawLine(centerX, height-2, centerX + segmentLength, height-2, paint);
                 break;
             case 2:
                 canvas.drawLine(centerX, height - segmentLength, centerX + segmentLength, height - segmentLength, paint);
@@ -149,7 +149,7 @@ public class CistercianThumbnailView extends View {
                 canvas.drawPath(path4, paint);
                 break;
             case 5:
-                canvas.drawLine(centerX, height, centerX + segmentLength, height, paint);
+                canvas.drawLine(centerX, height-2, centerX + segmentLength, height-2, paint);
                 Path path5 = new Path();
                 path5.moveTo(centerX, height - segmentLength);
                 path5.lineTo(centerX + segmentLength, height);
@@ -159,7 +159,7 @@ public class CistercianThumbnailView extends View {
                 canvas.drawLine(centerX + segmentLength, height, centerX + segmentLength, height - segmentLength, paint);
                 break;
             case 7:
-                canvas.drawLine(centerX, height, centerX + segmentLength, height, paint);
+                canvas.drawLine(centerX, height-2, centerX + segmentLength, height-2, paint);
                 canvas.drawLine(centerX + segmentLength, height, centerX + segmentLength, height - segmentLength, paint);
                 break;
             case 8:
@@ -167,14 +167,14 @@ public class CistercianThumbnailView extends View {
                 canvas.drawLine(centerX + segmentLength, height, centerX + segmentLength, height - segmentLength, paint);
                 break;
             case 9:
-                canvas.drawLine(centerX, height, centerX + segmentLength, height, paint);
+                canvas.drawLine(centerX, height-2, centerX + segmentLength, height-2, paint);
                 canvas.drawLine(centerX, height - segmentLength, centerX + segmentLength, height - segmentLength, paint);
                 canvas.drawLine(centerX + segmentLength, height, centerX + segmentLength, height - segmentLength, paint);
                 break;
         }
         switch(thousands) {
             case 1:
-                canvas.drawLine(centerX, height, centerX - segmentLength, height, paint);
+                canvas.drawLine(centerX, height-2, centerX - segmentLength, height-2, paint);
                 break;
             case 2:
                 canvas.drawLine(centerX, height - segmentLength, centerX - segmentLength, height - segmentLength, paint);
@@ -192,7 +192,7 @@ public class CistercianThumbnailView extends View {
                 canvas.drawPath(path4, paint);
                 break;
             case 5:
-                canvas.drawLine(centerX, height, centerX - segmentLength, height, paint);
+                canvas.drawLine(centerX, height-2, centerX - segmentLength, height-2, paint);
                 Path path5 = new Path();
                 path5.moveTo(centerX, height - segmentLength);
                 path5.lineTo(centerX - segmentLength, height);
@@ -202,7 +202,7 @@ public class CistercianThumbnailView extends View {
                 canvas.drawLine(centerX - segmentLength, height, centerX - segmentLength, height - segmentLength, paint);
                 break;
             case 7:
-                canvas.drawLine(centerX, height, centerX - segmentLength, height, paint);
+                canvas.drawLine(centerX, height-2, centerX - segmentLength, height-2, paint);
                 canvas.drawLine(centerX - segmentLength, height, centerX - segmentLength, height - segmentLength, paint);
                 break;
             case 8:
@@ -210,7 +210,7 @@ public class CistercianThumbnailView extends View {
                 canvas.drawLine(centerX - segmentLength, height, centerX - segmentLength, height - segmentLength, paint);
                 break;
             case 9:
-                canvas.drawLine(centerX, height, centerX - segmentLength, height, paint);
+                canvas.drawLine(centerX, height-2, centerX - segmentLength, height-2, paint);
                 canvas.drawLine(centerX, height - segmentLength, centerX - segmentLength, height - segmentLength, paint);
                 canvas.drawLine(centerX - segmentLength, height, centerX - segmentLength, height - segmentLength, paint);
                 break;
