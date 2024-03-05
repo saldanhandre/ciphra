@@ -341,6 +341,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             arabicResults.add(numberResult);
             updateResultsDisplay();
+
+            // Add result to history
+            ConversionHistoryManager.getInstance(getApplicationContext()).addConversion(numberResult);
         }
     }
 
