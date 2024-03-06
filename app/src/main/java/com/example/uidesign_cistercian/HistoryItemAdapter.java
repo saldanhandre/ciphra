@@ -35,10 +35,11 @@ public class HistoryItemAdapter extends ArrayAdapter<Integer> {
 
     // Method to toggle selection state
     public void toggleItemSelection(int position) {
-        if (selectedItems.contains(position)) {
-            selectedItems.remove(position);
+        Integer itemValue = getItem(position); // Get the actual value
+        if (selectedItems.contains(itemValue)) {
+            selectedItems.remove(itemValue);
         } else {
-            selectedItems.add(position);
+            selectedItems.add(itemValue);
         }
         notifyDataSetChanged();
     }
@@ -64,15 +65,15 @@ public class HistoryItemAdapter extends ArrayAdapter<Integer> {
         TextView tvArabicNumber = convertView.findViewById(R.id.tvArabicNumber);
         CistercianThumbnailView ivThumbnail = convertView.findViewById(R.id.ivThumbnail);
 
-        Integer item = historyItems.get(position);
+        Integer item = getItem(position); // Get the item at the current position
         tvArabicNumber.setText(String.valueOf(item));
 
         // Set the number on the CistercianThumbnailView
         ivThumbnail.setNumber(item);
 
-        // Highlight selected items
-        if (selectedItems.contains(position)) {
-            convertView.setBackgroundColor(Color.LTGRAY); // Example highlight
+        // Highlight selected items based on their value
+        if (selectedItems.contains(item)) { // Check if the item's value is in the set of selected items
+            convertView.setBackgroundColor(Color.LTGRAY);
         } else {
             convertView.setBackgroundColor(Color.TRANSPARENT);
         }
