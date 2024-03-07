@@ -336,8 +336,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Bitmap bitmapImage = Bitmap.createBitmap(rotatedImage.cols(), rotatedImage.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(rotatedImage, bitmapImage);
 
-            ImageView imageView = findViewById(R.id.image_display_view_provisorio);
-            imageView.setImageBitmap(bitmapImage);
+            //ImageView imageView = findViewById(R.id.image_display_view_provisorio);
+            //imageView.setImageBitmap(bitmapImage);
 
             arabicResults.add(numberResult);
             updateResultsDisplay();
