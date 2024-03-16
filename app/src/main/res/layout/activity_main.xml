@@ -5,8 +5,8 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="?attr/actionBarSize"
-    android:background="@color/background" >
+    android:background="@color/background"
+    android:paddingTop="?attr/actionBarSize">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/horizontalGuideline12"
@@ -116,7 +116,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                app:layout_constraintGuide_percent="0.621"/>
+                app:layout_constraintGuide_percent="0.621" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/horizontalGuideline8"
@@ -264,9 +264,9 @@
                 android:background="@drawable/horizontal_right_selector"
                 app:layout_constraintBottom_toBottomOf="@+id/horizontalGuideline1_2"
                 app:layout_constraintEnd_toEndOf="@+id/verticalGuideline7"
+                app:layout_constraintHeight_percent="0.13"
                 app:layout_constraintStart_toStartOf="@+id/verticalGuideline7"
                 app:layout_constraintTop_toTopOf="@+id/horizontalGuideline1_2"
-                app:layout_constraintHeight_percent="0.13"
                 app:layout_constraintWidth_percent="0.516" />
 
             <ImageView
@@ -276,12 +276,12 @@
                 android:background="@drawable/horizontal_right_selector"
                 app:layout_constraintBottom_toBottomOf="@+id/horizontalGuideline5_2"
                 app:layout_constraintEnd_toEndOf="@+id/verticalGuideline7"
+                app:layout_constraintHeight_percent="0.13"
                 app:layout_constraintHorizontal_bias="0.81"
                 app:layout_constraintStart_toStartOf="@+id/verticalGuideline7"
                 app:layout_constraintTop_toTopOf="@+id/horizontalGuideline5_2"
                 app:layout_constraintVertical_bias="0.4"
-                app:layout_constraintHeight_percent="0.13"
-                app:layout_constraintWidth_percent="0.516"/>
+                app:layout_constraintWidth_percent="0.516" />
 
 
             <ImageView
@@ -390,10 +390,10 @@
                 android:background="@drawable/horizontal_left_selector"
                 app:layout_constraintBottom_toBottomOf="@+id/horizontalGuideline5_1"
                 app:layout_constraintEnd_toEndOf="@+id/verticalGuideline3"
+                app:layout_constraintHeight_percent="0.13"
                 app:layout_constraintStart_toStartOf="@+id/verticalGuideline3"
                 app:layout_constraintTop_toTopOf="@+id/horizontalGuideline5_1"
-                app:layout_constraintHeight_percent="0.13"
-                app:layout_constraintWidth_percent="0.516"/>
+                app:layout_constraintWidth_percent="0.516" />
 
             <ImageView
                 android:id="@+id/segment8_1"
@@ -616,10 +616,10 @@
                 android:background="@drawable/horizontal_left_selector"
                 app:layout_constraintBottom_toBottomOf="@+id/horizontalGuideline7_1"
                 app:layout_constraintEnd_toEndOf="@+id/verticalGuideline3"
+                app:layout_constraintHeight_percent="0.13"
                 app:layout_constraintStart_toStartOf="@+id/verticalGuideline3"
                 app:layout_constraintTop_toTopOf="@+id/horizontalGuideline7_1"
-                app:layout_constraintHeight_percent="0.13"
-                app:layout_constraintWidth_percent="0.516"/>
+                app:layout_constraintWidth_percent="0.516" />
 
             <ImageView
                 android:id="@+id/segment18_1"
@@ -749,9 +749,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:inputType="number"
+                android:maxLength="4"
                 android:textColor="@color/black"
                 android:textSize="60sp"
-                android:maxLength="4"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/verticalGuideline11"
                 app:layout_constraintStart_toStartOf="@+id/verticalGuideline11"
@@ -779,11 +779,11 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintDimensionRatio="H,1:1"
                 app:layout_constraintEnd_toEndOf="@+id/verticalGuideline10"
+                app:layout_constraintHeight_percent="0.48"
                 app:layout_constraintHorizontal_bias="0.461"
                 app:layout_constraintStart_toStartOf="@+id/verticalGuideline10"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.507"
-                app:layout_constraintHeight_percent="0.48">
+                app:layout_constraintVertical_bias="0.507">
 
                 <ImageView
                     android:id="@+id/bin_icon"
@@ -878,11 +878,11 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="H,1:1"
             app:layout_constraintEnd_toEndOf="@+id/verticalGuideline14"
+            app:layout_constraintHeight_percent="0.4"
             app:layout_constraintHorizontal_bias="0.461"
             app:layout_constraintStart_toStartOf="@+id/verticalGuideline14"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.507"
-            app:layout_constraintHeight_percent="0.4">
+            app:layout_constraintVertical_bias="0.507">
 
             <ImageView
                 android:id="@+id/photo_gallery_icon"
@@ -892,6 +892,7 @@
                 android:src="@drawable/outline_photo_library_24" />
 
         </FrameLayout>
+
         <FrameLayout
             android:id="@+id/history_button"
             android:layout_width="0dp"
@@ -901,11 +902,11 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="H,1:1"
             app:layout_constraintEnd_toEndOf="@+id/verticalGuideline15"
+            app:layout_constraintHeight_percent="0.4"
             app:layout_constraintHorizontal_bias="0.461"
             app:layout_constraintStart_toStartOf="@+id/verticalGuideline15"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.507"
-            app:layout_constraintHeight_percent="0.4">
+            app:layout_constraintVertical_bias="0.507">
 
             <ImageView
                 android:id="@+id/history_icon"
