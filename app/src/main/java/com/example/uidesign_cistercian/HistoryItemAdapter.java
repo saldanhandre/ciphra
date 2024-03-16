@@ -24,8 +24,9 @@ import java.util.List;
 public class HistoryItemAdapter extends ArrayAdapter<Integer> {
     private Context context;
     private List<Integer> historyItems;
-    // Track selected items
-    private Set<Integer> selectedItems = new HashSet<>();
+    private Set<Integer> selectedItems = new HashSet<>(); // Track selected items
+    private Set<Integer> selectedPositions = new HashSet<>(); // Track selected positions
+
 
     public HistoryItemAdapter(@NonNull Context context, @NonNull List<Integer> objects) {
         super(context, 0, objects);
@@ -35,18 +36,25 @@ public class HistoryItemAdapter extends ArrayAdapter<Integer> {
 
     // Method to toggle selection state
     public void toggleItemSelection(int position) {
-        Integer itemValue = getItem(position); // Get the actual value
-        if (selectedItems.contains(itemValue)) {
-            selectedItems.remove(itemValue);
+        if (selectedPositions.contains(position)) {
+            selectedPositions.remove(position);
         } else {
-            selectedItems.add(itemValue);
+            selectedPositions.add(position);
         }
         notifyDataSetChanged();
+        if (selectionChangedListener != null) {
+            selectionChangedListener.onSelectionChanged();
+        }
+    }
+
+    // Method to get all selected positions
+    public Set<Integer> getSelectedPositions() {
+        return new HashSet<>(selectedPositions);
     }
 
     // Method to clear selections
     public void clearSelections() {
-        selectedItems.clear();
+        selectedPositions.clear();
         notifyDataSetChanged();
     }
 
@@ -71,13 +79,19 @@ public class HistoryItemAdapter extends ArrayAdapter<Integer> {
         // Set the number on the CistercianThumbnailView
         ivThumbnail.setNumber(item);
 
-        // Highlight selected items based on their value
-        if (selectedItems.contains(item)) { // Check if the item's value is in the set of selected items
-            convertView.setBackgroundColor(Color.LTGRAY);
-        } else {
-            convertView.setBackgroundColor(Color.TRANSPARENT);
-        }
+        // Highlight based on position selection
+        convertView.setBackgroundColor(selectedPositions.contains(position) ? Color.LTGRAY : Color.TRANSPARENT);
 
         return convertView;
+    }
+
+    public interface OnItemSelectionChangedListener {
+        void onSelectionChanged();
+    }
+
+    private OnItemSelectionChangedListener selectionChangedListener;
+
+    public void setOnItemSelectionChangedListener(OnItemSelectionChangedListener listener) {
+        this.selectionChangedListener = listener;
     }
 }

@@ -24,6 +24,7 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
 
     private ListView historyListView;
     private HistoryItemAdapter adapter;
+    private ActionMode actionMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,23 +66,22 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
         historyListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
             @Override
             public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-                // Toggle the selection state
+                // Toggle the selection state in the adapter
                 adapter.toggleItemSelection(position);
 
-                // Update the title in the action mode
-                mode.setTitle(adapter.getSelectedItems().size() + " selected");
+                // Update the title with the current selection count from the adapter
+                int selectedCount = adapter.getSelectedPositions().size();
+                mode.setTitle(selectedCount + " selected");
             }
 
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 // Inflate the menu for selected items
                 mode.getMenuInflater().inflate(R.menu.menu_selection, menu);
-
                 // Hide the toolbar
                 Toolbar toolbar = findViewById(R.id.toolbar);
                 toolbar.setVisibility(View.GONE);
-
-                return true;
+                return true; // return true to create the action mode
             }
 
             @Override
@@ -92,14 +92,23 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 if (item.getItemId() == R.id.action_delete_selected) {
-                    // Handle delete selected items
-                    deleteSelectedItems(adapter.getSelectedItems());
-                    mode.finish(); // Close the action mode
+                    List<Integer> selectedPositionsList = new ArrayList<>(adapter.getSelectedPositions());
+                    Collections.sort(selectedPositionsList, Collections.reverseOrder());
+
+                    List<Integer> positionsToRemove = new ArrayList<>();
+                    for (int position : selectedPositionsList) {
+                        positionsToRemove.add(adapter.getCount() - 1 - position);
+                    }
+
+                    ConversionHistoryManager.getInstance(getApplicationContext()).removeConversionsByPosition(positionsToRemove);
+                    adapter.clearSelections();
+                    updateHistory();
+
+                    mode.finish();
                     return true;
                 }
                 return false;
             }
-
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 adapter.clearSelections();
@@ -110,8 +119,11 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
 
                 adapter.clearSelections();
             }
+
+
         });
     }
+
 
     @Override
     public void onHistoryUpdated() {
@@ -126,6 +138,18 @@ public class HistoryActivity extends AppCompatActivity implements ConversionHist
         if (adapter == null) {
             adapter = new HistoryItemAdapter(this, history);
             historyListView.setAdapter(adapter);
+
+            // Set the OnItemSelectionChangedListener right after initializing your adapter
+            adapter.setOnItemSelectionChangedListener(new HistoryItemAdapter.OnItemSelectionChangedListener() {
+                @Override
+                public void onSelectionChanged() {
+                    // This assumes you have an ActionMode variable `actionMode` accessible in this context
+                    if (actionMode != null) {
+                        int selectedCount = adapter.getSelectedPositions().size();
+                        actionMode.setTitle(selectedCount + " selected");
+                    }
+                }
+            });
         } else {
             adapter.clear();
             adapter.addAll(history);

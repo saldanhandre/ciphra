@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -96,6 +97,21 @@ public class ConversionHistoryManager {
 
     public void removeConversions(Set<Integer> itemsToRemove) {
         conversionHistory.removeAll(itemsToRemove);
+        saveHistory();
+        notifyHistoryUpdated();
+    }
+
+    // Method to remove conversions by positions
+    public void removeConversionsByPosition(List<Integer> positionsToRemove) {
+        // Sort positions in reverse order to avoid shifting issues
+        Collections.sort(positionsToRemove, Collections.reverseOrder());
+
+        // Remove items from the end to avoid index shifting problems
+        for (int position : positionsToRemove) {
+            if (position >= 0 && position < conversionHistory.size()) {
+                conversionHistory.remove(position);
+            }
+        }
         saveHistory();
         notifyHistoryUpdated();
     }
