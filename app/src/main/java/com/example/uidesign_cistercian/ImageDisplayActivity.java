@@ -350,11 +350,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
             //ImageView imageView = findViewById(R.id.image_display_view_provisorio);
             //imageView.setImageBitmap(bitmapImage);
 
-            arabicResults.add(numberResult);
-            updateResultsDisplay();
-
-            // Add result to history
-            ConversionHistoryManager.getInstance(getApplicationContext()).addConversion(numberResult);
+            if(numberResult >= 0) {
+                arabicResults.add(numberResult);
+                updateResultsDisplay();
+                // Add result to history
+                ConversionHistoryManager.getInstance(getApplicationContext()).addConversion(numberResult);
+            }
         }
     }
 
