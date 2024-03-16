@@ -10,6 +10,7 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
@@ -54,6 +55,7 @@ import java.util.Set;
 public class ImageDisplayActivity extends AppCompatActivity {
 
     private Mat matImage;
+    private FrameLayout imageOverlayLayout;
     private int imageHeight;
     private List<Integer> arabicResults = new ArrayList<>();
     private List<Rect> finalFilteredRects = new ArrayList<>();
@@ -67,6 +69,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
     private final Scalar orange = new Scalar(255, 165, 0);
     private final Scalar black = new Scalar(0, 0, 0);
     private final Scalar white = new Scalar(255, 255, 255);
+    private int lightBlue = Color.rgb(193, 230, 254);
+    private int darkBlue = Color.rgb(0, 28, 52);
+
 
     // Load openCV library
     static {
@@ -86,6 +91,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // FrameLayout
+        imageOverlayLayout = findViewById(R.id.imageOverlayLayout);
 
         // Enable back button
         if (getSupportActionBar() != null) {
@@ -200,7 +208,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         drawQuadrants(coloredBinaryImage, foundRecsAfterCountours);
 
         // Convert processed Mat back to Bitmap
-        Utils.matToBitmap(coloredBinaryImage, bitmap);
+        //Utils.matToBitmap(coloredBinaryImage, bitmap);
 
         // Update ImageView with the processed Bitmap
         runOnUiThread(() -> {
@@ -317,6 +325,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
         for (Rect rect : filteredRects) {
+            // Calculate the center point of the rectangle
+            Point center = new Point(rect.tl().x + rect.width / 3, rect.tl().y + rect.height / 2);
+
+            // Create a TextView dynamically
+            TextView textView = new TextView(this);
+
             //drawRectangle(coloredBinaryImage, rect, green, 1);
             Line stem = findStem(coloredBinaryImage, rect);
             //stem.draw(coloredBinaryImage);
@@ -356,6 +370,20 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 // Add result to history
                 ConversionHistoryManager.getInstance(getApplicationContext()).addConversion(numberResult);
             }
+
+            // Set text and other properties for the TextView
+            textView.setText(String.valueOf(numberResult));
+            textView.setTextColor(darkBlue);
+            textView.setBackgroundColor(lightBlue);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18); // text size
+
+            // Create layout params to set position
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+            params.leftMargin = (int) center.x - textView.getWidth() / 2; // Adjust horizontal position
+            params.topMargin = (int) center.y - textView.getHeight() / 2; // Adjust vertical position
+
+            // Add the TextView to the layout
+            imageOverlayLayout.addView(textView, params);
         }
     }
 
