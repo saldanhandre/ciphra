@@ -366,7 +366,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             if(numberResult >= 0) {
                 arabicResults.add(numberResult);
-                updateResultsDisplay();
+//                updateResultsDisplay();
                 // Add result to history
                 ConversionHistoryManager.getInstance(getApplicationContext()).addConversion(numberResult);
             }
@@ -375,7 +375,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             textView.setText(String.valueOf(numberResult));
             textView.setTextColor(darkBlue);
             textView.setBackgroundColor(lightBlue);
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18); // text size
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20); // text size
 
             // Create layout params to set position
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
@@ -2109,19 +2109,19 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
 //CHECK
-    private void updateResultsDisplay() {
-        TextView resultsView = findViewById(R.id.results);
-        StringBuilder resultsText = new StringBuilder("Results:\n");
-        for (int result : arabicResults) {
-            if(arabicResults.size() > 1) {
-                resultsText.append(result).append(", ");
-            }
-            else {
-                resultsText.append(result).append("");
-            }
-        }
-        resultsView.setText(resultsText.toString());
-    }
+//    private void updateResultsDisplay() {
+//        TextView resultsView = findViewById(R.id.results);
+//        StringBuilder resultsText = new StringBuilder("Results:\n");
+//        for (int result : arabicResults) {
+//            if(arabicResults.size() > 1) {
+//                resultsText.append(result).append(", ");
+//            }
+//            else {
+//                resultsText.append(result).append("");
+//            }
+//        }
+//        resultsView.setText(resultsText.toString());
+//    }
 
     private void displayResultsOnImageOverlay(Mat imageMat, List<Rect> cipherRects, List<Integer> results) {
         FrameLayout layout = findViewById(R.id.imageOverlayLayout);
