@@ -11,7 +11,7 @@
     <color name="red">#FF0000</color>
     <color name="transparent">#00000000</color>
 
-    <color name="background">#ffffff</color>
+    <color name="background">#FFFFFF</color>
     <color name="bottom_bar_background">#f2f2f2</color>
     <color name="top_bar_background">#f2f2f2</color>
 

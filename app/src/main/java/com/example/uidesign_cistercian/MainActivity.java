@@ -159,12 +159,12 @@ public class MainActivity extends AppCompatActivity {
     private void initializeSegmentRelations() {
         segmentRelations = new HashMap<>();
         segmentRelations.put(R.id.segment1, new int[]{R.id.segment3_1, R.id.segment3_2});
-        segmentRelations.put(R.id.segment2, new int[]{R.id.segment3_1, R.id.segment3_2, R.id.segment4_1, R.id.segment4_2});
+        segmentRelations.put(R.id.segment2, new int[]{R.id.segment3_1, R.id.segment3_2, R.id.segment4_1, R.id.segment4_2, R.id.centerUnits});
         segmentRelations.put(R.id.segment3_1, new int[]{R.id.segment1, R.id.segment2, R.id.segment4_1, R.id.segment4_2, R.id.segment5});
         segmentRelations.put(R.id.segment3_2, new int[]{R.id.segment1, R.id.segment2, R.id.segment4_1, R.id.segment4_2, R.id.segment5});
         segmentRelations.put(R.id.segment4_1, new int[]{R.id.segment2, R.id.segment3_1, R.id.segment3_2, R.id.segment5});
         segmentRelations.put(R.id.segment4_2, new int[]{R.id.segment2, R.id.segment3_1, R.id.segment3_2, R.id.segment5});
-        segmentRelations.put(R.id.segment5, new int[]{R.id.segment3_1, R.id.segment3_2, R.id.segment4_1, R.id.segment4_2});
+        segmentRelations.put(R.id.segment5, new int[]{R.id.segment3_1, R.id.segment3_2, R.id.segment4_1, R.id.segment4_2, R.id.centerUnits});
 
         segmentRelations.put(R.id.segment6, new int[]{R.id.segment8_1, R.id.segment8_2});
         segmentRelations.put(R.id.segment7, new int[]{R.id.segment8_1, R.id.segment8_2, R.id.segment9_1, R.id.segment9_2});
@@ -194,7 +194,9 @@ public class MainActivity extends AppCompatActivity {
     private void initializeDiagonalSegmentPairs() {
         diagonalSegmentPairs = new HashMap<>();
         diagonalSegmentPairs.put(R.id.segment3_1, R.id.segment3_2);
+        diagonalSegmentPairs.put(R.id.segment3_1, new Integer[]{R.id.segment3_2, R.id.centerUnits});
         diagonalSegmentPairs.put(R.id.segment3_2, R.id.segment3_1);
+        diagonalSegmentPairs.put(R.id.segment3_2, R.id.centerUnits);
         diagonalSegmentPairs.put(R.id.segment4_1, R.id.segment4_2);
         diagonalSegmentPairs.put(R.id.segment4_2, R.id.segment4_1);
         diagonalSegmentPairs.put(R.id.segment8_1, R.id.segment8_2);

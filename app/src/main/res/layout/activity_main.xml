@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingTop="?attr/actionBarSize"
-    android:background="@color/background">
+    android:background="@color/background" >
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/horizontalGuideline12"
@@ -68,6 +68,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 app:layout_constraintGuide_percent="0.241" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/squareHorizontalGuidelineTop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.2427" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/horizontalGuideline4"
@@ -197,6 +204,13 @@
                 app:layout_constraintGuide_percent="0.622" />
 
             <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/squareVerticalGuidelineRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.723" />
+
+            <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/verticalGuideline7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -311,6 +325,22 @@
                 app:layout_constraintTop_toTopOf="@+id/horizontalGuideline2"
                 app:layout_constraintVertical_bias="0.15"
                 app:layout_constraintWidth_percent="0.2" />
+
+            <ImageView
+                android:id="@+id/centerUnits"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/center_selector"
+                android:rotation="45"
+                app:layout_constraintBottom_toBottomOf="@+id/squareHorizontalGuidelineTop"
+                app:layout_constraintEnd_toEndOf="@+id/squareVerticalGuidelineRight"
+                app:layout_constraintDimensionRatio="H,1:1"
+                app:layout_constraintHeight_percent="0.026207"
+                app:layout_constraintHorizontal_bias="0.848"
+                app:layout_constraintStart_toStartOf="@+id/squareVerticalGuidelineRight"
+                app:layout_constraintTop_toTopOf="@+id/squareHorizontalGuidelineTop"
+                app:layout_constraintVertical_bias="0.15" />
+
 
             <ImageView
                 android:id="@+id/segment5"

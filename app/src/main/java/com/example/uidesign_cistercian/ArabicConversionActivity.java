@@ -9,6 +9,7 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+// NOT IN USE
 public class ArabicConversionActivity extends AppCompatActivity {
 
     @Override
