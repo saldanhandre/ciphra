@@ -62,6 +62,12 @@ public class ConversionHistoryManager {
 
     // Method to add a new entry to the history
     public void addConversion(int arabicNumber) {
+        // Check if the history is not empty and if the last number is the same as the one being added
+        if (!conversionHistory.isEmpty() && conversionHistory.get(conversionHistory.size() - 1) == arabicNumber) {
+            return; // Do not add the number if it's the same as the most recent one
+        }
+
+        // Existing check to not add 0
         if (arabicNumber != 0) {
             conversionHistory.add(arabicNumber);
             saveHistory();
