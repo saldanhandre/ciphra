@@ -340,7 +340,8 @@
                 app:layout_constraintVertical_bias="0.15"
                 app:layout_constraintWidth_percent="0.2" />
 
-            <ImageView
+
+            <!--<ImageView
                 android:id="@+id/centerUnits"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -353,7 +354,7 @@
                 app:layout_constraintHorizontal_bias="0.848"
                 app:layout_constraintStart_toStartOf="@+id/squareVerticalGuidelineRight"
                 app:layout_constraintTop_toTopOf="@+id/squareHorizontalGuidelineTop"
-                app:layout_constraintVertical_bias="0.15" />
+                app:layout_constraintVertical_bias="0.15" /> -->
 
 
             <ImageView
@@ -452,7 +453,7 @@
                 app:layout_constraintVertical_bias="0.151"
                 app:layout_constraintWidth_percent="0.2" />
 
-            <ImageView
+            <!--<ImageView
                 android:id="@+id/centerTens"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -465,7 +466,7 @@
                 app:layout_constraintHorizontal_bias="0.848"
                 app:layout_constraintStart_toStartOf="@+id/squareVerticalGuidelineLeft"
                 app:layout_constraintTop_toTopOf="@+id/squareHorizontalGuidelineTop"
-                app:layout_constraintVertical_bias="0.15" />
+                app:layout_constraintVertical_bias="0.15" />-->
 
             <ImageView
                 android:id="@+id/segment10"
@@ -565,7 +566,7 @@
                 app:layout_constraintVertical_bias="0.85"
                 app:layout_constraintWidth_percent="0.2" />
 
-            <ImageView
+            <!--<ImageView
                 android:id="@+id/centerHundreds"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -578,7 +579,7 @@
                 app:layout_constraintHorizontal_bias="0.848"
                 app:layout_constraintStart_toStartOf="@+id/squareVerticalGuidelineRight"
                 app:layout_constraintTop_toTopOf="@+id/squareHorizontalGuidelineBottom"
-                app:layout_constraintVertical_bias="0.15" />
+                app:layout_constraintVertical_bias="0.15" />-->
 
             <ImageView
                 android:id="@+id/segment15"
@@ -677,7 +678,7 @@
                 app:layout_constraintVertical_bias="0.85"
                 app:layout_constraintWidth_percent="0.2" />
 
-            <ImageView
+            <!--<ImageView
                 android:id="@+id/centerThousands"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -690,7 +691,7 @@
                 app:layout_constraintHorizontal_bias="0.848"
                 app:layout_constraintStart_toStartOf="@+id/squareVerticalGuidelineLeft"
                 app:layout_constraintTop_toTopOf="@+id/squareHorizontalGuidelineBottom"
-                app:layout_constraintVertical_bias="0.15" />
+                app:layout_constraintVertical_bias="0.15" /> -->
 
             <ImageView
                 android:id="@+id/segment20"
