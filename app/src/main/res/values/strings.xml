@@ -5,4 +5,5 @@
     <string name="title_notifications">Notifications</string>
     <string name="thumbnail_desc">Thumbnail Image</string>
     <string name="history_activity_title">History</string>
+    <string name="image_display_activity_title">Conversion</string>
 </resources>

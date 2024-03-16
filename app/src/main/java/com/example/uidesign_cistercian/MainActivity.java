@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Map<Integer, int[]> segmentRelations;
     private Map<Integer, Integer> diagonalSegmentPairs;
-    TextView resultTextView;
+    //TextView resultTextView;
     private EditText resultEditText;
     FrameLayout photo_gallery_button, camera_button, bin_button;
     ImageView imageView;
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         initializeSegmentRelations(); // Initialize the relationships
         initializeDiagonalSegmentPairs();
         initializeSegmentClickListeners(); // Set up the click listeners for each segment
-        resultTextView = findViewById(R.id.resultTextView); // Initialize the TextView for the result
+        //resultTextView = findViewById(R.id.resultTextView); // Initialize the TextView for the result
 
         updateResult();  // Update the result initially
         getPermission(); // Get permissions such as the camera use
@@ -1253,7 +1253,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void resetConversionTimer() {
         conversionHandler.removeCallbacks(conversionRunnable);
-        conversionHandler.postDelayed(conversionRunnable, 2500); // 5 seconds
+        conversionHandler.postDelayed(conversionRunnable, 2000); // 2 seconds
     }
 
 
