@@ -140,6 +140,13 @@
                 app:layout_constraintGuide_percent="0.754" />
 
             <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/squareHorizontalGuidelineBottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.755" />
+
+            <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/horizontalGuideline10"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -181,6 +188,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 app:layout_constraintGuide_percent="0.276" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/squareVerticalGuidelineLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.277" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/verticalGuideline4"
@@ -439,6 +453,21 @@
                 app:layout_constraintWidth_percent="0.2" />
 
             <ImageView
+                android:id="@+id/centerTens"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/center_selector"
+                android:rotation="45"
+                app:layout_constraintBottom_toBottomOf="@+id/squareHorizontalGuidelineTop"
+                app:layout_constraintEnd_toEndOf="@+id/squareVerticalGuidelineLeft"
+                app:layout_constraintDimensionRatio="H,1:1"
+                app:layout_constraintHeight_percent="0.026207"
+                app:layout_constraintHorizontal_bias="0.848"
+                app:layout_constraintStart_toStartOf="@+id/squareVerticalGuidelineLeft"
+                app:layout_constraintTop_toTopOf="@+id/squareHorizontalGuidelineTop"
+                app:layout_constraintVertical_bias="0.15" />
+
+            <ImageView
                 android:id="@+id/segment10"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -537,6 +566,21 @@
                 app:layout_constraintWidth_percent="0.2" />
 
             <ImageView
+                android:id="@+id/centerHundreds"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/center_selector"
+                android:rotation="45"
+                app:layout_constraintBottom_toBottomOf="@+id/squareHorizontalGuidelineBottom"
+                app:layout_constraintEnd_toEndOf="@+id/squareVerticalGuidelineRight"
+                app:layout_constraintDimensionRatio="H,1:1"
+                app:layout_constraintHeight_percent="0.026207"
+                app:layout_constraintHorizontal_bias="0.848"
+                app:layout_constraintStart_toStartOf="@+id/squareVerticalGuidelineRight"
+                app:layout_constraintTop_toTopOf="@+id/squareHorizontalGuidelineBottom"
+                app:layout_constraintVertical_bias="0.15" />
+
+            <ImageView
                 android:id="@+id/segment15"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -632,6 +676,21 @@
                 app:layout_constraintTop_toTopOf="@+id/horizontalGuideline10"
                 app:layout_constraintVertical_bias="0.85"
                 app:layout_constraintWidth_percent="0.2" />
+
+            <ImageView
+                android:id="@+id/centerThousands"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/center_selector"
+                android:rotation="45"
+                app:layout_constraintBottom_toBottomOf="@+id/squareHorizontalGuidelineBottom"
+                app:layout_constraintEnd_toEndOf="@+id/squareVerticalGuidelineLeft"
+                app:layout_constraintDimensionRatio="H,1:1"
+                app:layout_constraintHeight_percent="0.026207"
+                app:layout_constraintHorizontal_bias="0.848"
+                app:layout_constraintStart_toStartOf="@+id/squareVerticalGuidelineLeft"
+                app:layout_constraintTop_toTopOf="@+id/squareHorizontalGuidelineBottom"
+                app:layout_constraintVertical_bias="0.15" />
 
             <ImageView
                 android:id="@+id/segment20"
