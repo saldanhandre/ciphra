@@ -164,7 +164,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Dilate the image
         Mat dilatedImage = new Mat();
-        Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(60, 60));
+        Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(220, 220));
         Imgproc.dilate(matImage, dilatedImage, element);
 
         // Apply Median Blur
@@ -183,11 +183,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Threshold and Normalize
         Mat thrImage = new Mat();
         Imgproc.threshold(normImage, thrImage, 230, 255, Imgproc.THRESH_TRUNC);
-        Core.normalize(thrImage, thrImage, 0, 255, Core.NORM_MINMAX);
+        //Core.normalize(thrImage, thrImage, 0, 255, Core.NORM_MINMAX);
 
 
         // Apply Gaussian Blur for noise reduction
-        Imgproc.GaussianBlur(normImage, normImage, new Size(9, 9), 0);
+        Imgproc.GaussianBlur(thrImage, normImage, new Size(9, 9), 0);
 
         // Apply Binary Threshold
         Mat binaryImage = new Mat(); // keep copy of binary image for future processing
@@ -201,14 +201,14 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Mat coloredBinaryImage = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC3);
         Imgproc.cvtColor(binaryImage, coloredBinaryImage, Imgproc.COLOR_GRAY2BGR);
 
-        // Find Contours and approximate them
+        // Find Contours in the edge detected image
         foundRecsAfterCountours = findAndApproximateContours(edgeDetectedImage, coloredBinaryImage);
 
         // Draw the Quadrants
         drawQuadrants(coloredBinaryImage, foundRecsAfterCountours);
 
         // Convert processed Mat back to Bitmap
-        //Utils.matToBitmap(coloredBinaryImage, bitmap);
+        Utils.matToBitmap(dilatedImage, bitmap);
 
         // Update ImageView with the processed Bitmap
         runOnUiThread(() -> {
@@ -325,6 +325,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
         for (Rect rect : filteredRects) {
+
+            // Draw rectangle for debugging
+            drawRectangle(coloredBinaryImage, rect, red, 2);
+
             // Calculate the center point of the rectangle
             Point center = new Point(rect.tl().x + rect.width / 3, rect.tl().y + rect.height / 2);
 
@@ -351,7 +355,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // resize the rect to fit exactly the cipher
             //System.out.println("Going to call resizedRect");
             Rect resizedRect = resizeRectangle(rotatedImage, boundingRect, true, true, true, true);
-            //drawRectangle(rotatedImage, resizedRect, blue, 1);
+            drawRectangle(rotatedImage, resizedRect, blue, 1);
             //System.out.println("resizedRect.tl = " + resizedRect.tl() + ", resizedRect.br = " + resizedRect.br());
 
             // process the cipher and get number
