@@ -70,8 +70,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
     private final Scalar orange = new Scalar(255, 165, 0);
     private final Scalar black = new Scalar(0, 0, 0);
     private final Scalar white = new Scalar(255, 255, 255);
-    private int lightBlue = Color.rgb(193, 230, 254);
-    private int darkBlue = Color.rgb(0, 28, 52);
+    private final int lightBlue = Color.rgb(193, 230, 254);
+    private final int transparentLightBlue = Color.argb(210, 193, 230, 254);
+    private final int darkBlue = Color.rgb(0, 28, 52);
 
 
     // Load openCV library
@@ -211,7 +212,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         drawQuadrants(coloredBinaryImage, foundRecsAfterCountours);
 
         // Convert processed Mat back to Bitmap
-        Utils.matToBitmap(coloredBinaryImage, bitmap);
+        //Utils.matToBitmap(coloredBinaryImage, bitmap);
 
         // Update ImageView with the processed Bitmap
         runOnUiThread(() -> {
@@ -330,10 +331,22 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (Rect rect : filteredRects) {
 
             // Draw rectangle for debugging
-            drawRectangle(coloredBinaryImage, rect, red, 2);
+            //drawRectangle(coloredBinaryImage, rect, red, 2);
 
-            // Calculate the center point of the rectangle
-            Point center = new Point(rect.tl().x, rect.tl().y);
+//            // Draw a small circle around the top-left corner of the rectangle for debugging
+//            Point tl = rect.tl();
+//            int radius = 5; // Adjust the radius as needed
+//            Scalar color = new Scalar(255, 0, 0); // red color
+//            Imgproc.circle(coloredBinaryImage, tl, radius, color, -1); // -1 for filled circle
+
+
+            // Use the top-left corner of the rectangle as the position for the TextView
+            Point center = rect.tl(); // Use the top-left corner of the rectangle
+
+            // Create layout params to set position
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+            params.leftMargin = (int) center.x; // Set the left margin to the x-coordinate of the top-left corner
+            params.topMargin = (int) center.y; // Set the top margin to the y-coordinate of the top-left corner
 
             // Create a TextView dynamically
             TextView textView = new TextView(this);
@@ -381,21 +394,19 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // Set text and other properties for the TextView
             textView.setText(String.valueOf(numberResult));
             textView.setTextColor(darkBlue);
-            textView.setBackgroundColor(lightBlue);
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20); // text size
+            textView.setBackgroundColor(transparentLightBlue);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22); // text size
 
             // Measure the TextView to get its dimensions
             textView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             int width = textView.getMeasuredWidth();
             int height = textView.getMeasuredHeight();
 
-            // Create layout params to set position
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-            params.leftMargin = (int) (center.x - width / 2); // Adjust horizontal position
-            params.topMargin = (int) (center.y - height / 2); // Adjust vertical position
 
-            // Add the TextView to the layout
-            imageOverlayLayout.addView(textView, params);
+            if(numberResult > 0) {
+                // Add the TextView to the layout
+                imageOverlayLayout.addView(textView, params);
+            }
         }
     }
 
