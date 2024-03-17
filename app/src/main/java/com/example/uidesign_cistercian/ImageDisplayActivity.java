@@ -13,6 +13,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -164,12 +165,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Dilate the image
         Mat dilatedImage = new Mat();
-        Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(220, 220));
+        Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(210, 210));
         Imgproc.dilate(matImage, dilatedImage, element);
 
         // Apply Median Blur
         Mat bgImage = new Mat();
-        Imgproc.medianBlur(dilatedImage, bgImage, 21);
+        Imgproc.medianBlur(dilatedImage, bgImage, 25);
 
         // Calculate the absolute difference
         Mat diffImage = new Mat();
@@ -182,20 +183,22 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         // Threshold and Normalize
         Mat thrImage = new Mat();
-        Imgproc.threshold(normImage, thrImage, 230, 255, Imgproc.THRESH_TRUNC);
-        //Core.normalize(thrImage, thrImage, 0, 255, Core.NORM_MINMAX);
-
+        Imgproc.threshold(normImage, thrImage, 210, 255, Imgproc.THRESH_TRUNC);
+        Core.normalize(thrImage, thrImage, 0, 255, Core.NORM_MINMAX);
 
         // Apply Gaussian Blur for noise reduction
-        Imgproc.GaussianBlur(thrImage, normImage, new Size(9, 9), 0);
+//        Imgproc.GaussianBlur(thrImage, thrImage, new Size(9, 9), 0);
+
+        Imgproc.erode(thrImage, thrImage, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(4, 4)));
+
 
         // Apply Binary Threshold
         Mat binaryImage = new Mat(); // keep copy of binary image for future processing
-        Imgproc.threshold(normImage, binaryImage, 155, 255, Imgproc.THRESH_BINARY);
+        Imgproc.threshold(thrImage, binaryImage, 105, 255, Imgproc.THRESH_BINARY);
 
         // Apply Canny Edge Detection
         Mat edgeDetectedImage = new Mat();
-        Imgproc.Canny(binaryImage, edgeDetectedImage, 100, 200);
+        Imgproc.Canny(binaryImage, edgeDetectedImage, 140, 170);
 
         // Convert matImage to 3 channels
         Mat coloredBinaryImage = new Mat(bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC3);
@@ -208,7 +211,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         drawQuadrants(coloredBinaryImage, foundRecsAfterCountours);
 
         // Convert processed Mat back to Bitmap
-        Utils.matToBitmap(dilatedImage, bitmap);
+        Utils.matToBitmap(coloredBinaryImage, bitmap);
 
         // Update ImageView with the processed Bitmap
         runOnUiThread(() -> {
@@ -330,7 +333,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             drawRectangle(coloredBinaryImage, rect, red, 2);
 
             // Calculate the center point of the rectangle
-            Point center = new Point(rect.tl().x + rect.width / 3, rect.tl().y + rect.height / 2);
+            Point center = new Point(rect.tl().x, rect.tl().y);
 
             // Create a TextView dynamically
             TextView textView = new TextView(this);
@@ -355,7 +358,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // resize the rect to fit exactly the cipher
             //System.out.println("Going to call resizedRect");
             Rect resizedRect = resizeRectangle(rotatedImage, boundingRect, true, true, true, true);
-            drawRectangle(rotatedImage, resizedRect, blue, 1);
+            //drawRectangle(rotatedImage, resizedRect, blue, 1);
             //System.out.println("resizedRect.tl = " + resizedRect.tl() + ", resizedRect.br = " + resizedRect.br());
 
             // process the cipher and get number
@@ -365,10 +368,10 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Bitmap bitmapImage = Bitmap.createBitmap(rotatedImage.cols(), rotatedImage.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(rotatedImage, bitmapImage);
 
-            //ImageView imageView = findViewById(R.id.image_display_view_provisorio);
-            //imageView.setImageBitmap(bitmapImage);
+//            ImageView imageView = findViewById(R.id.image_display_view_provisorio);
+//            imageView.setImageBitmap(bitmapImage);
 
-            if(numberResult >= 0) {
+            if(numberResult > 0) {
                 arabicResults.add(numberResult);
 //                updateResultsDisplay();
                 // Add result to history
@@ -381,10 +384,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
             textView.setBackgroundColor(lightBlue);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20); // text size
 
+            // Measure the TextView to get its dimensions
+            textView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+            int width = textView.getMeasuredWidth();
+            int height = textView.getMeasuredHeight();
+
             // Create layout params to set position
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-            params.leftMargin = (int) center.x - textView.getWidth() / 2; // Adjust horizontal position
-            params.topMargin = (int) center.y - textView.getHeight() / 2; // Adjust vertical position
+            params.leftMargin = (int) (center.x - width / 2); // Adjust horizontal position
+            params.topMargin = (int) (center.y - height / 2); // Adjust vertical position
 
             // Add the TextView to the layout
             imageOverlayLayout.addView(textView, params);
@@ -823,406 +831,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
             System.out.println("Stem Found at 3rd check");
         }
         return stem;
-
-//        Map<Line, Double> percentages1stCheck = new HashMap<>();
-//        Map<Line, Double> percentages2ndCheck = new HashMap<>();
-//        Map<Line, Double> percentagesTop4 = new HashMap<>();
-//
-//
-//        Map<Point, Point> p1AndP2_1stCheck = new HashMap<>();
-//        Map<Map.Entry<Point, Point>, Double> p1AndP2_and_Percentage_1stCheck = new HashMap<>();
-//
-//        Map<Point, Point> p1AndP2_2ndCheck = new HashMap<>();
-//        Map<Map.Entry<Point, Point>, Double> p1AndP2_and_Percentage_2ndCheck = new HashMap<>();
-//
-//        List<Line> top4Lines = new ArrayList<>();
-//
-//
-//        Point rectMiddlePoint = new Point(rect.x + rect.width / 2.00, rect.y + rect.height / 2.00);
-//
-//        // Draw the bounding rectangle
-//        //drawRectangle(image, rect, green, 1);
-//
-//        boolean stemFound = false;
-//        boolean firstCheckDone = false;
-//        boolean secondCheckDone = false;
-//        boolean similarPercentages = false;
-//        int dividerInt = 70;
-//        double dividerDouble = 70.0; // these 2 need to have the same value
-//
-//        Line stem = null;
-//
-//        if (!stemFound) {
-//            for (int a = 0; a <= dividerInt; a++) {
-//                double percentage = 0.0;
-//                Point p1 = new Point(rect.x, rect.y + a * (rect.height / dividerDouble));
-//                Point p2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / dividerDouble)));
-//                Point divisionPoint1 = adjustPointToBounds(image, p1);
-//                Point divisionPoint2 = adjustPointToBounds(image, p2);
-//                if (divisionPoint1 != null && divisionPoint2 != null) {
-//                    // calculate percentage of uninterrupted black pixel stream in imaginary line between points
-//                    percentage = getUninterruptedBlackPixelPercentage(image, divisionPoint1, divisionPoint2);
-//                    //System.out.println("Percentage = " + percentage);
-//                    // create map entry for the points and store it in the points map
-//                    Map.Entry<Point, Point> entry = new AbstractMap.SimpleEntry<>(divisionPoint1, divisionPoint2);
-//                    p1AndP2_1stCheck.put(entry.getKey(), entry.getValue());
-//                    // store the entry and its percentage in the map
-//                    p1AndP2_and_Percentage_1stCheck.put(entry, percentage);
-//                } else {
-//                    System.out.println("Print");
-//                }
-//
-//                if (percentage >= 90) {
-//                    stem = new Line(divisionPoint1, divisionPoint2, red, 1);
-//                    stem.draw(image);
-//                    stemFound = true;
-//                    System.out.println("Stem Found at 1st check");
-//                    break;
-//                }
-//            }
-//            firstCheckDone = true;
-//        }
-//        if (!stemFound && firstCheckDone) {
-//            for (int a = 0; a <= dividerInt; a++) {
-//                double percentage = 0.0;
-//                Point p1 = new Point(rect.x + rect.width - (a * (rect.width / dividerDouble)), rect.y);
-//                Point p2 = new Point(rect.x + a * (rect.width / dividerDouble), rect.y + rect.height);
-//                Point divisionPoint1 = adjustPointToBounds(image, p1);
-//                Point divisionPoint2 = adjustPointToBounds(image, p2);
-//                if (divisionPoint1 != null && divisionPoint2 != null) {
-//                    // calculate percentage of uninterrupted black pixel stream in imaginary line between points
-//                    percentage = getUninterruptedBlackPixelPercentage(image, divisionPoint1, divisionPoint2);
-//                    // create map entry for the points and store it in the points map
-//                    Map.Entry<Point, Point> entry = new AbstractMap.SimpleEntry<>(divisionPoint1, divisionPoint2);
-//                    p1AndP2_2ndCheck.put(entry.getKey(), entry.getValue());
-//                    // store the entry and its percentage in the map
-//                    p1AndP2_and_Percentage_2ndCheck.put(entry, percentage);
-//                } else {
-//                    System.out.println("Print");
-//                }
-//
-//                if (percentage >= 90) {
-//                    stem = new Line(divisionPoint1, divisionPoint2, red, 1);
-//                    stem.draw(image);
-//                    stemFound = true;
-//                    System.out.println("Stem Found at 2nd check");
-//                    break;
-//                }
-//            }
-//            secondCheckDone = true;
-//        }
-//        if (!stemFound && firstCheckDone && secondCheckDone) {
-//            /*
-//            // For 1st check
-//            // create list with the map entries of the percentages
-//            List<Map.Entry<Line, Double>> sortedEntries1 = new ArrayList<>(percentages1stCheck.entrySet());
-//            // Sort the list in descending order
-//            sortedEntries1.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-//
-//            // Initialize the largest percentages of the 1st Check
-//            Map.Entry<Line, Double> biggestPercent1stCheck = null;
-//            Map.Entry<Line, Double> secondBiggestPercent1stCheck = null;
-//
-//            if (!sortedEntries1.isEmpty()) {
-//                biggestPercent1stCheck = sortedEntries1.get(0); // largest percentage in the 1st check
-//                if (sortedEntries1.size() > 1) {
-//                    secondBiggestPercent1stCheck = sortedEntries1.get(1); // second largest percentage in the 1st check
-//                }
-//            }
-//
-//            // Add the largest 2 percentages to the Top 4 Map
-//            percentagesTop4.put(biggestPercent1stCheck.getKey(), biggestPercent1stCheck.getValue());
-//            percentagesTop4.put(secondBiggestPercent1stCheck.getKey(), secondBiggestPercent1stCheck.getValue());
-//
-//            // draw the 2 largest percentages of the check 1
-//            //biggestPercent1stCheck.getKey().draw(coloredBinaryImage);
-//            //secondBiggestPercent1stCheck.getKey().draw(coloredBinaryImage);
-//             */
-//
-//
-//            // For 1st check - POINT METHOD
-//            // create list with the map entries of the percentages
-//            List<Map.Entry<Map.Entry<Point, Point>, Double>> sortedEntries1 = new ArrayList<>(p1AndP2_and_Percentage_1stCheck.entrySet());
-//            // Sort the list in descending order according to the percentages
-//            sortedEntries1.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-//
-//            // Initialize the largest percentages of the 1st Check
-//            Map.Entry<Map.Entry<Point, Point>, Double> biggestPercent1stCheck = null;
-//            Map.Entry<Map.Entry<Point, Point>, Double> secondBiggestPercent1stCheck = null;
-//
-//            if (!sortedEntries1.isEmpty()) {
-//                biggestPercent1stCheck = sortedEntries1.get(0); // entry with the largest percentage in the 1st check
-//                if (sortedEntries1.size() > 1) {
-//                    secondBiggestPercent1stCheck = sortedEntries1.get(1); // entry with the second largest percentage in the 1st check
-//                }
-//            }
-//
-//            // Create the lines for the 2 largest percentages
-//            Line biggestPercent1stCheckLine = new Line(biggestPercent1stCheck.getKey().getKey(), biggestPercent1stCheck.getKey().getValue(), red, 1);
-//            Line secondBiggestPercent1stCheckLine = new Line(secondBiggestPercent1stCheck.getKey().getKey(), secondBiggestPercent1stCheck.getKey().getValue(), red, 1);
-//
-//            System.out.println("biggestPercent1stCheckLine value = " + biggestPercent1stCheckLine.getUninterruptedBlackPixelPercentage(image) + ", length = " + biggestPercent1stCheckLine.getLength());
-//            System.out.println("secondBiggestPercent1stCheckLine value = " + secondBiggestPercent1stCheckLine.getUninterruptedBlackPixelPercentage(image) + ", length = " + secondBiggestPercent1stCheckLine.getLength());
-//
-//            // Add the largest 2 Lines to the Top 4 List
-//            top4Lines.add(biggestPercent1stCheckLine);
-//            top4Lines.add(secondBiggestPercent1stCheckLine);
-//
-//
-//            /*
-//            // For 2nd check
-//            // create list with the map entries of the percentages
-//            List<Map.Entry<Line, Double>> sortedEntries2 = new ArrayList<>(percentages2ndCheck.entrySet());
-//            // Sort the list in descending order
-//            sortedEntries2.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-//
-//            // Initialize the largest percentages of the 2nd Check
-//            Map.Entry<Line, Double> biggestPercent2ndCheck = null;
-//            Map.Entry<Line, Double> secondBiggestPercent2ndCheck = null;
-//
-//            if (!sortedEntries2.isEmpty()) {
-//                biggestPercent2ndCheck = sortedEntries2.get(0); // largest percentage in the 2nd check
-//                if (sortedEntries2.size() > 1) {
-//                    secondBiggestPercent2ndCheck = sortedEntries2.get(1); // second largest percentage in the 2nd check
-//                }
-//            }
-//
-//            // Add the largest 2 percentages to the Top 4 Map
-//            percentagesTop4.put(biggestPercent2ndCheck.getKey(), biggestPercent2ndCheck.getValue());
-//            percentagesTop4.put(secondBiggestPercent2ndCheck.getKey(), secondBiggestPercent2ndCheck.getValue());
-//
-//            // draw the 2 largest percentages of the check 2
-//            //biggestPercent2ndCheck.getKey().draw(coloredBinaryImage);
-//            //secondBiggestPercent2ndCheck.getKey().draw(coloredBinaryImage);
-//
-//             */
-//
-//            // For 2nd check - POINT METHOD
-//            // create list with the map entries of the percentages
-//            List<Map.Entry<Map.Entry<Point, Point>, Double>> sortedEntries2 = new ArrayList<>(p1AndP2_and_Percentage_2ndCheck.entrySet());
-//            // Sort the list in descending order according to the percentages
-//            sortedEntries2.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-//
-//            // Initialize the largest percentages of the 1st Check
-//            Map.Entry<Map.Entry<Point, Point>, Double> biggestPercent2ndCheck = null;
-//            Map.Entry<Map.Entry<Point, Point>, Double> secondBiggestPercent2ndCheck = null;
-//
-//            if (!sortedEntries2.isEmpty()) {
-//                biggestPercent2ndCheck = sortedEntries2.get(0); // entry with the largest percentage in the 1st check
-//                if (sortedEntries2.size() > 1) {
-//                    secondBiggestPercent2ndCheck = sortedEntries2.get(1); // entry with the second largest percentage in the 1st check
-//                }
-//            }
-//
-//            // Create the lines for the 2 largest percentages
-//            Line biggestPercent2ndCheckLine = new Line(biggestPercent2ndCheck.getKey().getKey(), biggestPercent2ndCheck.getKey().getValue(), red, 1);
-//            Line secondBiggestPercent2ndCheckLine = new Line(secondBiggestPercent2ndCheck.getKey().getKey(), secondBiggestPercent2ndCheck.getKey().getValue(), red, 1);
-//
-//            System.out.println("biggestPercent2ndCheckLine value = " + biggestPercent2ndCheckLine.getUninterruptedBlackPixelPercentage(image) + ", length = " + biggestPercent2ndCheckLine.getLength());
-//            System.out.println("secondBiggestPercent2ndCheckLine value = " + secondBiggestPercent2ndCheckLine.getUninterruptedBlackPixelPercentage(image) + ", length = " + secondBiggestPercent2ndCheckLine.getLength());
-//
-//            // Add the largest 2 Lines to the Top 4 List
-//            top4Lines.add(biggestPercent2ndCheckLine);
-//            top4Lines.add(secondBiggestPercent2ndCheckLine);
-//
-//
-//
-//
-//
-//
-//
-//            // Sort that list descending, according to the length
-//            top4Lines.sort((line1, line2) -> Double.compare(line2.getUninterruptedBlackPixelPercentage(image), line1.getUninterruptedBlackPixelPercentage(image)));
-//
-//            // top4Lines is sorted, print the top 4 lines values
-//            top4Lines.stream()
-//                    .limit(4)
-//                    .forEach(line -> System.out.println("value of line: " + line.getUninterruptedBlackPixelPercentage(image)));
-//
-//            // Initialize the largest percentages
-//            Line largestLine = top4Lines.get(0); // line with the largest length
-//            Line secondLargestLine = top4Lines.get(1); // line with the second largest length
-//
-//            System.out.println("largestLine value = " + largestLine.getUninterruptedBlackPixelPercentage(image));
-//            System.out.println("secondLargestLine value = " + secondLargestLine.getUninterruptedBlackPixelPercentage(image));
-//
-//            // Get uninterrupted percentages of black pixels for the 2 largest lines and determine if they are similar
-//            if (Math.abs(largestLine.getUninterruptedBlackPixelPercentage(image) - secondLargestLine.getUninterruptedBlackPixelPercentage(image)) <= 9) {
-//                similarPercentages = true;
-//            }
-//
-//            // in case they're similar, this means that the lines are from the same check, and the result
-//            // will noe be accurate, in this case, attribute the values of the largest in each check
-//            if (similarPercentages) {
-//                System.out.println("Similar percentages");
-//                largestLine = biggestPercent1stCheckLine;
-//                secondLargestLine = biggestPercent2ndCheckLine;
-//
-//                System.out.println("largestLine value = " + largestLine.getUninterruptedBlackPixelPercentage(image));
-//                System.out.println("secondLargestLine value = " + secondLargestLine.getUninterruptedBlackPixelPercentage(image));
-//            }
-//
-//            // draw the 2 largest lines of the rectangle
-//            largestLine.draw(image);
-//            //secondLargestLine.draw(image);
-//
-//            // Create the 2 candidates for Stem, by making lines between opposite corners of the 2 largest lines
-//            // Point P1 of the largest line
-//            Point largestP1 = largestLine.getPt1();
-//            Point largestAdjustedP1 = adjustPointToBounds(image, largestP1);
-//            // Point P2 of the largest line
-//            Point largestP2 = largestLine.getPt2();
-//            Point largestAdjustedP2 = adjustPointToBounds(image, largestP2);
-//            // Point P1 of the second largest line
-//            Point secondLargestP1 = secondLargestLine.getPt1();
-//            Point secondLargestAdjustedP1 = adjustPointToBounds(image, secondLargestP1);
-//            // Point P2 of the second largest line
-//            Point secondLargestP2 = secondLargestLine.getPt2();
-//            Point secondLargestAdjustedP2 = adjustPointToBounds(image, secondLargestP2);
-//
-//            // initializing the stem candidates, which are 2 lines parallel to the actual stem
-//            Line stemCandidate1 = null, stemCandidate2 = null;
-//
-//            // creating the stem candidates, by switching the points between the largest lines
-//            if (largestAdjustedP1 != null && largestAdjustedP2 != null && secondLargestAdjustedP1 != null && secondLargestAdjustedP2 != null) {
-//                stemCandidate1 = new Line(largestAdjustedP1, secondLargestAdjustedP2, new Scalar(255, 50, 50), 2);
-//                stemCandidate2 = new Line(secondLargestAdjustedP1, largestAdjustedP2, new Scalar(255, 50, 50), 2);
-//                if (stemCandidate1.getLength() < (largestLine.getLength() * 0.5)) {
-//                    stemCandidate1 = new Line(largestAdjustedP1, secondLargestAdjustedP1, new Scalar(255, 50, 50), 2);
-//                    stemCandidate2 = new Line(secondLargestAdjustedP2, largestAdjustedP2, new Scalar(255, 50, 50), 2);
-//                }
-//            } else {
-//                System.out.println("Print");
-//            }
-//
-//            // draw the 2 stem candidates
-//            //stemCandidate1.draw(image);
-//            //stemCandidate2.draw(image);
-//
-//            // Create a line that unites the intersection point with the candidates - stem guideline
-//            // This line is perpendicular to the actual stem
-//            Line stemGuideline = null;
-//            if (stemCandidate1.getPerpendicularIntersectionPoint(rectMiddlePoint) != null && stemCandidate2.getPerpendicularIntersectionPoint(rectMiddlePoint) != null) {
-//                stemGuideline= new Line(stemCandidate1.getPerpendicularIntersectionPoint(rectMiddlePoint), stemCandidate2.getPerpendicularIntersectionPoint(rectMiddlePoint), blue, 1);
-//            } else {
-//                System.out.println("Adjusted points");
-//                Point p1 = adjustPointToBounds(image, stemCandidate1.getPerpendicularIntersectionPoint(rectMiddlePoint));
-//                Point p2 = adjustPointToBounds(image, stemCandidate1.getPerpendicularIntersectionPoint(rectMiddlePoint));
-//                stemGuideline= new Line(p1, p2, blue, 1);
-//
-//            }
-//            // draw the stem guideline
-//            if (stemGuideline != null && stemGuideline.getPt1() != null && stemGuideline.getPt2() != null) {
-//                stemGuideline.draw(image);
-//                //System.out.println("stemGuideline drawn");
-//            } else {
-//                System.out.println("stemGuideline not drawn");
-//            }
-//
-//            // find the stem middle point, which is the middle point of the guideline
-//            Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(image);
-//
-//            // create the stem and draw it
-//            stem = stemGuideline.getStemLine(stemMiddlePoint);
-//            //stem.draw(image);
-//            System.out.println("Stem Found at 3rd check");
-//
-//
-//            /*
-//            // create list with the map entries of the top 4 percentages
-//            List<Map.Entry<Line, Double>> top4List = new ArrayList<>(percentagesTop4.entrySet());
-//            // Sort the list in descending order
-//            top4List.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-//
-//            // Initialize the largest percentages
-//            Map.Entry<Line, Double> largestPercentage = null;
-//            Map.Entry<Line, Double> secondLargestPercentage = null;
-//
-//            if (Math.abs(biggestPercent2ndCheck.getValue() - biggestPercent1stCheck.getValue()) <= 9) {
-//                similarPercentages = true;
-//            }
-//
-//            if (!percentagesTop4.isEmpty() && !similarPercentages) {
-//                largestPercentage = top4List.get(0); // largest percentage
-//                if (percentagesTop4.size() > 1) {
-//                    secondLargestPercentage = top4List.get(1); // second largest percentage
-//                }
-//            } else if (!percentagesTop4.isEmpty() && similarPercentages) {
-//                largestPercentage = biggestPercent1stCheck;
-//                secondLargestPercentage = biggestPercent2ndCheck;
-//            }
-//
-//            // draw the 2 largest percentages of the rectangle
-//            //largestPercentage.getKey().draw(image);
-//            //secondLargestPercentage.getKey().draw(image);
-//
-//            // trim the 2 largest percentages of the rectangle
-//            //Line largestPercentageTrimmed = largestPercentage.getKey().trimToBlackPixels(image);
-//            //Line secondLargestPercentageTrimmed = secondLargestPercentage.getKey().trimToBlackPixels(image);
-//
-//            // draw the 2 trimmed largest percentages of the rectangle
-//            //largestPercentageTrimmed.draw(image);
-//            //secondLargestPercentageTrimmed.draw(image);
-//
-//            Point intersectionPoint = rectMiddlePoint;
-//            //intersectionPoint = largestPercentage.getKey().getIntersectionPoint(secondLargestPercentage.getKey());
-//
-//            // Create the 2 candidates for Stem, by making lines between opposite corners of the 2 largestPercentage lines
-//            Point largestP1 = largestPercentage.getKey().getPt1();
-//            Point largestPercentageP1 = adjustPointToBounds(image, largestP1);
-//
-//            Point largestP2 = largestPercentage.getKey().getPt2();
-//            Point largestPercentageP2 = adjustPointToBounds(image, largestP2);
-//            Point secondLargestP1 = secondLargestPercentage.getKey().getPt1();
-//            Point secondLargestPercentageP1 = adjustPointToBounds(image, secondLargestP1);
-//
-//            Point secondLargestP2 = secondLargestPercentage.getKey().getPt2();
-//            Point secondLargestPercentageP2 = adjustPointToBounds(image, secondLargestP2);
-//
-//            Line stemCandidate1 = null, stemCandidate2 = null;
-//
-//            if (largestPercentageP1 != null && largestPercentageP2 != null && secondLargestPercentageP1 != null && secondLargestPercentageP2 != null) {
-//                stemCandidate1 = new Line(largestPercentageP1, secondLargestPercentageP2, new Scalar(255, 50, 50), 2);
-//                stemCandidate2 = new Line(secondLargestPercentageP1, largestPercentageP2, new Scalar(255, 50, 50), 2);
-//                if (stemCandidate1.getLength() < (largestPercentage.getKey().getLength() * 0.5)) {
-//                    stemCandidate1 = new Line(largestPercentageP1, secondLargestPercentageP1, new Scalar(255, 50, 50), 2);
-//                    stemCandidate2 = new Line(secondLargestPercentageP2, largestPercentageP2, new Scalar(255, 50, 50), 2);
-//                }
-//            } else {
-//                System.out.println("Print");
-//            }
-//
-//            // draw the 2 stem candidates
-//            //stemCandidate1.draw(image);
-//            //stemCandidate2.draw(image);
-//
-//            // Create a line that unites the intersection point with the candidates - stem guideline
-//            Line stemGuideline = null;
-//            if (stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint) != null && stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint) != null) {
-//                stemGuideline= new Line(stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint), stemCandidate2.getPerpendicularIntersectionPoint(intersectionPoint), blue, 1);
-//            } else {
-//                System.out.println("Adjusted points");
-//                Point p1 = adjustPointToBounds(image, stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint));
-//                Point p2 = adjustPointToBounds(image, stemCandidate1.getPerpendicularIntersectionPoint(intersectionPoint));
-//                stemGuideline= new Line(p1, p2, blue, 1);
-//
-//            }
-//            // draw it
-//            if (stemGuideline != null && stemGuideline.getPt1() != null && stemGuideline.getPt2() != null) {
-//                //stemGuideline.draw(image);
-//                System.out.println("stemGuideline drawn");
-//            } else {
-//                System.out.println("stemGuideline not drawn");
-//            }
-//
-//            Point stemMiddlePoint = stemGuideline.findMiddleBlackPixel(image);
-//            stem = stemGuideline.getStemLine(stemMiddlePoint);
-//            //stem.draw(image);
-//            System.out.println("Stem Found at 3rd check");
-//
-//             */
-//        }
-//        return stem;
     }
 
     // Method to calculate the percentage of pixels in a line between two points on a Mat image
@@ -1486,15 +1094,15 @@ public class ImageDisplayActivity extends AppCompatActivity {
             //drawSubQuadrants(image, subQuadrantsUnits);
             
             // Get the result from the segments
-            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.2);
+            Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
 
             List<Line> segmentsUnits = getSegmentsFromPoints(point1, point2, point3, point4);
 
             unitsResultBySegments = detectValidSegments(image, segmentsUnits);
-            drawSegments(image, segmentsUnits);
+            //drawSegments(image, segmentsUnits);
             
             boolean sameResult = unitsResultBySegments == unitsResultBySubQuadrants;
             System.out.println("Digit Units (" + sameResult + ") - Segments: " + unitsResultBySegments + ", Rects: " + unitsResultBySubQuadrants);
@@ -1535,18 +1143,18 @@ public class ImageDisplayActivity extends AppCompatActivity {
             subQuadrantsTens.addAll(Arrays.asList(subQuadrantTens1, subQuadrantTens2, subQuadrantTens3, subQuadrantTens4, subQuadrantTens5, subQuadrantTens6, subQuadrantTens7, subQuadrantTens8, subQuadrantTens9));
             
             tensResultBySubQuadrants = detectValidSubQuadrants(image, subQuadrantsTens);
-            //uadrants(image, subQuadrantsTens);
+            //drawSubQuadrants(image, subQuadrantsTens);
             
             // Get the result from the segments
-            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.7);
-            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/3.7);
+            Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
 
             List<Line> segmentsTens = getSegmentsFromPoints(point1, point2, point3, point4);
 
             tensResultBySegments = detectValidSegments(image, segmentsTens);
-            drawSegments(image, segmentsTens);
+            //drawSegments(image, segmentsTens);
 
             boolean sameResult = tensResultBySegments == tensResultBySubQuadrants;
             System.out.println("Digit Tens (" + sameResult + ") - Segments: " + tensResultBySegments + ", Rects: " + tensResultBySubQuadrants);
@@ -1591,13 +1199,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
             Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.7);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.7);
+            Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
 
             List<Line> segmentsHundreds = getSegmentsFromPoints(point1, point2, point3, point4);
 
             hundredsResultBySegments = detectValidSegments(image, segmentsHundreds);
-            drawSegments(image, segmentsHundreds);
+            //drawSegments(image, segmentsHundreds);
 
             boolean sameResult = hundredsResultBySegments == hundredsResultBySubQuadrants;
             System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + hundredsResultBySegments + ", Rects: " + hundredsResultBySubQuadrants);
@@ -1642,13 +1250,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
             Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
-            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/3.2);
+            Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
 
             List<Line> segmentsThousands = getSegmentsFromPoints(point1, point2, point3, point4);
 
             thousandsResultBySegments = detectValidSegments(image, segmentsThousands);
-            drawSegments(image, segmentsThousands);
+            //drawSegments(image, segmentsThousands);
 
             boolean sameResult = thousandsResultBySegments == thousandsResultBySubQuadrants;
             System.out.println("Digit Thousands (" + sameResult + ") - Segments: " + thousandsResultBySegments + ", Rects: " + thousandsResultBySubQuadrants);
