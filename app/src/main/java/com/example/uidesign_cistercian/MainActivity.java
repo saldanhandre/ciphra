@@ -113,7 +113,9 @@ public class MainActivity extends AppCompatActivity {
                         updateCistercianSegments(thousands, hundreds, tens, units);
                     } catch (NumberFormatException e) {
                         // Handle the case where the input is not a valid number
-                        clearCistercianSegments(); // Clear the segments in case of invalid number
+                        //clearCistercianSegments(); // Clear the segments in case of invalid number
+                        updateCistercianSegments(0,0,0,0);
+                        updateResult();
                     }
                 }
                 resetConversionTimer();
@@ -958,39 +960,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
-
-    private void clearCistercianSegments(){
-        setSegmentPressed(R.id.segment1, false);
-        setSegmentPressed(R.id.segment2, false);
-        setSegmentPressed(R.id.segment3_1, false);
-        setSegmentPressed(R.id.segment3_2, false);
-        setSegmentPressed(R.id.segment4_1, false);
-        setSegmentPressed(R.id.segment4_2, false);
-        setSegmentPressed(R.id.segment5, false);
-        setSegmentPressed(R.id.segment6, false);
-        setSegmentPressed(R.id.segment7, false);
-        setSegmentPressed(R.id.segment8_1, false);
-        setSegmentPressed(R.id.segment8_2, false);
-        setSegmentPressed(R.id.segment9_1, false);
-        setSegmentPressed(R.id.segment9_2, false);
-        setSegmentPressed(R.id.segment10, false);
-        setSegmentPressed(R.id.segment11, false);
-        setSegmentPressed(R.id.segment12, false);
-        setSegmentPressed(R.id.segment13_1, false);
-        setSegmentPressed(R.id.segment13_2, false);
-        setSegmentPressed(R.id.segment14_1, false);
-        setSegmentPressed(R.id.segment14_2, false);
-        setSegmentPressed(R.id.segment15, false);
-        setSegmentPressed(R.id.segment16, false);
-        setSegmentPressed(R.id.segment17, false);
-        setSegmentPressed(R.id.segment18_1, false);
-        setSegmentPressed(R.id.segment18_2, false);
-        setSegmentPressed(R.id.segment19_1, false);
-        setSegmentPressed(R.id.segment19_2, false);
-        setSegmentPressed(R.id.segment20, false);
-    }
-
-
 
     /*
      * Timer
