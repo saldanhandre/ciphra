@@ -190,6 +190,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         // Apply Gaussian Blur for noise reduction
 //        Imgproc.GaussianBlur(thrImage, thrImage, new Size(9, 9), 0);
 
+        //Erode to make lines thicker
         Imgproc.erode(thrImage, thrImage, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(4, 4)));
 
 
@@ -240,7 +241,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Imgproc.approxPolyDP(contourFloat, approxCurve, epsilon, true);
             // Draw the approximated contour for visualization
             MatOfPoint points = new MatOfPoint(approxCurve.toArray());
-            //Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, blue, 2);
+            //Imgproc.drawContours(coloredBinaryImage, Arrays.asList(points), -1, blue, 1);
             // Calculate bounding rectangle for each contour
             Rect boundingRect = Imgproc.boundingRect(contour);
             boundingRects.add(boundingRect);
@@ -331,7 +332,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (Rect rect : filteredRects) {
 
             // Draw rectangle for debugging
-            //drawRectangle(coloredBinaryImage, rect, red, 2);
+            //drawRectangle(coloredBinaryImage, rect, red, 1);
 
 //            // Draw a small circle around the top-left corner of the rectangle for debugging
 //            Point tl = rect.tl();
