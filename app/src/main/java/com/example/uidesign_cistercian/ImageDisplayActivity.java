@@ -70,7 +70,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
     private final Scalar orange = new Scalar(255, 165, 0);
     private final Scalar black = new Scalar(0, 0, 0);
     private final Scalar white = new Scalar(255, 255, 255);
-    private final int lightBlue = Color.rgb(193, 230, 254);
+    private final Scalar gray = new Scalar(128, 128, 128);
+    private final Scalar lightBlue = new Scalar(123, 160, 255);
     private final int transparentLightBlue = Color.argb(210, 193, 230, 254);
     private final int darkBlue = Color.rgb(0, 28, 52);
 
@@ -191,12 +192,13 @@ public class ImageDisplayActivity extends AppCompatActivity {
 //        Imgproc.GaussianBlur(thrImage, thrImage, new Size(9, 9), 0);
 
         //Erode to make lines thicker
-        Imgproc.erode(thrImage, thrImage, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(4, 4)));
+        Mat thickerImage = new Mat();
+        Imgproc.erode(thrImage, thickerImage, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(8, 8)));
 
 
         // Apply Binary Threshold
         Mat binaryImage = new Mat(); // keep copy of binary image for future processing
-        Imgproc.threshold(thrImage, binaryImage, 105, 255, Imgproc.THRESH_BINARY);
+        Imgproc.threshold(thickerImage, binaryImage, 105, 255, Imgproc.THRESH_BINARY);
 
         // Apply Canny Edge Detection
         Mat edgeDetectedImage = new Mat();
@@ -213,7 +215,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         drawQuadrants(coloredBinaryImage, foundRecsAfterCountours);
 
         // Convert processed Mat back to Bitmap
-        //Utils.matToBitmap(coloredBinaryImage, bitmap);
+        //Utils.matToBitmap(thickerImage, bitmap);
 
         // Update ImageView with the processed Bitmap
         runOnUiThread(() -> {
@@ -261,7 +263,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         //List<Rect> finalFilteredRects = new ArrayList<>(); // Set of rectangles that pass filters 1, 2, and 3 (already initialized in the beginning)
 
         // Filter 1 - Filter out rectangles that are too small
-        double minHeightThreshold = 0.15 * imageHeight; // Minimum height of a rectangle
+        double minHeightThreshold = 0.12 * imageHeight; // Minimum height of a rectangle
         for (Rect rect : rects) {
             if (rect.height >= minHeightThreshold) {
                 sizeFilteredRects.add(rect);
@@ -274,22 +276,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
         NOTE FROM PAST SELF: PARA SEGMENTS QUE ESTAO SEPARADOS DA MAIN STEM, VER SE UMA GRANDE MAIORIA DA PERCENTAGEM DOS PIXELS
         ]E PRETA, SE FOR VERDADE E SE O COMPRIMENTO FOR MENOS DE METADE DO COMPRIMENTO TO MAIOR RECT (SE PELO MENOS 50% DOS RECTS TIVEREM
         O MESMO GRANDE COMPRIMENTO OU SIOMILAR), ]E PORQUE ]E UM SEGMENTO SEPARADO, ENTAO TEM DE SER ENCONTRAR A STEM DELE.
-        for (Rect rect : sizeFilteredRects) {
-            Mat rotatedImage = image.clone(); // Clone the image for rotation
-
-            if (rect.width > rect.height) {
-                // Rotate the image 90 degrees clockwise
-                Core.rotate(coloredBinaryImage, rotatedImage, Core.ROTATE_90_COUNTERCLOCKWISE);
-                Rect rotatedRect = new Rect(rect.y, coloredBinaryImage.cols() - rect.x - rect.width, rect.height, rect.width);
-                processCipher(rotatedImage, rotatedRect);
-                Core.rotate(rotatedImage, coloredBinaryImage, Core.ROTATE_90_CLOCKWISE);
-            } else {
-                //System.out.println("rectangle was NOT rotated");
-                processCipher(coloredBinaryImage, rect);
-            }
-
-        }
-
          */
 
         // Filter 2 - Filter out duplicates based on a unique signature of each rectangle
@@ -332,7 +318,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (Rect rect : filteredRects) {
 
             // Draw rectangle for debugging
-            //drawRectangle(coloredBinaryImage, rect, red, 1);
+            //drawRectangle(coloredBinaryImage, rect, gray, 1);
 
 //            // Draw a small circle around the top-left corner of the rectangle for debugging
 //            Point tl = rect.tl();
@@ -367,12 +353,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             // Get the bounding rect
             Rect boundingRect = expandUntilNoBlack(rotatedImage);
-            //drawRectangle(rotatedImage, boundingRect, orange, 1);
+            //drawRectangle(rotatedImage, boundingRect, gray, 1);
 
             // resize the rect to fit exactly the cipher
             //System.out.println("Going to call resizedRect");
             Rect resizedRect = resizeRectangle(rotatedImage, boundingRect, true, true, true, true);
-            //drawRectangle(rotatedImage, resizedRect, blue, 1);
+            //drawRectangle(rotatedImage, resizedRect, orange, 1);
             //System.out.println("resizedRect.tl = " + resizedRect.tl() + ", resizedRect.br = " + resizedRect.br());
 
             // process the cipher and get number
@@ -382,8 +368,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Bitmap bitmapImage = Bitmap.createBitmap(rotatedImage.cols(), rotatedImage.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(rotatedImage, bitmapImage);
 
-//            ImageView imageView = findViewById(R.id.image_display_view_provisorio);
-//            imageView.setImageBitmap(bitmapImage);
+            ImageView imageView = findViewById(R.id.image_display_view_provisorio);
+            imageView.setImageBitmap(bitmapImage);
 
             if(numberResult > 0) {
                 arabicResults.add(numberResult);
@@ -1018,7 +1004,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         } else {
             System.out.println("Print");
         }
-        // this finds the exact middle point inside of the stem, so that the calculations of the quadrants is exact
+        // this finds the exact middle point inside of the stem, so that the calculations of the quadrants are exact
         Point pointTop = guidelineTop.findMiddleBlackPixel(image);
         Point secondPoint = new Point(pointTop.x, rect.y);
         Line line = new Line(pointTop, secondPoint, pink, 1);
@@ -1107,9 +1093,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             
             // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/3.5, topLimitY + subQuadrantHeight/4.0);
             Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/3.5, bottomLimitY - subQuadrantHeight/4.0);
 
             List<Line> segmentsUnits = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -1159,9 +1145,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/3.5, topLimitY + subQuadrantHeight/4.0);
             Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/3.5, bottomLimitY - subQuadrantHeight/4.0);
 
             List<Line> segmentsTens = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -1210,9 +1196,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
             // Get the result from the segments
             Point point1 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point2 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point2 = new Point(rightLimitX - subQuadrantWidth/3.5, bottomLimitY - subQuadrantHeight/4.0);
             Point point3 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point4 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point4 = new Point(rightLimitX - subQuadrantWidth/3.5, topLimitY + subQuadrantHeight/4.0);
 
             List<Line> segmentsHundreds = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -1261,9 +1247,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
             
             // Get the result from the segments
             Point point1 = new Point(rightLimitX - subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
-            Point point2 = new Point(leftLimitX + subQuadrantWidth/4.0, bottomLimitY - subQuadrantHeight/4.0);
+            Point point2 = new Point(leftLimitX + subQuadrantWidth/3.5, bottomLimitY - subQuadrantHeight/4.0);
             Point point3 = new Point(rightLimitX - subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
-            Point point4 = new Point(leftLimitX + subQuadrantWidth/4.0, topLimitY + subQuadrantHeight/4.0);
+            Point point4 = new Point(leftLimitX + subQuadrantWidth/3.5, topLimitY + subQuadrantHeight/4.0);
 
             List<Line> segmentsThousands = getSegmentsFromPoints(point1, point2, point3, point4);
 
@@ -1301,7 +1287,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                                 leftLimitX = x + (guideline1Rect.width / 20);
                                 Point lineStart = new Point(leftLimitX, rect.y);
                                 Point lineEnd = new Point(leftLimitX, rect.y + rect.height);
-                                Line leftLimit = new Line(lineStart, lineEnd, pink, 1);
+                                Line leftLimit = new Line(lineStart, lineEnd, pink, 2);
                                 //leftLimit.draw(image); // draw the line
                                 firstLineDrawn = true;
                                 break;
@@ -1335,7 +1321,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
                                 rightLimitX = x + guideline2Rect.width / 10;
                                 Point lineStart = new Point(rightLimitX, rect.y);
                                 Point lineEnd = new Point(rightLimitX, rect.y + rect.height);
-                                Line rightLimit = new Line(lineStart, lineEnd, pink, 1);
+                                Line rightLimit = new Line(lineStart, lineEnd, pink, 2);
                                 //rightLimit.draw(image); // draw the line
                                 break;
                             }
@@ -1447,9 +1433,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
                             pixel3Found = true;
                             topLimitY = y;
-                            Point lineStart = new Point(guideline3Rect.x, topLimitY);
-                            Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
-                            Line topLimit = new Line(lineStart, lineEnd, pink, 1);
+                            Point lineStart = new Point(leftLimitX, topLimitY);
+                            Point lineEnd = new Point(rightLimitX, topLimitY);
+                            Line topLimit = new Line(lineStart, lineEnd, pink, 2);
                             //topLimit.draw(image); // draw the line
                             break;
                         }
@@ -1459,8 +1445,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
             if (!pixel3Found) {
                 topLimitY = guideline3Rect.y;
-                Point lineStart = new Point(guideline3Rect.x, topLimitY);
-                Point lineEnd = new Point(guideline3Rect.x + guideline3Width, topLimitY);
+                Point lineStart = new Point(leftLimitX, topLimitY);
+                Point lineEnd = new Point(rightLimitX, topLimitY);
                 Line topLimit = new Line(lineStart, lineEnd, pink, 1);
                 //topLimit.draw(image); // draw the line
             }
@@ -1482,9 +1468,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
                         if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
                             pixel4Found = true;
                             bottomLimitY = y;
-                            Point lineStart = new Point(guideline4Rect.x, bottomLimitY);
-                            Point lineEnd = new Point(guideline4Rect.x + guideline4Width, bottomLimitY);
-                            Line bottomLimit = new Line(lineStart, lineEnd, pink, 1);
+                            Point lineStart = new Point(leftLimitX, bottomLimitY);
+                            Point lineEnd = new Point(rightLimitX, bottomLimitY);
+                            Line bottomLimit = new Line(lineStart, lineEnd, pink, 2);
                             //bottomLimit.draw(image); // draw the line
                             break;
                         }
@@ -1495,8 +1481,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
             if (!pixel4Found) {
                 bottomLimitY = guideline4Rect.y + guideline3Height - guideline3Height/5;
-                Point lineStart = new Point(guideline4Rect.x, bottomLimitY);
-                Point lineEnd = new Point(guideline4Rect.x + guideline4Width, bottomLimitY);
+                Point lineStart = new Point(leftLimitX, bottomLimitY);
+                Point lineEnd = new Point(rightLimitX, bottomLimitY);
                 Line bottomLimit = new Line(lineStart, lineEnd, pink, 1);
                 //bottomLimit.draw(image); // draw the line
             }
@@ -1506,11 +1492,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
     public List<Line> getSegmentsFromPoints(Point p1, Point p2, Point p3, Point p4) {
-        Line segment1 = new Line(p1, p2, blue, 1);
-        Line segment2 = new Line(p3, p4, blue, 1);
-        Line segment3 = new Line(p1, p4, blue, 1);
-        Line segment4 = new Line(p3, p2, blue, 1);
-        Line segment5 = new Line(p2, p4, blue, 1);
+        Line segment1 = new Line(p1, p2, lightBlue, 2);
+        Line segment2 = new Line(p3, p4, lightBlue, 2);
+        Line segment3 = new Line(p1, p4, lightBlue, 2);
+        Line segment4 = new Line(p3, p2, lightBlue, 2);
+        Line segment5 = new Line(p2, p4, lightBlue, 2);
 
         return Arrays.asList(segment1, segment2, segment3, segment4, segment5);
     }
