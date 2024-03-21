@@ -490,52 +490,37 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
     public static List<Rect> removeSimilarRectangles(List<Rect> rectangles) {
-        // Thresholds for considering rectangles as similar
-        final int MAX_POS_DIFF = 3; // Max difference in position (x and y coordinates)
-        final int MAX_SIZE_DIFF = 3; // Max difference in size (width and height)
-
-        // This list will track indexes of rectangles to remove
-        List<Integer> indexesToRemove = new ArrayList<>();
+        final int MAX_POS_DIFF = 4; // Allow a small difference in starting points.
+        final int MAX_SIZE_DIFF = 3000; // Allow a small difference in starting points.
+        List<Rect> result = new ArrayList<>();
+        Set<Integer> processed = new HashSet<>();
 
         for (int i = 0; i < rectangles.size(); i++) {
-            if (indexesToRemove.contains(i)) {
-                // If this rectangle is already marked for removal, skip it
-                continue;
-            }
-
-            Rect rect1 = rectangles.get(i);
+            if (processed.contains(i)) continue;
+            Rect fusedRect = rectangles.get(i);
+            processed.add(i);
 
             for (int j = i + 1; j < rectangles.size(); j++) {
-                if (indexesToRemove.contains(j)) {
-                    // If the other rectangle is already marked for removal, skip it
-                    continue;
-                }
+                if (processed.contains(j)) continue;
 
-                Rect rect2 = rectangles.get(j);
+                Rect comparisonRect = rectangles.get(j);
+                // Check for nearly identical start points or overall similarity.
+                if ((Math.abs(fusedRect.x - comparisonRect.x) <= MAX_POS_DIFF &&
+                        Math.abs(fusedRect.y - comparisonRect.y) <= MAX_POS_DIFF) ||
+                        (Math.abs(fusedRect.x - comparisonRect.x) <= MAX_POS_DIFF &&
+                                Math.abs(fusedRect.y - comparisonRect.y) <= MAX_POS_DIFF &&
+                                Math.abs(fusedRect.width - comparisonRect.width) <= MAX_SIZE_DIFF &&
+                                Math.abs(fusedRect.height - comparisonRect.height) <= MAX_SIZE_DIFF)) {
 
-                int posXDiff = Math.abs(rect1.x - rect2.x);
-                int posYDiff = Math.abs(rect1.y - rect2.y);
-                int widthDiff = Math.abs(rect1.width - rect2.width);
-                int heightDiff = Math.abs(rect1.height - rect2.height);
-
-                // Check if rectangles are similar based on the defined thresholds
-                if (posXDiff <= MAX_POS_DIFF && posYDiff <= MAX_POS_DIFF &&
-                        widthDiff <= MAX_SIZE_DIFF && heightDiff <= MAX_SIZE_DIFF) {
-                    // Mark the second rectangle for removal
-                    indexesToRemove.add(j);
+                    // Fuse and update the fusedRect reference.
+                    fusedRect = fuseRectangles(fusedRect, comparisonRect);
+                    processed.add(j);
                 }
             }
+            result.add(fusedRect);
         }
 
-        // Create a new list for rectangles that are not marked for removal
-        List<Rect> uniqueRectangles = new ArrayList<>();
-        for (int i = 0; i < rectangles.size(); i++) {
-            if (!indexesToRemove.contains(i)) {
-                uniqueRectangles.add(rectangles.get(i));
-            }
-        }
-
-        return uniqueRectangles;
+        return result;
     }
 
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
