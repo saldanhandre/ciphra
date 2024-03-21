@@ -215,7 +215,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         drawQuadrants(coloredBinaryImage, foundRecsAfterCountours);
 
         // Convert processed Mat back to Bitmap
-        Utils.matToBitmap(coloredBinaryImage, bitmap);
+        //Utils.matToBitmap(coloredBinaryImage, bitmap);
 
         // Update ImageView with the processed Bitmap
         runOnUiThread(() -> {
@@ -273,13 +273,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
 
-        /*
-        // Extra filter -  filter out rectangles that dont have a stem
-        NOTE FROM PAST SELF: PARA SEGMENTS QUE ESTAO SEPARADOS DA MAIN STEM, VER SE UMA GRANDE MAIORIA DA PERCENTAGEM DOS PIXELS
-        ]E PRETA, SE FOR VERDADE E SE O COMPRIMENTO FOR MENOS DE METADE DO COMPRIMENTO TO MAIOR RECT (SE PELO MENOS 50% DOS RECTS TIVEREM
-        O MESMO GRANDE COMPRIMENTO OU SIOMILAR), ]E PORQUE ]E UM SEGMENTO SEPARADO, ENTAO TEM DE SER ENCONTRAR A STEM DELE.
-         */
-
         // Filter 2 - Filter out duplicates based on a unique signature of each rectangle
         for (Rect rect : sizeFilteredRects) {
             String signature = rect.tl().toString() + "-" + rect.br().toString(); // Create a unique signature
@@ -290,20 +283,12 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
 
-        for (Rect rect : uniqueFilteredRects) {
-//            Line line1 = new Line(rect.tl(), rect.br(), blue, 1);
-//            Line line2 = new Line(new Point(rect.tl().x + rect.width, rect.tl().y), new Point(rect.br().x - rect.width, rect.br().y), blue, 1);
-//            System.out.println("line1: " + line1.getBlackPixelPercentage(image) + ", line2: " + line2.getBlackPixelPercentage(image));
-//            if (line1.getBlackPixelPercentage(image) > 75 || line2.getBlackPixelPercentage(image) > 75) {
-//                possibleSeparatedSegments.add(rect);
-//                System.out.println("rect added to separate segments list");
-//            }
-        }
+        // Filter 3 - Get segments that are separated from the cypher and unite them with the cypher
 //        printRectSizesAndFindBlackPixel(image, possibleSeparatedSegments);
         provisorioRects = joinSegmentToCypher(image, uniqueFilteredRects);
         System.out.println("provisorioRects : " + provisorioRects);
 
-        // Filter 3 - Filter out rectangles that are contained within others
+        // Filter 4 - Filter out rectangles that are contained within others
         for (int i = 0; i < provisorioRects.size(); i++) {
             Rect rect1 = provisorioRects.get(i);
             boolean isContained = false;
@@ -529,7 +514,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (Rect rect : filteredRects) {
 
             // Draw rectangle for debugging
-            drawRectangle(coloredBinaryImage, rect, gray, 1);
+            //drawRectangle(coloredBinaryImage, rect, gray, 1);
 
 //            // Draw a small circle around the top-left corner of the rectangle for debugging
 //            Point tl = rect.tl();
@@ -556,6 +541,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             int numberResult = 0;
 
             double angle = stem.getSmallestAngleFromVertical(); // Rotation angle in degrees
+            System.out.println(angle);
 
             // Perform the rotation with the new dimensions
             Mat rotatedImage = cloneAndCropImageWithPadding(coloredBinaryImage, rect, -angle);
@@ -847,6 +833,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         //drawRectangle(image, rect, green, 1);
 
         boolean stemFound = false;
+        boolean halfCypherCheckDone = false;
         boolean firstCheckDone = false;
         boolean secondCheckDone = false;
         boolean similarPercentages = false;
@@ -855,7 +842,33 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         Line stem = null;
 
-        if (!stemFound) {
+        if (rect.height > rect.width) {
+            Line line1 = new Line(new Point(rect.x+rect.width/10.0, rect.y), new Point(rect.x+rect.width/10.0, rect.y+ rect.height), red, 1);
+            Line line2 = new Line(new Point(rect.x+rect.width-rect.width/10.0, rect.y), new Point(rect.x+rect.width-rect.width/10.0, rect.y+ rect.height), red, 1);
+            if (line1.getBlackPixelPercentage(image) > 90) {
+                stem = line1;
+                stemFound = true; // stem found on the left side of the vertical cypher
+                System.out.println("stem is left");
+            } else if (line2.getBlackPixelPercentage(image) > 90) {
+                stem = line2;
+                stemFound = true; // stem found on the left side of the vertical cypher
+                System.out.println("stem is right");
+            }
+        } else {
+            Line line1 = new Line(new Point(rect.x, rect.y + rect.height/10.0), new Point(rect.x+rect.width, rect.y + rect.height/10.0), red, 1);
+            Line line2 = new Line(new Point(rect.x, rect.y + rect.height- rect.height/10.0), new Point(rect.x + rect.width, rect.y + rect.height- rect.height/10.0), red, 1);
+            line1.draw(image);
+            line2.draw(image);
+
+            if (line1.getBlackPixelPercentage(image) > 90) {
+                stem = line1;
+                stemFound = true; // stem found on the left side of the vertical cypher
+            } else if (line2.getBlackPixelPercentage(image) > 90) {
+                stem = line2;
+                stemFound = true; // stem found on the left side of the vertical cypher
+            }
+        }
+        if(!stemFound) {
             for (int a = 0; a <= dividerInt; a++) {
                 Point p1 = new Point(rect.x, rect.y + a * (rect.height / dividerDouble));
                 Point p2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / dividerDouble)));
@@ -879,7 +892,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
             firstCheckDone = true;
         }
-        if (!stemFound && firstCheckDone) {
+        if (!stemFound) {
             for (int a = 0; a <= dividerInt; a++) {
                 Point p1 = new Point(rect.x + rect.width - (a * (rect.width / dividerDouble)), rect.y);
                 Point p2 = new Point(rect.x + a * (rect.width / dividerDouble), rect.y + rect.height);
@@ -905,7 +918,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
             secondCheckDone = true;
         }
-        if (!stemFound && firstCheckDone && secondCheckDone) {
+        if (!stemFound) {
             // For 1st check
             // create list with the map entries of the percentages
             List<Map.Entry<Line, Double>> sortedEntries1 = new ArrayList<>(percentages1stCheck.entrySet());
@@ -1040,74 +1053,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
             System.out.println("Stem Found at 3rd check");
         }
         return stem;
-    }
-
-    // Method to calculate the percentage of pixels in a line between two points on a Mat image
-    public double getUninterruptedBlackPixelPercentage(Mat image, Point point1, Point point2) {
-        if (image.empty()) {
-            throw new IllegalArgumentException("Image is empty");
-        }
-
-        //Imgproc.line(image, point1, point2, green, 1);
-
-        // Convert points to integers (assuming the points are at pixel locations)
-        int x0 = (int) point1.x;
-        int y0 = (int) point1.y;
-        int x1 = (int) point2.x;
-        int y1 = (int) point2.y;
-
-        int deltaX = Math.abs(x1 - x0);
-        int deltaY = Math.abs(y1 - y0);
-        int x, y, end;
-        int xIncrement = (x0 < x1) ? 1 : -1;
-        int yIncrement = (y0 < y1) ? 1 : -1;
-        int err = deltaX - deltaY;
-        int e2;
-
-        int totalPixels = 0;
-        int currentStreamLength = 0;
-        int longestStreamLength = 0;
-
-        x = x0;
-        y = y0;
-        end = deltaX > deltaY ? deltaX : deltaY; // Use the larger difference as the end condition
-
-        for(int i = 0; i <= end; i++) {
-            totalPixels++;
-
-            if (x >= 0 && x < image.width() && y >= 0 && y < image.height()) {
-                double[] pixel = image.get(y, x);
-                if (pixel != null && pixel[0] == 0) { // Checking if the pixel is black
-                    currentStreamLength++;
-                    if (currentStreamLength > longestStreamLength) {
-                        longestStreamLength = currentStreamLength; // Update the longest stream if current is longer
-                    }
-                } else {
-                    currentStreamLength = 0; // Reset current stream length if pixel is not black
-                }
-            }
-
-            if (x == x1 && y == y1) {
-                break;
-            }
-
-            e2 = 2 * err;
-            if (e2 > -deltaY) {
-                err -= deltaY;
-                x += xIncrement;
-            }
-            if (e2 < deltaX) {
-                err += deltaX;
-                y += yIncrement;
-            }
-        }
-
-        if (totalPixels == 0) {
-            return 0.0; // To avoid division by zero
-        }
-
-        // Calculate the percentage of the longest uninterrupted stream of black pixels
-        return (double) longestStreamLength / totalPixels * 100.0;
     }
 
     public static Mat cloneAndCropImageWithPadding(Mat src, Rect rect, double angle) {
@@ -1311,7 +1256,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsUnits = getSegmentsFromPoints(point1, point2, point3, point4);
 
             unitsResultBySegments = detectValidSegments(image, segmentsUnits);
-            drawSegments(image, segmentsUnits);
+            //drawSegments(image, segmentsUnits);
             
             boolean sameResult = unitsResultBySegments == unitsResultBySubQuadrants;
             System.out.println("Digit Units (" + sameResult + ") - Segments: " + unitsResultBySegments + ", Rects: " + unitsResultBySubQuadrants);
@@ -1363,7 +1308,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsTens = getSegmentsFromPoints(point1, point2, point3, point4);
 
             tensResultBySegments = detectValidSegments(image, segmentsTens);
-            drawSegments(image, segmentsTens);
+            //drawSegments(image, segmentsTens);
 
             boolean sameResult = tensResultBySegments == tensResultBySubQuadrants;
             System.out.println("Digit Tens (" + sameResult + ") - Segments: " + tensResultBySegments + ", Rects: " + tensResultBySubQuadrants);
