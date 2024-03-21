@@ -453,6 +453,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
             } else if (foundCypherBottom) { // if the segment only finds a cypher on the bottom side
                 Rect finalRect = fuseRectangles(rect, findRectangleContainingPoint(rects, pointBottom)); // fuse segment's rect with the bottom cypher's rect
                 finalRects.add(finalRect);
+            } else if (!foundCypherLeft && !foundCypherRight && !foundCypherTop && !foundCypherBottom) {
+                finalRects.add(rect);
             }
         }
         System.out.println("Initial List: " + rects);
