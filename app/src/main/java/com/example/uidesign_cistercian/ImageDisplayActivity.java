@@ -215,7 +215,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         drawQuadrants(coloredBinaryImage, foundRecsAfterCountours);
 
         // Convert processed Mat back to Bitmap
-        //Utils.matToBitmap(thickerImage, bitmap);
+        Utils.matToBitmap(coloredBinaryImage, bitmap);
 
         // Update ImageView with the processed Bitmap
         runOnUiThread(() -> {
@@ -262,6 +262,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
         Set<String> uniqueRectSignatures = new HashSet<>(); // Signatures for filter 2
         //List<Rect> finalFilteredRects = new ArrayList<>(); // Set of rectangles that pass filters 1, 2, and 3 (already initialized in the beginning)
 
+        List<Rect> provisorioRects = new ArrayList<>(); //
+
         // Filter 1 - Filter out rectangles that are too small
         double minHeightThreshold = 0.12 * imageHeight; // Minimum height of a rectangle
         for (Rect rect : rects) {
@@ -289,23 +291,25 @@ public class ImageDisplayActivity extends AppCompatActivity {
         }
 
         for (Rect rect : uniqueFilteredRects) {
-            Line line1 = new Line(rect.tl(), rect.br(), blue, 1);
-            Line line2 = new Line(new Point(rect.tl().x + rect.width, rect.tl().y), new Point(rect.br().x - rect.width, rect.br().y), blue, 1);
-            System.out.println("line1: " + line1.getBlackPixelPercentage(image) + ", line2: " + line2.getBlackPixelPercentage(image));
-            if (line1.getBlackPixelPercentage(image) > 75 || line2.getBlackPixelPercentage(image) > 75) {
-                possibleSeparatedSegments.add(rect);
-                System.out.println("rect added to separate segments list");
-            }
+//            Line line1 = new Line(rect.tl(), rect.br(), blue, 1);
+//            Line line2 = new Line(new Point(rect.tl().x + rect.width, rect.tl().y), new Point(rect.br().x - rect.width, rect.br().y), blue, 1);
+//            System.out.println("line1: " + line1.getBlackPixelPercentage(image) + ", line2: " + line2.getBlackPixelPercentage(image));
+//            if (line1.getBlackPixelPercentage(image) > 75 || line2.getBlackPixelPercentage(image) > 75) {
+//                possibleSeparatedSegments.add(rect);
+//                System.out.println("rect added to separate segments list");
+//            }
         }
-        printRectSizesAndFindBlackPixel(image, possibleSeparatedSegments);
+//        printRectSizesAndFindBlackPixel(image, possibleSeparatedSegments);
+        provisorioRects = joinSegmentToCypher(image, uniqueFilteredRects);
+        System.out.println("provisorioRects : " + provisorioRects);
 
         // Filter 3 - Filter out rectangles that are contained within others
-        for (int i = 0; i < uniqueFilteredRects.size(); i++) {
-            Rect rect1 = uniqueFilteredRects.get(i);
+        for (int i = 0; i < provisorioRects.size(); i++) {
+            Rect rect1 = provisorioRects.get(i);
             boolean isContained = false;
-            for (int j = 0; j < uniqueFilteredRects.size(); j++) {
+            for (int j = 0; j < provisorioRects.size(); j++) {
                 if (i == j) continue; // Skip comparing the rectangle with itself
-                Rect rect2 = uniqueFilteredRects.get(j);
+                Rect rect2 = provisorioRects.get(j);
 
                 if (rect2.contains(rect1.tl()) && rect2.contains(rect1.br())) {
                     // If rect1 is fully contained within rect2
@@ -320,89 +324,225 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
 
+        System.out.println("finalFilteredRects - for recognition: " + finalFilteredRects);
         return finalFilteredRects;
     }
 
-    public void printRectSizesAndFindBlackPixel(Mat image, List<Rect> rects) {
+    public List<Rect> joinSegmentToCypher(Mat image, List<Rect> rects) {
+        List<Rect> finalRects = new ArrayList<>(); // List of rectangles after the filter
         for (Rect rect : rects) {
             Point centre = new Point(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
             int longerSide = Math.max(rect.width, rect.height);
             int shorterSide = Math.min(rect.width, rect.height);
+
+            boolean analyse = false;
+
+            boolean foundCypherRight = false;
+            boolean foundCypherLeft = false;
+            boolean foundCypherTop = false;
+            boolean foundCypherBottom = false;
+
+            Point pointLeft = null;
+            Point pointRight = null;
+            Point pointTop = null;
+            Point pointBottom = null;
+
             System.out.println("Longer side: " + longerSide + ", Shorter side: " + shorterSide);
             System.out.println("centre" + centre);
 
-            if (rect.height <= rect.width) {
+            Line line1 = new Line(rect.tl(), rect.br(), blue, 1);
+            Line line2 = new Line(new Point(rect.tl().x + rect.width, rect.tl().y), new Point(rect.br().x - rect.width, rect.br().y), blue, 1);
+            //System.out.println("line1: " + line1.getBlackPixelPercentage(image) + ", line2: " + line2.getBlackPixelPercentage(image));
+
+            if (line1.getBlackPixelPercentage(image) > 75 || line2.getBlackPixelPercentage(image) > 75) {
+                analyse = true;
+                System.out.println("rect added to separate segments list");
+            }
+
+            if (analyse && rect.height >= rect.width) {
                 // check for black pixel on the left side
-                boolean foundBlackPixelLeft = false;
                 for (int x = (int)centre.x - rect.width; x >= 0; x--) { // Start from the centre and go left until the image finishes
                     double[] pixel = image.get((int)centre.y, x);
                     if (pixel != null && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) {
                         System.out.println("Found Left black pixel at: (" + x + ", " + (int)centre.y + ")");
-                        foundBlackPixelLeft = true;
+                        pointLeft = new Point(x, (int)centre.y);
+                        foundCypherLeft = true;
                         break;
                     }
                 }
 
-                if (!foundBlackPixelLeft) {
+                if (!foundCypherLeft) {
                     System.out.println("Left didn't find black pixel");
                 }
 
                 // check for black pixel on the right side
-                boolean foundBlackPixelRight = false;
                 for (int x = (int)centre.x + rect.width; x <= image.cols(); x++) { // Start from the centre and go right until the image finishes
                     double[] pixel = image.get((int)centre.y, x);
                     if (pixel != null && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) {
                         System.out.println("Found Right black pixel at: (" + x + ", " + (int)centre.y + ")");
-                        foundBlackPixelRight = true;
+                        pointRight = new Point(x, (int)centre.y);
+                        foundCypherRight = true;
                         break;
                     }
                 }
 
-                if (!foundBlackPixelRight) {
+                if (!foundCypherRight) {
                     System.out.println("Right didn't find black pixel");
                 }
-            } else {
+            } else if (analyse && rect.height < rect.width) {
                 // check for black pixel on the top side
-                boolean foundBlackPixelTop = false;
                 for (int y = (int)centre.y - rect.height; y >= 0; y--) { // Start from the centre and go top until the image finishes
                     double[] pixel = image.get(y, (int)centre.x);
                     if (pixel != null && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) {
                         System.out.println("Found Top black pixel at: (" + (int)centre.x + ", " + y + ")");
-                        foundBlackPixelTop = true;
+                        pointTop = new Point((int)centre.x, y);
+                        foundCypherTop = true;
                         break;
                     }
                 }
 
-                if (!foundBlackPixelTop) {
+                if (!foundCypherTop) {
                     System.out.println("Top didn't find black pixel");
                 }
 
                 // check for black pixel on the Bottom side
-                boolean foundBlackPixelBottom = false;
                 for (int y = (int)centre.y + rect.height; y <= image.rows(); y++) { // Start from the centre and go Bottom until the image finishes
                     double[] pixel = image.get(y, (int)centre.x);
                     if (pixel != null && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) {
                         System.out.println("Found Bottom black pixel at: (" + (int)centre.x + ", " + y + ")");
-                        foundBlackPixelBottom = true;
+                        pointBottom = new Point((int)centre.x, y);
+                        foundCypherBottom = true;
                         break;
                     }
                 }
 
-                if (!foundBlackPixelBottom) {
+                if (!foundCypherBottom) {
                     System.out.println("Bottom didn't find black pixel");
                 }
             }
+
+            if (foundCypherLeft) {
+                if (!foundCypherRight) { // if the segment only finds a cypher on the left side
+                    Rect finalRect = fuseRectangles(rect, findRectangleContainingPoint(rects, pointLeft)); // fuse segment's rect with the left cypher's rect
+                    finalRects.add(finalRect);
+                } else { // if the segment finds cyphers both on the left and right sides
+                    if (centre.x-pointLeft.x < pointRight.x-centre.x) { // if the left cypher is closer
+                        Rect finalRect = fuseRectangles(rect, findRectangleContainingPoint(rects, pointLeft)); // fuse segment's rect with the left cypher's rect
+                        finalRects.add(finalRect);
+                    } else { // if the right cypher is closer
+                        Rect finalRect = fuseRectangles(rect, findRectangleContainingPoint(rects, pointRight)); // fuse segment's rect with the right cypher's rect
+                        finalRects.add(finalRect);
+                    }
+                }
+            } else if (foundCypherRight) { // if the segment only finds a cypher on the right side
+                Rect finalRect = fuseRectangles(rect, findRectangleContainingPoint(rects, pointRight)); // fuse segment's rect with the right cypher's rect
+                finalRects.add(finalRect);
+            } else if (foundCypherTop) {
+                if (!foundCypherBottom) { // if the segment only finds a cypher on the top side
+                    Rect finalRect = fuseRectangles(rect, findRectangleContainingPoint(rects, pointTop)); // fuse segment's rect with the top cypher's rect
+                    finalRects.add(finalRect);
+                } else { // if the segment finds cyphers both on the top and bottom sides
+                    if (centre.y - pointTop.y < pointBottom.y - centre.y) { // if the top cypher is closer
+                        Rect finalRect = fuseRectangles(rect, findRectangleContainingPoint(rects, pointTop)); // fuse segment's rect with the top cypher's rect
+                        finalRects.add(finalRect);
+                    } else { // if the right cypher is closer
+                        Rect finalRect = fuseRectangles(rect, findRectangleContainingPoint(rects, pointBottom)); // fuse segment's rect with the bottom cypher's rect
+                        finalRects.add(finalRect);
+                    }
+                }
+            } else if (foundCypherBottom) { // if the segment only finds a cypher on the bottom side
+                Rect finalRect = fuseRectangles(rect, findRectangleContainingPoint(rects, pointBottom)); // fuse segment's rect with the bottom cypher's rect
+                finalRects.add(finalRect);
+            }
         }
+        System.out.println("Initial List: " + rects);
+        System.out.println("After 1st step filter List: " + finalRects);
+        List<Rect> uniqueRectangles = removeSimilarRectangles(finalRects);
+        System.out.println("After 2nd step filter List: " + uniqueRectangles);
+        return uniqueRectangles;
     }
 
+    // Method to find the rectangle containing a given point
+    private Rect findRectangleContainingPoint(List<Rect> rectangles, Point point) {
+        for (Rect rect : rectangles) {
+            if (point.x >= rect.tl().x && point.x <= rect.tl().x + rect.width && point.y >= rect.tl().y && point.y <= rect.tl().y + rect.height) {
+                return rect; // Return the first rectangle that contains the point
+            }
+        }
+        return null; // Return null if no rectangle contains the point
+    }
 
+    public static Rect fuseRectangles(Rect rect1, Rect rect2) {
+        // Determine the minimum and maximum x (left and right) coordinates
+        int minX = Math.min(rect1.x, rect2.x);
+        int maxX = Math.max(rect1.x + rect1.width, rect2.x + rect2.width);
 
+        // Determine the minimum and maximum y (top and bottom) coordinates
+        int minY = Math.min(rect1.y, rect2.y);
+        int maxY = Math.max(rect1.y + rect1.height, rect2.y + rect2.height);
+
+        // Calculate the new rectangle's width and height
+        int width = maxX - minX;
+        int height = maxY - minY;
+
+        // Create and return the new rectangle
+        return new Rect(minX, minY, width, height);
+    }
+
+    public static List<Rect> removeSimilarRectangles(List<Rect> rectangles) {
+        // Thresholds for considering rectangles as similar
+        final int MAX_POS_DIFF = 3; // Max difference in position (x and y coordinates)
+        final int MAX_SIZE_DIFF = 3; // Max difference in size (width and height)
+
+        // This list will track indexes of rectangles to remove
+        List<Integer> indexesToRemove = new ArrayList<>();
+
+        for (int i = 0; i < rectangles.size(); i++) {
+            if (indexesToRemove.contains(i)) {
+                // If this rectangle is already marked for removal, skip it
+                continue;
+            }
+
+            Rect rect1 = rectangles.get(i);
+
+            for (int j = i + 1; j < rectangles.size(); j++) {
+                if (indexesToRemove.contains(j)) {
+                    // If the other rectangle is already marked for removal, skip it
+                    continue;
+                }
+
+                Rect rect2 = rectangles.get(j);
+
+                int posXDiff = Math.abs(rect1.x - rect2.x);
+                int posYDiff = Math.abs(rect1.y - rect2.y);
+                int widthDiff = Math.abs(rect1.width - rect2.width);
+                int heightDiff = Math.abs(rect1.height - rect2.height);
+
+                // Check if rectangles are similar based on the defined thresholds
+                if (posXDiff <= MAX_POS_DIFF && posYDiff <= MAX_POS_DIFF &&
+                        widthDiff <= MAX_SIZE_DIFF && heightDiff <= MAX_SIZE_DIFF) {
+                    // Mark the second rectangle for removal
+                    indexesToRemove.add(j);
+                }
+            }
+        }
+
+        // Create a new list for rectangles that are not marked for removal
+        List<Rect> uniqueRectangles = new ArrayList<>();
+        for (int i = 0; i < rectangles.size(); i++) {
+            if (!indexesToRemove.contains(i)) {
+                uniqueRectangles.add(rectangles.get(i));
+            }
+        }
+
+        return uniqueRectangles;
+    }
 
     private void drawQuadrants(Mat coloredBinaryImage, List<Rect> filteredRects) {
         for (Rect rect : filteredRects) {
 
             // Draw rectangle for debugging
-            //drawRectangle(coloredBinaryImage, rect, gray, 1);
+            drawRectangle(coloredBinaryImage, rect, gray, 1);
 
 //            // Draw a small circle around the top-left corner of the rectangle for debugging
 //            Point tl = rect.tl();
@@ -1287,7 +1427,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsHundreds = getSegmentsFromPoints(point1, point2, point3, point4);
 
             hundredsResultBySegments = detectValidSegments(image, segmentsHundreds);
-            drawSegments(image, segmentsHundreds);
+            //drawSegments(image, segmentsHundreds);
 
             boolean sameResult = hundredsResultBySegments == hundredsResultBySubQuadrants;
             System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + hundredsResultBySegments + ", Rects: " + hundredsResultBySubQuadrants);
@@ -1338,7 +1478,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsThousands = getSegmentsFromPoints(point1, point2, point3, point4);
 
             thousandsResultBySegments = detectValidSegments(image, segmentsThousands);
-            drawSegments(image, segmentsThousands);
+            //drawSegments(image, segmentsThousands);
 
             boolean sameResult = thousandsResultBySegments == thousandsResultBySubQuadrants;
             System.out.println("Digit Thousands (" + sameResult + ") - Segments: " + thousandsResultBySegments + ", Rects: " + thousandsResultBySubQuadrants);
