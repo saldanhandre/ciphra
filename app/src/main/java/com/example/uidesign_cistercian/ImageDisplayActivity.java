@@ -61,6 +61,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
     private List<Integer> arabicResults = new ArrayList<>();
     private List<Rect> finalFilteredRects = new ArrayList<>();
     private List<Rect> foundRecsAfterCountours = new ArrayList<>();
+    private List<Rect> possibleSeparatedSegments = new ArrayList<>();
 
     // COLOURS
     private final Scalar blue = new Scalar(0, 0, 255);
@@ -193,8 +194,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         //Erode to make lines thicker
         Mat thickerImage = new Mat();
-        Imgproc.erode(thrImage, thickerImage, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(8, 8)));
-
+        Imgproc.erode(thrImage, thickerImage, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(7, 7)));
 
         // Apply Binary Threshold
         Mat binaryImage = new Mat(); // keep copy of binary image for future processing
@@ -288,6 +288,17 @@ public class ImageDisplayActivity extends AppCompatActivity {
             }
         }
 
+        for (Rect rect : uniqueFilteredRects) {
+            Line line1 = new Line(rect.tl(), rect.br(), blue, 1);
+            Line line2 = new Line(new Point(rect.tl().x + rect.width, rect.tl().y), new Point(rect.br().x - rect.width, rect.br().y), blue, 1);
+            System.out.println("line1: " + line1.getBlackPixelPercentage(image) + ", line2: " + line2.getBlackPixelPercentage(image));
+            if (line1.getBlackPixelPercentage(image) > 75 || line2.getBlackPixelPercentage(image) > 75) {
+                possibleSeparatedSegments.add(rect);
+                System.out.println("rect added to separate segments list");
+            }
+        }
+        printRectSizesAndFindBlackPixel(image, possibleSeparatedSegments);
+
         // Filter 3 - Filter out rectangles that are contained within others
         for (int i = 0; i < uniqueFilteredRects.size(); i++) {
             Rect rect1 = uniqueFilteredRects.get(i);
@@ -311,6 +322,79 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         return finalFilteredRects;
     }
+
+    public void printRectSizesAndFindBlackPixel(Mat image, List<Rect> rects) {
+        for (Rect rect : rects) {
+            Point centre = new Point(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
+            int longerSide = Math.max(rect.width, rect.height);
+            int shorterSide = Math.min(rect.width, rect.height);
+            System.out.println("Longer side: " + longerSide + ", Shorter side: " + shorterSide);
+            System.out.println("centre" + centre);
+
+            if (rect.height <= rect.width) {
+                // check for black pixel on the left side
+                boolean foundBlackPixelLeft = false;
+                for (int x = (int)centre.x - rect.width; x >= 0; x--) { // Start from the centre and go left until the image finishes
+                    double[] pixel = image.get((int)centre.y, x);
+                    if (pixel != null && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) {
+                        System.out.println("Found Left black pixel at: (" + x + ", " + (int)centre.y + ")");
+                        foundBlackPixelLeft = true;
+                        break;
+                    }
+                }
+
+                if (!foundBlackPixelLeft) {
+                    System.out.println("Left didn't find black pixel");
+                }
+
+                // check for black pixel on the right side
+                boolean foundBlackPixelRight = false;
+                for (int x = (int)centre.x + rect.width; x <= image.cols(); x++) { // Start from the centre and go right until the image finishes
+                    double[] pixel = image.get((int)centre.y, x);
+                    if (pixel != null && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) {
+                        System.out.println("Found Right black pixel at: (" + x + ", " + (int)centre.y + ")");
+                        foundBlackPixelRight = true;
+                        break;
+                    }
+                }
+
+                if (!foundBlackPixelRight) {
+                    System.out.println("Right didn't find black pixel");
+                }
+            } else {
+                // check for black pixel on the top side
+                boolean foundBlackPixelTop = false;
+                for (int y = (int)centre.y - rect.height; y >= 0; y--) { // Start from the centre and go top until the image finishes
+                    double[] pixel = image.get(y, (int)centre.x);
+                    if (pixel != null && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) {
+                        System.out.println("Found Top black pixel at: (" + (int)centre.x + ", " + y + ")");
+                        foundBlackPixelTop = true;
+                        break;
+                    }
+                }
+
+                if (!foundBlackPixelTop) {
+                    System.out.println("Top didn't find black pixel");
+                }
+
+                // check for black pixel on the Bottom side
+                boolean foundBlackPixelBottom = false;
+                for (int y = (int)centre.y + rect.height; y <= image.rows(); y++) { // Start from the centre and go Bottom until the image finishes
+                    double[] pixel = image.get(y, (int)centre.x);
+                    if (pixel != null && pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10) {
+                        System.out.println("Found Bottom black pixel at: (" + (int)centre.x + ", " + y + ")");
+                        foundBlackPixelBottom = true;
+                        break;
+                    }
+                }
+
+                if (!foundBlackPixelBottom) {
+                    System.out.println("Bottom didn't find black pixel");
+                }
+            }
+        }
+    }
+
 
 
 
@@ -1100,7 +1184,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsUnits = getSegmentsFromPoints(point1, point2, point3, point4);
 
             unitsResultBySegments = detectValidSegments(image, segmentsUnits);
-            //drawSegments(image, segmentsUnits);
+            drawSegments(image, segmentsUnits);
             
             boolean sameResult = unitsResultBySegments == unitsResultBySubQuadrants;
             System.out.println("Digit Units (" + sameResult + ") - Segments: " + unitsResultBySegments + ", Rects: " + unitsResultBySubQuadrants);
@@ -1152,7 +1236,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsTens = getSegmentsFromPoints(point1, point2, point3, point4);
 
             tensResultBySegments = detectValidSegments(image, segmentsTens);
-            //drawSegments(image, segmentsTens);
+            drawSegments(image, segmentsTens);
 
             boolean sameResult = tensResultBySegments == tensResultBySubQuadrants;
             System.out.println("Digit Tens (" + sameResult + ") - Segments: " + tensResultBySegments + ", Rects: " + tensResultBySubQuadrants);
@@ -1203,7 +1287,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsHundreds = getSegmentsFromPoints(point1, point2, point3, point4);
 
             hundredsResultBySegments = detectValidSegments(image, segmentsHundreds);
-            //drawSegments(image, segmentsHundreds);
+            drawSegments(image, segmentsHundreds);
 
             boolean sameResult = hundredsResultBySegments == hundredsResultBySubQuadrants;
             System.out.println("Digit Hundreds (" + sameResult + ") - Segments: " + hundredsResultBySegments + ", Rects: " + hundredsResultBySubQuadrants);
@@ -1254,7 +1338,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
             List<Line> segmentsThousands = getSegmentsFromPoints(point1, point2, point3, point4);
 
             thousandsResultBySegments = detectValidSegments(image, segmentsThousands);
-            //drawSegments(image, segmentsThousands);
+            drawSegments(image, segmentsThousands);
 
             boolean sameResult = thousandsResultBySegments == thousandsResultBySubQuadrants;
             System.out.println("Digit Thousands (" + sameResult + ") - Segments: " + thousandsResultBySegments + ", Rects: " + thousandsResultBySubQuadrants);
@@ -1492,11 +1576,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
     }
 
     public List<Line> getSegmentsFromPoints(Point p1, Point p2, Point p3, Point p4) {
-        Line segment1 = new Line(p1, p2, lightBlue, 2);
-        Line segment2 = new Line(p3, p4, lightBlue, 2);
-        Line segment3 = new Line(p1, p4, lightBlue, 2);
-        Line segment4 = new Line(p3, p2, lightBlue, 2);
-        Line segment5 = new Line(p2, p4, lightBlue, 2);
+        Line segment1 = new Line(p1, p2, lightBlue, 1);
+        Line segment2 = new Line(p3, p4, lightBlue, 1);
+        Line segment3 = new Line(p1, p4, lightBlue, 1);
+        Line segment4 = new Line(p3, p2, lightBlue, 1);
+        Line segment5 = new Line(p2, p4, lightBlue, 1);
 
         return Arrays.asList(segment1, segment2, segment3, segment4, segment5);
     }
@@ -1524,7 +1608,7 @@ public class ImageDisplayActivity extends AppCompatActivity {
         for (int i = 0; i < segments.size(); i++) {
             Line segment = segments.get(i);
             //System.out.println("Segment " + (i + 1) + " has percentage: " + segment.getBlackPixelPercentage(image));
-            if (segment.getBlackPixelPercentage(image) > 50.0) {
+            if (segment.getBlackPixelPercentage(image) > 60.0) {
                 flaggedSegments.add(i + 1);
                 System.out.println("Seg. " + (i + 1) + " FLAGGED (" + segment.getBlackPixelPercentage(image) +  "%)");
             }

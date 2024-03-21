@@ -527,7 +527,7 @@ public class MainActivity extends AppCompatActivity {
         switch(units){
             case 0:
                 for (int segment : segmentsUnits) {
-                    System.out.println("Segment: " + segment);
+                    //System.out.println("Segment: " + segment);
                     setSegmentPressed(segment, false);
                     updateRelatedSegments(segment, false);
                 }
@@ -636,7 +636,7 @@ public class MainActivity extends AppCompatActivity {
         switch(tens){
             case 0:
                 for (int segment : segmentsTens) {
-                    System.out.println("Segment: " + segment);
+                    //System.out.println("Segment: " + segment);
                     setSegmentPressed(segment, false);
                     updateRelatedSegments(segment, false);
                 }
@@ -745,7 +745,7 @@ public class MainActivity extends AppCompatActivity {
         switch(hundreds){
             case 0:
                 for (int segment : segmentsHundreds) {
-                    System.out.println("Segment: " + segment);
+                    //System.out.println("Segment: " + segment);
                     setSegmentPressed(segment, false);
                     updateRelatedSegments(segment, false);
                 }
@@ -854,7 +854,7 @@ public class MainActivity extends AppCompatActivity {
         switch(thousands){
             case 0:
                 for (int segment : segmentsThousands) {
-                    System.out.println("Segment: " + segment);
+                    //System.out.println("Segment: " + segment);
                     setSegmentPressed(segment, false);
                     updateRelatedSegments(segment, false);
                 }

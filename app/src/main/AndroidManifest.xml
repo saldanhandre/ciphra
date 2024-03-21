@@ -33,5 +33,4 @@
         <activity android:name=".ArabicConversionActivity" />
         <activity android:name=".ImageDisplayActivity"/>
     </application>
-
 </manifest>

@@ -34,32 +34,6 @@ public class ConversionHistoryManager {
         return instance;
     }
 
-    private void loadHistory() {
-        String historyString = sharedPreferences.getString("history", null);
-        if (historyString != null && !historyString.isEmpty()) {
-            for (String itemStr : historyString.split(",")) {
-                Log.d("HistoryDebug", "Adding item to history: " + Integer.parseInt(itemStr));
-                conversionHistory.add(Integer.parseInt(itemStr));
-            }
-        }
-    }
-
-    private void saveHistory() {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        StringBuilder historyString = new StringBuilder();
-        for (int number : conversionHistory) {
-            if (historyString.length() > 0) historyString.append(",");
-            historyString.append(number);
-        }
-        editor.putString("history", historyString.toString());
-        editor.apply();
-    }
-
-    // Method to get the conversion history
-    public List<Integer> getConversionHistory() {
-        return conversionHistory;
-    }
-
     // Method to add a new entry to the history
     public void addConversion(int arabicNumber) {
         // Check if the history is not empty and if the last number is the same as the one being added
@@ -75,6 +49,39 @@ public class ConversionHistoryManager {
         }
     }
 
+    private void saveHistory() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        StringBuilder historyString = new StringBuilder();
+        for (int number : conversionHistory) {
+            if (historyString.length() > 0) historyString.append(",");
+            historyString.append(number);
+        }
+        editor.putString("history", historyString.toString());
+        editor.apply();
+    }
+
+    // Method to notify all registered listeners of an update
+    private void notifyHistoryUpdated() {
+        for (HistoryUpdateListener listener : listeners) {
+            listener.onHistoryUpdated();
+        }
+    }
+
+    private void loadHistory() {
+        String historyString = sharedPreferences.getString("history", null);
+        if (historyString != null && !historyString.isEmpty()) {
+            for (String itemStr : historyString.split(",")) {
+                Log.d("HistoryDebug", "Adding item to history: " + Integer.parseInt(itemStr));
+                conversionHistory.add(Integer.parseInt(itemStr));
+            }
+        }
+    }
+
+    // Method to get the conversion history
+    public List<Integer> getConversionHistory() {
+        return conversionHistory;
+    }
+
     // Method to register a listener
     public void addHistoryUpdateListener(HistoryUpdateListener listener) {
         if (!listeners.contains(listener)) {
@@ -85,13 +92,6 @@ public class ConversionHistoryManager {
     // Method to unregister a listener
     public void removeHistoryUpdateListener(HistoryUpdateListener listener) {
         listeners.remove(listener);
-    }
-
-    // Method to notify all registered listeners of an update
-    private void notifyHistoryUpdated() {
-        for (HistoryUpdateListener listener : listeners) {
-            listener.onHistoryUpdated();
-        }
     }
 
     // Method for clearing the history
