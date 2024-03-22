@@ -565,8 +565,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
             Bitmap bitmapImage = Bitmap.createBitmap(rotatedImage.cols(), rotatedImage.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(rotatedImage, bitmapImage);
 
-            ImageView imageView = findViewById(R.id.image_display_view_provisorio);
-            imageView.setImageBitmap(bitmapImage);
+//            ImageView imageView = findViewById(R.id.image_display_view_provisorio);
+//            imageView.setImageBitmap(bitmapImage);
 
             if(numberResult > 0) {
                 arabicResults.add(numberResult);
@@ -845,6 +845,9 @@ public class ImageDisplayActivity extends AppCompatActivity {
         if (rect.height > rect.width) {
             Line line1 = new Line(new Point(rect.x+rect.width/10.0, rect.y), new Point(rect.x+rect.width/10.0, rect.y+ rect.height), red, 1);
             Line line2 = new Line(new Point(rect.x+rect.width-rect.width/10.0, rect.y), new Point(rect.x+rect.width-rect.width/10.0, rect.y+ rect.height), red, 1);
+            //line1.draw(image);
+            //line2.draw(image);
+            System.out.println("percentage of line1: " + line1.getBlackPixelPercentage(image) + " percentage of line2: " + line2.getBlackPixelPercentage(image));
             if (line1.getBlackPixelPercentage(image) > 90) {
                 stem = line1;
                 stemFound = true; // stem found on the left side of the vertical cypher
@@ -857,8 +860,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
         } else {
             Line line1 = new Line(new Point(rect.x, rect.y + rect.height/10.0), new Point(rect.x+rect.width, rect.y + rect.height/10.0), red, 1);
             Line line2 = new Line(new Point(rect.x, rect.y + rect.height- rect.height/10.0), new Point(rect.x + rect.width, rect.y + rect.height- rect.height/10.0), red, 1);
-            line1.draw(image);
-            line2.draw(image);
+            //line1.draw(image);
+            //line2.draw(image);
 
             if (line1.getBlackPixelPercentage(image) > 90) {
                 stem = line1;
@@ -874,6 +877,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 Point p2 = new Point(rect.x + rect.width, rect.y + rect.height - (a * (rect.height / dividerDouble)));
                 Point divisionPoint1 = adjustPointToBounds(image, p1);
                 Point divisionPoint2 = adjustPointToBounds(image, p2);
+//                Line l = new Line(divisionPoint1, divisionPoint2, red, 1);
+//                l.draw(image);
                 if (divisionPoint1 != null && divisionPoint2 != null) {
                     stem = new Line(divisionPoint1, divisionPoint2, red, 1);
                 } else {
@@ -898,6 +903,8 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 Point p2 = new Point(rect.x + a * (rect.width / dividerDouble), rect.y + rect.height);
                 Point divisionPoint1 = adjustPointToBounds(image, p1);
                 Point divisionPoint2 = adjustPointToBounds(image, p2);
+//                Line l = new Line(divisionPoint1, divisionPoint2, red, 1);
+//                l.draw(image);
                 if (divisionPoint1 != null && divisionPoint2 != null) {
                     stem = new Line(divisionPoint1, divisionPoint2, red, 1);
                 } else {
@@ -913,8 +920,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
                     System.out.println("Stem Found at 2nd check");
                     break;
                 }
-
-                //stemCandidate.draw(coloredBinaryImage);
             }
             secondCheckDone = true;
         }
@@ -1889,47 +1894,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
 //        resultsView.setText(resultsText.toString());
 //    }
 
-    private void displayResultsOnImageOverlay(Mat imageMat, List<Rect> cipherRects, List<Integer> results) {
-        FrameLayout layout = findViewById(R.id.imageOverlayLayout);
-
-        // Assuming ImageView is the first child and clear previous TextViews
-        layout.removeViews(1, layout.getChildCount() - 1);
-
-        for (int i = 0; i < cipherRects.size(); i++) {
-            final Rect rect = cipherRects.get(i);
-            int result = results.get(i);
-
-            final TextView resultView = new TextView(this);
-            resultView.setText(String.valueOf(result));
-            resultView.setTextColor(Color.RED); // Text color
-            resultView.setTextSize(20); // Text size
-            resultView.setGravity(Gravity.CENTER);
-
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT);
-
-            // Calculate center position of the TextView
-            // Assume getImageScale() correctly adjusts for any scaling applied by the ImageView
-            float scale = getImageScale(imageMat, layout);
-            int centerX = (int) ((rect.x + rect.width / 2.0f) * scale);
-            int centerY = (int) ((rect.y + rect.height / 2.0f) * scale);
-
-            // Initially, place TextView in the approximate center
-            params.leftMargin = centerX;
-            params.topMargin = centerY;
-
-            layout.addView(resultView, params);
-
-            // Dynamically adjust TextView position after it's been added to the layout
-            resultView.post(() -> {
-                // Adjust params based on actual TextView size
-                params.leftMargin = centerX - resultView.getWidth() / 2;
-                params.topMargin = centerY - resultView.getHeight() / 2;
-                resultView.setLayoutParams(params);
-            });
-        }
-    }
 
     /**
      * Calculate scaling factor between Mat dimensions and ImageView dimensions
